@@ -882,16 +882,12 @@
 <script>
 (function(){
   // ===== MODIFICATIONS ICI =====
-  // 1. Remplacez GUILD_ID par l'ID de votre serveur J.B.C Crome
-  //    (ex: '123456789012345678')
   const GUILD_ID = '1492875979142598716';
   
-  // 2. Si votre bot J.B.C Crome utilise un autre domaine ngrok,
-  //    remplacez le domaine ci-dessous par le sien.
-  //    (actuellement, 'caviar-gatherer-matriarch.ngrok-free.dev' pointe peut-être vers Kässbohrer)
-  const BASE_URL = 'gigabyte-puppet-surprise.ngrok-free.dev; 
+  // ⚠️ IMPORTANT : Remplace ceci par l'URL EXACTE affichée dans ton terminal quand le bot démarre !
+  // Exemple : 'https://a1b2c3d4.ngrok-free.dev'
+  const BASE_URL = 'https://COLLE_TON_URL_NGROK_ICI.ngrok-free.dev'; 
   
-  // L'URL de l'API inclut le paramètre guildId
   const TEAM_API_URL = BASE_URL + '/api/team?guildId=' + GUILD_ID;
   // ============================
 
@@ -984,14 +980,14 @@
     pill.textContent = count;
   }
 
-async function syncTeam(){
-  try{
-    const res = await fetch(TEAM_API_URL, {
-      cache: 'no-store',
-      headers: { 'ngrok-skip-browser-warning': '1' }
-    });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
+  async function syncTeam(){
+    try{
+      const res = await fetch(TEAM_API_URL, {
+        cache: 'no-store',
+        headers: { 'ngrok-skip-browser-warning': '1' }
+      });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
 
       Object.keys(ROLE_LABELS).forEach(key => {
         const grid = document.getElementById('role-' + key);
