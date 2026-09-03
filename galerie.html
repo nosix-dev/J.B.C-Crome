@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galerie J.B.C Crome</title>
+<link rel="icon" type="image/png" href="LogoV3.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root{
+    --asphalt:#07111d;
+    --panel:#0f1726;
+    --panel-2:#142338;
+    --hairline:rgba(255,255,255,.10);
+    --chrome-1:#f5f7fb;
+    --chrome-2:#dfe7f2;
+    --chrome-3:#8ea0b7;
+    --amber:#5da8ff;
+    --amber-dim:#274d7c;
+    --amber-glow:rgba(93,168,255,.24);
+    --safety-red:#3b82f6;
+    --safety-red-dark:#18365d;
+    --shadow-hard:0 18px 45px rgba(2,10,20,.45);
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:
+      radial-gradient(ellipse at 15% -10%, #12233a 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 110%, #0b1726 0%, transparent 55%),
+      var(--asphalt);
+    color:var(--chrome-2);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image: repeating-linear-gradient(35deg, rgba(255,255,255,.014) 0px, rgba(255,255,255,.014) 1px, transparent 1px, transparent 4px);
+    pointer-events:none;
+    z-index:1;
+  }
+  a{color:inherit; text-decoration:none;}
+  ::selection{background:var(--amber); color:#1a0f04;}
+
+  header{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 6vw;
+    background:linear-gradient(180deg, rgba(7,17,29,.96), rgba(7,17,29,.86));
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--hairline);
+  }
+  .logo{
+    font-family:'Anton', sans-serif;
+    font-size:22px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    background:linear-gradient(90deg, #ffffff 0%, #dce8f6 35%, #8db7eb 60%, #ffffff 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .logo::after{
+    content:"●"; color:var(--amber); font-size:8px; vertical-align:top;
+    -webkit-text-fill-color:var(--amber); margin-left:4px;
+  }
+  nav ul{list-style:none; display:flex; gap:10px;}
+  nav a{
+    font-size:12px; letter-spacing:1px; text-transform:uppercase;
+    color:var(--chrome-3); font-weight:600;
+    padding:8px 14px; border-radius:20px;
+    background:rgba(255,255,255,.02);
+    border:1px solid transparent;
+    display:inline-flex; align-items:center; gap:7px;
+    transition:color .2s ease, background .2s ease, border-color .2s ease;
+  }
+  nav a::before{
+    content:""; width:5px; height:5px; border-radius:50%;
+    background:var(--chrome-3); flex-shrink:0;
+    transition:background .2s ease, box-shadow .2s ease;
+  }
+  nav a:hover, nav a.active{
+    color:var(--chrome-1);
+    background:rgba(93,168,255,.12);
+    border-color:rgba(93,168,255,.28);
+  }
+  nav a:hover::before, nav a.active::before{
+    background:var(--amber); box-shadow:0 0 8px var(--amber-glow);
+  }
+
+  section{position:relative; z-index:2; padding:100px 6vw; scroll-margin-top:90px;}
+  .section-head{max-width:640px; margin-bottom:52px;}
+  .eyebrow{
+    font-family:'Space Mono', monospace;
+    font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--amber);
+    font-weight:700; margin-bottom:14px; display:block;
+  }
+  .section-head h2{
+    font-family:'Anton', sans-serif; font-size:clamp(30px,4.6vw,48px);
+    text-transform:uppercase; letter-spacing:.5px; color:var(--chrome-1);
+  }
+  .section-head p{margin-top:14px; color:var(--chrome-3); line-height:1.7; font-size:15px;}
+
+  .albums-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:26px;
+    padding:8px 0 26px;
+  }
+  .filmstrip-card{
+    background:#0c0b0a; border-radius:5px; padding:16px 14px 14px; position:relative; cursor:pointer;
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .filmstrip-card:hover{transform:translateY(-7px); box-shadow:var(--shadow-hard);}
+  .filmstrip-card::before, .filmstrip-card::after{
+    content:""; position:absolute; left:0; right:0; height:13px;
+    background-image:radial-gradient(circle, var(--asphalt) 3px, transparent 3.2px);
+    background-size:18px 13px; background-repeat:repeat-x; background-position:7px center;
+  }
+  .filmstrip-card::before{top:0;} .filmstrip-card::after{bottom:0;}
+  .filmstrip-frame-num{font-family:'Space Mono', monospace; font-size:10px; letter-spacing:1.5px; color:var(--chrome-3); padding-top:6px;}
+  .filmstrip-photo{
+    aspect-ratio:3/2; margin:12px 0; background-size:cover; background-position:center;
+    filter:grayscale(.12) contrast(1.06) saturate(1.05); border:1px solid rgba(255,255,255,.06);
+  }
+  .filmstrip-title{font-family:'Anton', sans-serif; font-size:15.5px; text-transform:uppercase; color:var(--chrome-1); line-height:1.25;}
+  .led-desc{font-size:12.5px; color:var(--chrome-3); margin-top:9px; line-height:1.55; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .filmstrip-meta{
+    display:flex; justify-content:space-between; margin-top:12px; padding-bottom:4px;
+    font-family:'Space Mono', monospace; font-size:9.5px; letter-spacing:1px; text-transform:uppercase; color:var(--amber); font-weight:700;
+  }
+  .filmstrip-hint{font-family:'Space Mono', monospace; font-size:11px; letter-spacing:1px; color:var(--chrome-3); margin-bottom:14px; display:block;}
+
+
+  #lightbox{
+    position:fixed; inset:0; z-index:200; background:rgba(8,7,6,.94); backdrop-filter:blur(6px);
+    display:none; flex-direction:column; align-items:center; justify-content:center; padding:5vh 5vw;
+    opacity:0; transition:opacity .25s ease;
+  }
+  #lightbox.open{display:flex; opacity:1;}
+  #lightbox img{max-width:100%; max-height:76vh; border-radius:8px; box-shadow:0 30px 70px rgba(0,0,0,.6); transform:scale(.96); transition:transform .25s ease;}
+  #lightbox.open img{transform:scale(1);}
+  #lightbox-info{margin-top:18px; max-width:620px; text-align:center;}
+  #lightbox-caption{color:var(--chrome-3); font-size:12px; letter-spacing:1px; text-transform:uppercase; font-family:'Space Mono', monospace;}
+  #lightbox-caption strong{color:var(--chrome-1);}
+  #lightbox-description{margin-top:8px; color:var(--chrome-2); font-size:14px; line-height:1.6;}
+  #lightbox-description:empty{display:none;}
+  #lightbox-close, #lightbox-prev, #lightbox-next{
+    position:absolute; border-radius:50%; background:rgba(255,255,255,.06);
+    border:1px solid rgba(93,168,255,.25); color:var(--chrome-1);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .2s ease, border-color .2s ease;
+  }
+  #lightbox-close:hover, #lightbox-prev:hover, #lightbox-next:hover{background:rgba(93,168,255,.14); border-color:var(--amber);}
+  #lightbox-close{top:26px; right:6vw; width:42px; height:42px; font-size:20px;}
+  #lightbox-prev, #lightbox-next{top:50%; transform:translateY(-50%); width:48px; height:48px; font-size:22px;}
+  #lightbox-prev{left:4vw;} #lightbox-next{right:4vw;}
+
+  .empty-state, .loading-state{
+    grid-column:1/-1; text-align:center; padding:56px 20px; color:var(--chrome-3);
+    border:1px dashed rgba(255,255,255,.14); border-radius:8px; font-size:14px;
+  }
+
+  footer{
+    padding:0 6vw 28px; position:relative; z-index:2;
+  }
+  footer .footer-shell{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+    padding:18px 22px; border:1px solid var(--hairline); border-radius:18px;
+    background:linear-gradient(135deg, rgba(255,255,255,.04), rgba(255,255,255,.025));
+    color:var(--chrome-3); font-size:11px; letter-spacing:.5px;
+    font-family:'Space Mono', monospace;
+    box-shadow:0 10px 24px rgba(2,10,20,.16);
+  }
+  body.push-footer{display:flex; flex-direction:column; min-height:100vh;}
+  body.push-footer footer{margin-top:auto;}
+
+  @media (max-width:760px){
+    header{padding:16px 5vw;} nav ul{gap:6px;} nav a{font-size:10.5px; padding:7px 10px;}
+  }
+
+  #preloader{
+    position:fixed; inset:0; z-index:999; background:var(--asphalt);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px;
+    transition:opacity .6s ease, visibility .6s ease;
+  }
+  #preloader.hidden{opacity:0; visibility:hidden; pointer-events:none;}
+  .preloader-logo{
+    font-family:'Anton', sans-serif; font-size:16px; letter-spacing:3px;
+    background:linear-gradient(180deg, #fff 0%, #e8e0d2 40%, #8a7f70 50%, #f3ede1 62%, #fff 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .preloader-ring{width:50px; height:50px; border-radius:50%; border:2px solid rgba(255,255,255,.08); border-top-color:var(--amber); animation:preloaderSpin .9s linear infinite;}
+  .preloader-bar{width:220px; height:3px; background:rgba(255,255,255,.08); border-radius:3px; overflow:hidden; position:relative;}
+  .preloader-bar-fill{height:100%; width:0%; border-radius:3px; background:linear-gradient(90deg, var(--amber-dim), var(--amber)); box-shadow:0 0 12px var(--amber-glow); transition:width .25s ease-out;}
+  .preloader-percent{font-family:'Space Mono', monospace; font-size:13px; letter-spacing:1px; color:var(--chrome-3); font-variant-numeric:tabular-nums; min-width:42px; text-align:center;}
+  .preloader-status{font-family:'Space Mono', monospace; font-size:9.5px; letter-spacing:2px; text-transform:uppercase; color:rgba(214,205,190,.4);}
+  @keyframes preloaderSpin{to{transform:rotate(360deg);}}
+
+</style>
+</head>
+<body class="push-footer">
+
+<div id="preloader">
+  <div class="preloader-ring"></div>
+  <div class="preloader-logo">J.B.C&nbsp;CROME</div>
+  <div class="preloader-bar"><div class="preloader-bar-fill" id="preloader-fill"></div></div>
+  <div class="preloader-percent" id="preloader-percent">0%</div>
+  <div class="preloader-status" id="preloader-status">Chargement du site…</div>
+</div>
+
+<header>
+  <a href="index.html" class="logo">J.B.C&nbsp;CROME</a>
+  <nav>
+    <ul>
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="apropos.html">A propos</a></li>
+      <li><a href="equipe.html">Équipe</a></li>
+      <li><a href="evenements.html">Événements</a></li>
+      <li><a href="galerie.html" class="active">Galerie</a></li>
+      <li><a href="discord.html">Discord</a></li>
+      <li><a href="classement.html">Classement</a></li>
+    </ul>
+  </nav>
+</header>
+
+<section id="galerie">
+  <div class="section-head">
+    <span class="eyebrow">Souvenirs de la route</span>
+    <h2>La galerie</h2>
+    <p>Une sélection de photos de convois et de la flotte J.B.C Crome — clique sur un album pour l'ouvrir.</p>
+  </div>
+
+  <span class="filmstrip-hint">Toute la flotte, album par album</span>
+  <div id="albums-grid" class="albums-grid">
+    <div class="loading-state">Chargement des albums…</div>
+  </div>
+</section>
+
+<div id="lightbox">
+  <div id="lightbox-close">✕</div>
+  <div id="lightbox-prev">‹</div>
+  <img id="lightbox-img" src="" alt="Photo agrandie">
+  <div id="lightbox-next">›</div>
+  <div id="lightbox-info">
+    <div id="lightbox-caption"></div>
+    <div id="lightbox-description"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-shell">
+    <span>J.B.C Crome — société de transport virtuelle ETS2 / TruckersMP</span>
+    <span>Fait avec un peu de graisse et beaucoup de chrome ✨</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  function forceScrollTop(){
+    window.scrollTo(0, 0);
+  }
+  forceScrollTop();
+  document.addEventListener('DOMContentLoaded', forceScrollTop);
+  window.addEventListener('load', forceScrollTop);
+  window.addEventListener('pageshow', forceScrollTop);
+  setTimeout(forceScrollTop, 0);
+  setTimeout(forceScrollTop, 350);
+})();
+</script>
+
+<script>
+(function(){
+  const preloader = document.getElementById('preloader');
+  const fill = document.getElementById('preloader-fill');
+  const percentLabel = document.getElementById('preloader-percent');
+  const statusLabel = document.getElementById('preloader-status');
+  if(!preloader || !fill || !percentLabel) return;
+
+  const DUREE_MIN_MS = 150;
+  const DUREE_MAX_MS = 400;
+
+  const debut = performance.now();
+  let pageEstPrete = (document.readyState === 'complete');
+  let masque = false;
+
+  const messages = [
+    'Chargement du site…',
+    'Préparation de la flotte…',
+    'Polissage du chrome…',
+    'Presque prêt…'
+  ];
+
+  window.addEventListener('load', function(){ pageEstPrete = true; });
+
+  function definirProgression(pct){
+    pct = Math.max(0, Math.min(100, pct));
+    fill.style.width = pct + '%';
+    percentLabel.textContent = Math.round(pct) + '%';
+    if(statusLabel){
+      const idx = Math.min(messages.length - 1, Math.floor((pct / 100) * messages.length));
+      statusLabel.textContent = messages[idx];
+    }
+  }
+
+  function cacherPreloader(){
+    if(masque) return;
+    masque = true;
+    definirProgression(100);
+    setTimeout(function(){
+      preloader.classList.add('hidden');
+    }, 150);
+  }
+
+  function boucle(){
+    const ecoule = performance.now() - debut;
+    const ratioTemps = Math.min(1, ecoule / DUREE_MIN_MS);
+    const progressionSimulee = 90 * (1 - Math.pow(1 - ratioTemps, 2));
+    definirProgression(progressionSimulee);
+
+    const dureeMinAtteinte = ecoule >= DUREE_MIN_MS;
+    const dureeMaxAtteinte = ecoule >= DUREE_MAX_MS;
+
+    if((pageEstPrete && dureeMinAtteinte) || dureeMaxAtteinte){
+      cacherPreloader();
+      return;
+    }
+    requestAnimationFrame(boucle);
+  }
+  requestAnimationFrame(boucle);
+})();
+</script>
+
+<script>
+(function(){
+  const GITHUB_USER = "nosix-dev";
+  const GITHUB_REPO = "JBC-Crome";
+  const GITHUB_BRANCH = "main";
+  const GITHUB_FOLDER = "galerie";
+  const DOSSIERS_MASQUES = ["couverture"];
+  const ALBUMS_META_URL = "albums.json";
+  const CATEGORIE_DEFAUT = "Convoi";
+  const ALBUM_RACINE_CLE = "_racine";
+  const ALBUM_RACINE_TITRE = "Photos";
+
+  // API Git Trees de GitHub : un seul appel recursive=1 renvoie tout
+  // l'arbre du dépôt (au lieu d'un appel par dossier comme avant), ce qui
+  // reste largement sous la limite de 60 requêtes/heure non-authentifiées.
+  // (jsDelivr a été essayé mais son API bloque volontairement le listing
+  // de fichiers avec un 403 systématique, donc abandonné.)
+  const GITHUB_TREE_URL = "https://api.github.com/repos/" + GITHUB_USER + "/" + GITHUB_REPO + "/git/trees/" + GITHUB_BRANCH + "?recursive=1";
+
+  function urlFichier(chemin){
+    // raw.githubusercontent.com n'est pas soumis à la limite de 60 req/h
+    // de api.github.com : on peut charger autant d'images que nécessaire.
+    return "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/" + chemin;
+  }
+
+  const grid = document.getElementById('albums-grid');
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const lightboxCaption = document.getElementById('lightbox-caption');
+  const lightboxDescription = document.getElementById('lightbox-description');
+  const btnClose = document.getElementById('lightbox-close');
+  const btnPrev = document.getElementById('lightbox-prev');
+  const btnNext = document.getElementById('lightbox-next');
+
+  let albums = [];
+  let albumOuvert = null;
+  let currentIndex = 0;
+
+  function estImage(nom){
+    return /\.(jpe?g|png|webp|gif)$/i.test(nom);
+  }
+
+  function prettifier(nomDossier){
+    return nomDossier
+      .replace(/[-_]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  function afficherErreur(){
+    grid.innerHTML = '<div class="empty-state">Impossible de charger la galerie pour le moment. Réessaie plus tard.</div>';
+  }
+
+  function afficherVide(){
+    grid.innerHTML = '<div class="empty-state">Aucun album pour le moment. Ajoute des photos dans "galerie" (ou crée un sous-dossier) sur GitHub pour en ajouter un.</div>';
+  }
+
+  function ouvrirLightbox(album, index){
+    albumOuvert = album;
+    currentIndex = index;
+    majImageLightbox();
+    lightbox.classList.add('open');
+  }
+
+  function majImageLightbox(){
+    const photo = albumOuvert.photos[currentIndex];
+    lightboxImg.src = photo.url;
+    lightboxCaption.innerHTML = '<strong>' + albumOuvert.titre + '</strong> — ' + (currentIndex + 1) + ' / ' + albumOuvert.photos.length;
+    lightboxDescription.textContent = photo.description || '';
+  }
+
+  function fermerLightbox(){
+    lightbox.classList.remove('open');
+  }
+
+  function suivant(delta){
+    if(!albumOuvert) return;
+    currentIndex = (currentIndex + delta + albumOuvert.photos.length) % albumOuvert.photos.length;
+    majImageLightbox();
+  }
+
+  btnClose.addEventListener('click', fermerLightbox);
+  btnPrev.addEventListener('click', function(){ suivant(-1); });
+  btnNext.addEventListener('click', function(){ suivant(1); });
+  lightbox.addEventListener('click', function(e){
+    if(e.target === lightbox) fermerLightbox();
+  });
+  document.addEventListener('keydown', function(e){
+    if(!lightbox.classList.contains('open')) return;
+    if(e.key === 'Escape') fermerLightbox();
+    if(e.key === 'ArrowLeft') suivant(-1);
+    if(e.key === 'ArrowRight') suivant(1);
+  });
+
+  
+  function afficherAlbums(){
+    if(!albums.length){ afficherVide(); return; }
+    grid.innerHTML = albums.map(function(album, i){
+      const nbPhotos = album.photos.length;
+      const desc = album.description ? '<p class="filmstrip-desc">' + album.description + '</p>' : '';
+      const numFrame = String(i + 1).padStart(2, '0');
+      return '<div class="filmstrip-card" data-album-index="' + i + '">'
+        + '<div class="filmstrip-frame-num">FRAME N&deg;' + numFrame + '</div>'
+        + '<div class="filmstrip-photo" style="background-image:url(\'' + album.couverture + '\')"></div>'
+        + '<h3 class="filmstrip-title">' + album.titre + '</h3>'
+        + desc
+        + '<div class="filmstrip-meta"><span>' + album.categorie + '</span><span>' + nbPhotos + ' PH</span></div>'
+        + '</div>';
+    }).join('');
+
+    grid.querySelectorAll('.filmstrip-card').forEach(function(card){
+      card.addEventListener('click', function(){
+        const album = albums[parseInt(card.dataset.albumIndex, 10)];
+        ouvrirLightbox(album, 0);
+      });
+    });
+  }
+
+  async function chargerArborescence(){
+    const res = await fetch(GITHUB_TREE_URL, { cache: 'no-store' });
+    if(!res.ok) throw new Error("Erreur API GitHub (" + res.status + ")");
+    return res.json();
+  }
+
+  async function chargerMeta(){
+    try{
+      const res = await fetch(ALBUMS_META_URL, { cache: 'no-store' });
+      if(!res.ok) return {};
+      const liste = await res.json();
+      const map = {};
+      liste.forEach(function(entree){ map[entree.dossier] = entree; });
+      return map;
+    }catch(err){
+      console.warn('[galerie] Pas de albums.json (optionnel) :', err);
+      return {};
+    }
+  }
+
+  function construireAlbum(nomDossier, cheminAffichage, fichiersImages, meta){
+    // fichiersImages : liste de {name, chemin} — chemin relatif au dépôt,
+    // utilisé pour construire l'URL cdn.jsdelivr.net.
+    const infos = meta[nomDossier] || {};
+    const descriptionsPhotos = infos.photos || {};
+    const photos = fichiersImages.map(f => ({
+      name: f.name,
+      url: urlFichier(f.chemin),
+      description: descriptionsPhotos[f.name] || ''
+    }));
+
+    let couverture = photos[0] ? photos[0].url : '';
+    if(infos.couverture){
+      const trouvee = photos.find(p => p.name === infos.couverture);
+      if(trouvee){
+        couverture = trouvee.url;
+      } else if(/^https?:\/\//i.test(infos.couverture)){
+        couverture = infos.couverture;
+      } else {
+        couverture = urlFichier(infos.couverture.replace(/^\/+/, ''));
+      }
+    }
+
+    return {
+      dossier: nomDossier,
+      categorie: infos.categorie || CATEGORIE_DEFAUT,
+      titre: infos.titre || (cheminAffichage === null ? ALBUM_RACINE_TITRE : prettifier(nomDossier)),
+      description: infos.description || '',
+      couverture: couverture,
+      photos: photos,
+    };
+  }
+
+  async function chargerAlbums(){
+    const [arbo, meta] = await Promise.all([chargerArborescence(), chargerMeta()]);
+
+    // L'API Git Trees renvoie une liste PLATE de chemins complets, ex :
+    // "galerie/photo.jpg", "galerie/convoi/photo1.jpg", chacun avec un
+    // type "blob" (fichier) ou "tree" (dossier).
+    const entrees = Array.isArray(arbo.tree) ? arbo.tree : [];
+    const prefixe = GITHUB_FOLDER + "/";
+
+    const fichiersRacine = [];
+    const parDossier = {};
+
+    entrees.forEach(function(entree){
+      if(entree.type !== 'blob') return;
+      if(!entree.path.startsWith(prefixe)) return;
+      const reste = entree.path.slice(prefixe.length);
+      if(!estImage(reste)) return;
+
+      const segments = reste.split('/');
+      if(segments.length === 1){
+        // Directement dans galerie/ (album racine)
+        fichiersRacine.push({ name: segments[0], chemin: entree.path });
+      } else {
+        // galerie/<dossier>/.../fichier.jpg -> on regroupe par premier
+        // niveau de sous-dossier uniquement.
+        const dossier = segments[0];
+        if(!parDossier[dossier]) parDossier[dossier] = [];
+        parDossier[dossier].push({ name: segments[segments.length - 1], chemin: entree.path });
+      }
+    });
+
+    const albumsDossiers = Object.keys(parDossier)
+      .filter(dossier => !DOSSIERS_MASQUES.includes(dossier))
+      .map(dossier => construireAlbum(dossier, dossier, parDossier[dossier], meta))
+      .filter(album => album.photos.length > 0);
+
+    const albums = [...albumsDossiers];
+
+    if(fichiersRacine.length > 0){
+      const albumRacine = construireAlbum(ALBUM_RACINE_CLE, null, fichiersRacine, meta);
+      albums.unshift(albumRacine);
+    }
+
+    return albums;
+  }
+
+  chargerAlbums()
+    .then(function(liste){
+      albums = liste;
+      afficherAlbums();
+    })
+    .catch(function(err){
+      console.error(err);
+      afficherErreur();
+    });
+})();
+</script>
+
+</body>
+</html>
