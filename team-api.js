@@ -1,25 +1,7 @@
 // team-api.js
-// Module qui expose GET /api/team, GET /api/stats, GET /api/classement et GET /api/events
-// pour le site J.B.C Crome, exposé en HTTPS via un tunnel ngrok (domaine gratuit fixe,
-// binaire officiel piloté directement, sans wrapper npm tiers).
-//
-// Utilisation dans index.js :
-//   const { startTeamApi } = require("./team-api");
-//   client.on("clientReady", () => { ...; startTeamApi(client); });
-//
-// Variables .env requises :
-//   NGROK_AUTHTOKEN = ton authtoken (dashboard ngrok -> "Your Authtoken")
-//   NGROK_DOMAIN    = ton domaine gratuit assigné (dashboard ngrok -> Gateway > Domains,
-//                     type xxxxx.ngrok-free.dev). NE PAS mettre https:// devant.
-//
-// Structure réelle dans data.json (par guild) pour les stats /api/team :
-//   guilds[guildId].webhookDrivers = { [pseudoTrucksBook]: { km, trajets }, ... }
-//   guilds[guildId].convois        = [ { participants: [discordId, ...] }, ... ]
-//   guilds[guildId].liaisons       = { [pseudoTrucksBook]: "discordId", ... } (optionnel)
-// Même source que /classement : on rapproche le pseudo Discord de chaque
-// membre (displayName puis username) avec les clés de webhookDrivers,
-// insensible à la casse. guildData.liaisons reste utilisable en priorité si
-// le pseudo Discord diffère trop du pseudo TrucksBook pour un membre donné.
+// Module qui expose GET /api/team, GET /api/stats et GET /api/classement pour le site J.B.C Crome,
+// exposé en HTTPS via un tunnel ngrok (domaine gratuit fixe, binaire officiel
+// piloté directement, sans wrapper npm tiers).
 
 const fs = require("fs");
 const path = require("path");
@@ -27,6 +9,7 @@ const https = require("https");
 const { spawn, execFileSync } = require("child_process");
 const express = require("express");
 const cors = require("cors");
+const trucksbookApi = require("./trucksbook");
 
 // ==== CONFIG ====
 const GUILD_ID = process.env.GUILD_ID || null;
@@ -42,6 +25,13 @@ const ROLE_IDS = {
   chauffeurs: "1495111013949902999",
   chauffeurs_essai: "1527806431519314183",
 };
+
+const ROLES_CHAUFFEURS_STATS = [
+  ROLE_IDS.patron,
+  ROLE_IDS.gerants,
+  ROLE_IDS.chauffeurs,
+  ROLE_IDS.chauffeurs_essai,
+];
 
 const DATA_PATH = path.join(__dirname, "data.json");
 
@@ -68,16 +58,17 @@ function chargerDonneesBot() {
   }
 }
 
-const CACHE_MS = 60 * 1000;
-const MEMBERS_CACHE_MS = 5 * 60 * 1000;
-// Après un échec (ex: rate limit gateway), on ne retente pas avant ce délai,
-// pour ne pas marteler Discord à chaque appel HTTP reçu entre-temps.
-const MEMBERS_RETRY_COOLDOWN_MS = 60 * 1000;
+// Cache des membres (pour /api/stats et /api/team) – on garde un cache long
+// car on ne veut pas être rate-limité.
+const MEMBERS_CACHE_MS = 10 * 60 * 1000; // 10 minutes
 let membersCache = null;
 let membersCacheTime = 0;
 let membersFetchPromise = null;
 let lastMembersFetchError = null;
 let lastMembersFetchErrorTime = 0;
+
+// Cache général pour l'API
+const CACHE_MS = 5 * 60 * 1000; // 5 minutes
 
 let cache = null;
 let cacheTime = 0;
@@ -89,26 +80,19 @@ let cacheEvents = null;
 let cacheEventsTime = 0;
 let started = false;
 
+// Fonction pour obtenir les membres avec un cache et une gestion d'erreur
 async function getGuildMembers(guild) {
   const now = Date.now();
   if (membersCache && now - membersCacheTime < MEMBERS_CACHE_MS) {
     return membersCache;
   }
 
-  // Un fetch a échoué récemment : on n'en relance pas un nouveau tout de
-  // suite. On sert le cache périmé s'il existe (mieux qu'une erreur 500),
-  // sinon on renvoie la même erreur sans re-solliciter le gateway Discord.
-  if (lastMembersFetchError && now - lastMembersFetchErrorTime < MEMBERS_RETRY_COOLDOWN_MS) {
+  if (lastMembersFetchError && now - lastMembersFetchErrorTime < 60 * 1000) {
     if (membersCache) return membersCache;
     throw lastMembersFetchError;
   }
 
   if (!membersFetchPromise) {
-    // Un seul .finally() sur LA MÊME chaîne que celle qu'on stocke et qu'on
-    // retourne : si guild.members.fetch() échoue (ex: rate limit gateway),
-    // le rejet remonte à l'appelant (qui l'awaite dans un try/catch) au lieu
-    // de rejeter une promesse fantôme non gérée (ce qui plantait tout le
-    // process en unhandled rejection).
     membersFetchPromise = guild.members.fetch()
       .then((members) => {
         membersCache = members;
@@ -119,7 +103,6 @@ async function getGuildMembers(guild) {
       .catch((err) => {
         lastMembersFetchError = err;
         lastMembersFetchErrorTime = Date.now();
-        // Un cache périmé vaut mieux qu'une route en erreur.
         if (membersCache) return membersCache;
         throw err;
       })
@@ -131,113 +114,25 @@ async function getGuildMembers(guild) {
   return membersFetchPromise;
 }
 
-// ==== ANCIENNETÉ (durée depuis l'arrivée sur le serveur) ====
-function calculerAnciennete(joinedAt) {
-  if (!joinedAt) return null;
-
-  const maintenant = new Date();
-  const debut = new Date(joinedAt);
-
-  let mois = (maintenant.getFullYear() - debut.getFullYear()) * 12
-    + (maintenant.getMonth() - debut.getMonth());
-  if (maintenant.getDate() < debut.getDate()) mois -= 1;
-  if (mois < 0) mois = 0;
-
-  if (mois < 1) return "< 1 mois";
-  if (mois < 12) return `${mois} mois`;
-
-  const ans = Math.floor(mois / 12);
-  const moisRestants = mois % 12;
-  if (moisRestants === 0) return `${ans} an${ans > 1 ? "s" : ""}`;
-  return `${ans} an${ans > 1 ? "s" : ""} ${moisRestants} mois`;
-}
-
-// ==== STATS PAR MEMBRE (km / missions / convois) via scarabgroups + TrucksBook ====
-function construireStatsParMembre(guildData, members) {
-  const webhookDrivers = guildData.webhookDrivers || {};
-  const liaisons = guildData.liaisons || {}; // { pseudoTrucksBook: discordId } — override manuel optionnel
-
-  const pseudoParDiscordId = {};
-  for (const [pseudo, discordId] of Object.entries(liaisons)) {
-    pseudoParDiscordId[discordId] = pseudo;
-  }
-
-  // Index des clés webhookDrivers en minuscules pour un rapprochement
-  // insensible à la casse (ex: pseudo Discord "zeox62" vs clé "ZEOX62").
-  const webhookParPseudoMinuscule = {};
-  for (const pseudo of Object.keys(webhookDrivers)) {
-    webhookParPseudoMinuscule[pseudo.toLowerCase().trim()] = pseudo;
-  }
-
-  // Nombre de convois par ID Discord, comptés depuis les participants
-  // (même logique que buildClassementData).
-  const compteurConvois = {};
-  for (const convoi of guildData.convois || []) {
-    for (const userId of convoi.participants || []) {
-      compteurConvois[userId] = (compteurConvois[userId] || 0) + 1;
-    }
-  }
-
-  const statsParDiscordId = {};
-  for (const member of members.values()) {
-    // 1) liaison manuelle explicite si elle existe (prioritaire)
-    let pseudoWebhook = pseudoParDiscordId[member.id] || null;
-
-    // 2) sinon, rapprochement automatique par pseudo Discord (displayName
-    //    puis username), comme /classement le fait déjà avec le nom envoyé
-    //    par le webhook TrucksBook.
-    if (!pseudoWebhook) {
-      pseudoWebhook =
-        webhookParPseudoMinuscule[(member.displayName || "").toLowerCase().trim()] ||
-        webhookParPseudoMinuscule[(member.user.username || "").toLowerCase().trim()] ||
-        null;
-    }
-
-    const statsWebhook = pseudoWebhook ? webhookDrivers[pseudoWebhook] : null;
-
-    statsParDiscordId[member.id] = {
-      km: (statsWebhook && statsWebhook.km) || 0,
-      convois: compteurConvois[member.id] || 0,
-      anciennete: calculerAnciennete(member.joinedAt),
-    };
-  }
-
-  return statsParDiscordId;
-}
-
 async function buildTeamData(client) {
   const guild = resoudreGuild(client);
   if (!guild) throw new Error("Aucun serveur Discord disponible pour le bot.");
 
   const members = await getGuildMembers(guild);
-  const botData = chargerDonneesBot();
-  const guildData = (botData.guilds && botData.guilds[guild.id]) || {};
-  const statsParDiscordId = construireStatsParMembre(guildData, members);
-
   const result = {};
 
   for (const [key, roleId] of Object.entries(ROLE_IDS)) {
     const role = guild.roles.cache.get(roleId);
-
     if (!role) {
       result[key] = [];
       continue;
     }
-
     result[key] = members
       .filter((m) => m.roles.cache.has(role.id))
-      .map((m) => {
-        const stats = statsParDiscordId[m.id] || { km: 0, convois: 0, anciennete: null };
-        return {
-          id: m.id,
-          pseudo: m.displayName || m.user.username,
-          avatar: m.displayAvatarURL({ extension: "png", size: 128 }),
-          joinedAt: m.joinedAt ? m.joinedAt.toISOString() : null,
-          km: stats.km,
-          convois: stats.convois,
-          anciennete: stats.anciennete,
-        };
-      });
+      .map((m) => ({
+        pseudo: m.displayName || m.user.username,
+        avatar: m.displayAvatarURL({ extension: "png", size: 128 }),
+      }));
   }
 
   return result;
@@ -256,19 +151,24 @@ async function buildStatsData(client) {
   if (!guild) throw new Error("Aucun serveur Discord disponible pour le bot.");
 
   const members = await getGuildMembers(guild);
-  const roleChauffeurs = guild.roles.cache.get(ROLE_IDS.chauffeurs);
-  const nbChauffeurs = roleChauffeurs
-    ? members.filter((m) => m.roles.cache.has(roleChauffeurs.id)).size
-    : 0;
+  const nbChauffeurs = members.filter((m) =>
+    ROLES_CHAUFFEURS_STATS.some((roleId) => m.roles.cache.has(roleId))
+  ).size;
 
-  const botData = chargerDonneesBot();
   let km = 0;
   let trajets = 0;
-
-  for (const guildData of Object.values(botData.guilds || {})) {
-    if (guildData && guildData.societe) {
-      km += guildData.societe.km || 0;
-      trajets += guildData.societe.trajets || 0;
+  try {
+    const statsTrucksBook = await trucksbookApi.getCompanyStats("all");
+    km = statsTrucksBook.km;
+    trajets = statsTrucksBook.trajets;
+  } catch (err) {
+    console.error("[team-api] TrucksBook injoignable, repli sur les stats internes :", err.message);
+    const botData = chargerDonneesBot();
+    for (const guildData of Object.values(botData.guilds || {})) {
+      if (guildData && guildData.societe) {
+        km += guildData.societe.km || 0;
+        trajets += guildData.societe.trajets || 0;
+      }
     }
   }
 
@@ -283,9 +183,8 @@ async function getStatsData(client) {
   return cacheStats;
 }
 
-// ==== CLASSEMENT (top km / missions / convois par chauffeur) ====
-// Lit botData.guilds[guildId].chauffeurs[userId] = { km, missions, convois }
-function construireTop(entries, champ, limite = 5) {
+// ==== CLASSEMENT (top km / missions par chauffeur) ====
+function construireTop(entries, champ, limite = 10) {
   return entries
     .filter((e) => (e[champ] || 0) > 0)
     .slice()
@@ -298,60 +197,50 @@ async function buildClassementData(client) {
   const guild = resoudreGuild(client);
   if (!guild) throw new Error("Aucun serveur Discord disponible pour le bot.");
 
-  const members = await getGuildMembers(guild);
-  const botData = chargerDonneesBot();
-  const guildData = (botData.guilds && botData.guilds[guild.id]) || {};
+  // Récupérer les stats du mois depuis TrucksBook (pour chaque chauffeur)
+  let trucksbookDrivers = {};
+  try {
+    trucksbookDrivers = await trucksbookApi.getDriversStats("month");
+  } catch (err) {
+    console.error("[team-api] Erreur récupération stats chauffeurs TrucksBook:", err.message);
+  }
 
-  // Km + missions (trajets) : alimentés par le webhook TrucksBook, indexés
-  // par pseudo TrucksBook (pas par ID Discord).
-  const webhookDrivers = guildData.webhookDrivers || {};
-  const entriesWebhook = Object.entries(webhookDrivers).map(([pseudo, stats]) => ({
+  // Convertir en tableau
+  const entries = Object.entries(trucksbookDrivers).map(([pseudo, stats]) => ({
     pseudo,
-    km: (stats && stats.km) || 0,
-    missions: (stats && stats.trajets) || 0,
+    km: stats.km || 0,
+    missions: stats.trajets || 0
   }));
 
-  // Convois : pas de compteur dédié dans data.json, on le calcule en comptant
-  // les apparitions de chaque ID Discord dans les listes "participants" des
-  // convois de la guild.
-  const compteurConvois = {};
-  for (const convoi of guildData.convois || []) {
-    for (const userId of convoi.participants || []) {
-      compteurConvois[userId] = (compteurConvois[userId] || 0) + 1;
-    }
-  }
-  const entriesConvois = Object.entries(compteurConvois).map(([userId, nb]) => {
-    const membre = members.get(userId);
-    const pseudo = membre ? (membre.displayName || membre.user.username) : `Utilisateur ${userId}`;
-    return { pseudo, convois: nb };
-  });
+  const topKm = construireTop(entries, "km", 10);
+  const topMissions = construireTop(entries, "missions", 10);
 
   return {
     updatedAt: new Date().toISOString(),
-    top_km: construireTop(entriesWebhook, "km"),
-    top_missions: construireTop(entriesWebhook, "missions"),
-    top_convois: construireTop(entriesConvois, "convois"),
+    top_km: topKm,
+    top_missions: topMissions
   };
 }
 
 async function getClassementData(client) {
   const now = Date.now();
   if (cacheClassement && now - cacheClassementTime < CACHE_MS) return cacheClassement;
-  cacheClassement = await buildClassementData(client);
-  cacheClassementTime = now;
-  return cacheClassement;
+
+  try {
+    cacheClassement = await buildClassementData(client);
+    cacheClassementTime = now;
+    return cacheClassement;
+  } catch (err) {
+    if (cacheClassement) {
+      console.warn("[team-api] Erreur rafraîchissement classement, retour du cache périmé:", err.message);
+      return cacheClassement;
+    }
+    throw err;
+  }
 }
 // ==================================================================
 
 // ==== EVENEMENTS (convois planifiés) ====
-// Lit botData.guilds[guildId].evenements = [
-//   { date: "2026-09-12", titre: "...", lieu: "...", categorie: "...",
-//     description: ["...", "..."] ou "...", lien: "https://...", image: "https://..." },
-//   ...
-// ]
-// Cette liste est gérée depuis le bot (commandes /evenement-ajouter,
-// /evenement-supprimer à créer côté ScaraBot) au lieu d'être éditée à la
-// main dans events.json sur le repo du site.
 async function buildEventsData(client) {
   const guild = resoudreGuild(client);
   if (!guild) throw new Error("Aucun serveur Discord disponible pour le bot.");
@@ -360,8 +249,6 @@ async function buildEventsData(client) {
   const guildData = (botData.guilds && botData.guilds[guild.id]) || {};
   const evenements = Array.isArray(guildData.evenements) ? guildData.evenements : [];
 
-  // Ne garde que les événements avec une date exploitable, triés du plus
-  // proche au plus lointain (même logique que le front evenements.html).
   return evenements
     .filter((ev) => ev && ev.date && !isNaN(new Date(ev.date)))
     .slice()
@@ -476,20 +363,11 @@ function startTeamApi(client, options = {}) {
   const port = options.port || PORT;
   const app = express();
 
-  // IMPORTANT : app.use(cors()) gère déjà tout seul les requêtes OPTIONS de
-  // pré-vol (preflight) pour toutes les routes, il ne faut pas rajouter de
-  // route explicite type app.options("*", cors()) : sur Express 5 (qui
-  // utilise path-to-regexp v6), le motif générique "*" tout seul fait planter
-  // le serveur au démarrage (route pattern invalide), ce qui empêchait le
-  // serveur — et donc les en-têtes CORS — d'être disponible pour /api/classement.
   app.use(cors({
-    origin: true, // reflète l'origine de la requête, fonctionne pour un site public
+    origin: true,
     methods: ["GET", "OPTIONS"],
   }));
 
-  // Bypass de la page d'avertissement ngrok sur TOUTES les réponses de l'API,
-  // pour que le fetch() du site ne tombe jamais sur l'interstitiel HTML sans
-  // en-têtes CORS (cause la plus probable de l'erreur observée).
   app.use((req, res, next) => {
     res.setHeader("ngrok-skip-browser-warning", "true");
     next();
@@ -541,4 +419,4 @@ function startTeamApi(client, options = {}) {
   });
 }
 
-module.exports = { startTeamApi };
+module.exports = { startTeamApi, getClassementData };
