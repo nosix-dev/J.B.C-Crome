@@ -1,7 +1,6 @@
 // team-api.js
-// Module qui expose GET /api/team, GET /api/stats et GET /api/classement pour le site J.B.C Crome,
-// exposé en HTTPS via un tunnel ngrok (domaine gratuit fixe, binaire officiel
-// piloté directement, sans wrapper npm tiers).
+// Module qui expose GET /api/team, GET /api/stats, GET /api/classement et GET /api/events pour le site J.B.C Crome,
+// exposé en HTTPS via un tunnel ngrok.
 
 const fs = require("fs");
 const path = require("path");
@@ -49,6 +48,16 @@ function resoudreGuild(client) {
   return client.guilds.cache.first() || null;
 }
 
+// Nouvelle fonction pour obtenir un guild par ID ou utiliser le guild par défaut
+function getGuildById(client, guildId) {
+  if (guildId) {
+    const guild = client.guilds.cache.get(guildId);
+    if (guild) return guild;
+    throw new Error(`Serveur ${guildId} introuvable pour le bot.`);
+  }
+  return resoudreGuild(client);
+}
+
 function chargerDonneesBot() {
   try {
     const raw = fs.readFileSync(DATA_PATH, "utf8");
@@ -58,8 +67,7 @@ function chargerDonneesBot() {
   }
 }
 
-// Cache des membres (pour /api/stats et /api/team) – on garde un cache long
-// car on ne veut pas être rate-limité.
+// Cache des membres
 const MEMBERS_CACHE_MS = 10 * 60 * 1000; // 10 minutes
 let membersCache = null;
 let membersCacheTime = 0;
@@ -114,8 +122,9 @@ async function getGuildMembers(guild) {
   return membersFetchPromise;
 }
 
-async function buildTeamData(client) {
-  const guild = resoudreGuild(client);
+// Modifier les fonctions build* pour accepter un paramètre guild
+async function buildTeamData(client, guild) {
+  if (!guild) guild = resoudreGuild(client);
   if (!guild) throw new Error("Aucun serveur Discord disponible pour le bot.");
 
   const members = await getGuildMembers(guild);
@@ -132,22 +141,33 @@ async function buildTeamData(client) {
       .map((m) => ({
         pseudo: m.displayName || m.user.username,
         avatar: m.displayAvatarURL({ extension: "png", size: 128 }),
+        id: m.id,
+        joinedAt: m.joinedAt ? m.joinedAt.toISOString() : null,
+        // Pour l'instant on met des données fictives ou on pourra les récupérer ailleurs
+        km: 0,
+        convois: 0,
+        anciennete: "Nouveau",
       }));
   }
 
   return result;
 }
 
-async function getTeamData(client) {
+async function getTeamData(client, guildId) {
   const now = Date.now();
-  if (cache && now - cacheTime < CACHE_MS) return cache;
-  cache = await buildTeamData(client);
+  const guild = getGuildById(client, guildId);
+  const cacheKey = guild.id; // on cache par serveur
+  // On pourrait faire un cache par guild, mais pour simplifier on garde le cache global
+  // et on invalide si le guild change
+  if (cache && cache._guildId === guild.id && now - cacheTime < CACHE_MS) return cache;
+  cache = await buildTeamData(client, guild);
+  cache._guildId = guild.id;
   cacheTime = now;
   return cache;
 }
 
-async function buildStatsData(client) {
-  const guild = resoudreGuild(client);
+async function buildStatsData(client, guild) {
+  if (!guild) guild = resoudreGuild(client);
   if (!guild) throw new Error("Aucun serveur Discord disponible pour le bot.");
 
   const members = await getGuildMembers(guild);
@@ -164,26 +184,29 @@ async function buildStatsData(client) {
   } catch (err) {
     console.error("[team-api] TrucksBook injoignable, repli sur les stats internes :", err.message);
     const botData = chargerDonneesBot();
-    for (const guildData of Object.values(botData.guilds || {})) {
-      if (guildData && guildData.societe) {
-        km += guildData.societe.km || 0;
-        trajets += guildData.societe.trajets || 0;
-      }
+    const guildData = (botData.guilds && botData.guilds[guild.id]) || {};
+    if (guildData.societe) {
+      km = guildData.societe.km || 0;
+      trajets = guildData.societe.trajets || 0;
     }
   }
 
   return { chauffeurs: nbChauffeurs, km, trajets };
 }
 
-async function getStatsData(client) {
+async function getStatsData(client, guildId) {
   const now = Date.now();
-  if (cacheStats && now - cacheStatsTime < CACHE_MS) return cacheStats;
-  cacheStats = await buildStatsData(client);
+  const guild = getGuildById(client, guildId);
+  // Pour éviter de mélanger les caches entre guilds, on utilise un cache par guild
+  // (on pourrait améliorer avec un Map)
+  if (cacheStats && cacheStats._guildId === guild.id && now - cacheStatsTime < CACHE_MS) return cacheStats;
+  cacheStats = await buildStatsData(client, guild);
+  cacheStats._guildId = guild.id;
   cacheStatsTime = now;
   return cacheStats;
 }
 
-// ==== CLASSEMENT (top km / missions par chauffeur) ====
+// ==== CLASSEMENT ====
 function construireTop(entries, champ, limite = 10) {
   return entries
     .filter((e) => (e[champ] || 0) > 0)
@@ -193,8 +216,8 @@ function construireTop(entries, champ, limite = 10) {
     .map((e, i) => ({ rang: i + 1, pseudo: e.pseudo, valeur: e[champ] || 0 }));
 }
 
-async function buildClassementData(client) {
-  const guild = resoudreGuild(client);
+async function buildClassementData(client, guild) {
+  if (!guild) guild = resoudreGuild(client);
   if (!guild) throw new Error("Aucun serveur Discord disponible pour le bot.");
 
   // Récupérer les stats du mois depuis TrucksBook (pour chaque chauffeur)
@@ -205,7 +228,6 @@ async function buildClassementData(client) {
     console.error("[team-api] Erreur récupération stats chauffeurs TrucksBook:", err.message);
   }
 
-  // Convertir en tableau
   const entries = Object.entries(trucksbookDrivers).map(([pseudo, stats]) => ({
     pseudo,
     km: stats.km || 0,
@@ -222,12 +244,14 @@ async function buildClassementData(client) {
   };
 }
 
-async function getClassementData(client) {
+async function getClassementData(client, guildId) {
   const now = Date.now();
-  if (cacheClassement && now - cacheClassementTime < CACHE_MS) return cacheClassement;
+  const guild = getGuildById(client, guildId);
+  if (cacheClassement && cacheClassement._guildId === guild.id && now - cacheClassementTime < CACHE_MS) return cacheClassement;
 
   try {
-    cacheClassement = await buildClassementData(client);
+    cacheClassement = await buildClassementData(client, guild);
+    cacheClassement._guildId = guild.id;
     cacheClassementTime = now;
     return cacheClassement;
   } catch (err) {
@@ -238,11 +262,10 @@ async function getClassementData(client) {
     throw err;
   }
 }
-// ==================================================================
 
-// ==== EVENEMENTS (convois planifiés) ====
-async function buildEventsData(client) {
-  const guild = resoudreGuild(client);
+// ==== EVENEMENTS ====
+async function buildEventsData(client, guild) {
+  if (!guild) guild = resoudreGuild(client);
   if (!guild) throw new Error("Aucun serveur Discord disponible pour le bot.");
 
   const botData = chargerDonneesBot();
@@ -255,15 +278,17 @@ async function buildEventsData(client) {
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 }
 
-async function getEventsData(client) {
+async function getEventsData(client, guildId) {
   const now = Date.now();
-  if (cacheEvents && now - cacheEventsTime < CACHE_MS) return cacheEvents;
-  cacheEvents = await buildEventsData(client);
+  const guild = getGuildById(client, guildId);
+  if (cacheEvents && cacheEvents._guildId === guild.id && now - cacheEventsTime < CACHE_MS) return cacheEvents;
+  cacheEvents = await buildEventsData(client, guild);
+  cacheEvents._guildId = guild.id;
   cacheEventsTime = now;
   return cacheEvents;
 }
-// ==================================================================
 
+// ==== TÉLÉCHARGEMENT NGROK ====
 function telechargerFichier(url, destPath, redirectsRestants = 5) {
   return new Promise((resolve, reject) => {
     https.get(url, { headers: { "User-Agent": "team-api-script" } }, (res) => {
@@ -353,6 +378,7 @@ async function ouvrirTunnelNgrok(port) {
   });
 }
 
+// ==== START ====
 function startTeamApi(client, options = {}) {
   if (started) {
     console.warn("[team-api] déjà démarré, appel ignoré.");
@@ -375,17 +401,19 @@ function startTeamApi(client, options = {}) {
 
   app.get("/api/team", async (req, res) => {
     try {
-      const data = await getTeamData(client);
+      const guildId = req.query.guildId || null;
+      const data = await getTeamData(client, guildId);
       res.json(data);
     } catch (err) {
-      console.error("[team-api] erreur:", err);
+      console.error("[team-api] erreur team:", err);
       res.status(500).json({ error: "internal_error" });
     }
   });
 
   app.get("/api/stats", async (req, res) => {
     try {
-      const data = await getStatsData(client);
+      const guildId = req.query.guildId || null;
+      const data = await getStatsData(client, guildId);
       res.json(data);
     } catch (err) {
       console.error("[team-api] erreur stats:", err);
@@ -395,7 +423,8 @@ function startTeamApi(client, options = {}) {
 
   app.get("/api/classement", async (req, res) => {
     try {
-      const data = await getClassementData(client);
+      const guildId = req.query.guildId || null;
+      const data = await getClassementData(client, guildId);
       res.json(data);
     } catch (err) {
       console.error("[team-api] erreur classement:", err);
@@ -405,7 +434,8 @@ function startTeamApi(client, options = {}) {
 
   app.get("/api/events", async (req, res) => {
     try {
-      const data = await getEventsData(client);
+      const guildId = req.query.guildId || null;
+      const data = await getEventsData(client, guildId);
       res.json(data);
     } catch (err) {
       console.error("[team-api] erreur events:", err);
