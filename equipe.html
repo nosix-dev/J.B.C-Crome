@@ -881,7 +881,19 @@
 
 <script>
 (function(){
-  const TEAM_API_URL = 'https://caviar-gatherer-matriarch.ngrok-free.dev/api/team';
+  // ===== MODIFICATIONS ICI =====
+  // 1. Remplacez GUILD_ID par l'ID de votre serveur J.B.C Crome
+  //    (ex: '123456789012345678')
+  const GUILD_ID = 'VOTRE_ID_ICI';
+  
+  // 2. Si votre bot J.B.C Crome utilise un autre domaine ngrok,
+  //    remplacez le domaine ci-dessous par le sien.
+  //    (actuellement, 'caviar-gatherer-matriarch.ngrok-free.dev' pointe peut-être vers Kässbohrer)
+  const BASE_URL = 'https://caviar-gatherer-matriarch.ngrok-free.dev';
+  
+  // L'URL de l'API inclut le paramètre guildId
+  const TEAM_API_URL = BASE_URL + '/api/team?guildId=' + GUILD_ID;
+  // ============================
 
   const ROLE_LABELS = {
     patron: 'Patron',
@@ -909,9 +921,6 @@
     return `<span class="avatar">${initials(m.pseudo)}</span>`;
   }
 
-  // attributs data-* communs posés sur chaque carte, utilisés ensuite par la modale profil.
-  // km / convois / anciennete viennent directement de /api/team (calculés côté bot
-  // via scarabgroups + webhookDrivers TrucksBook), pas besoin d'un second fetch.
   function memberDataAttrs(m){
     let attrs = '';
     if(m.avatar) attrs += ` data-avatar="${escapeHtml(m.avatar)}"`;
@@ -1041,9 +1050,6 @@ async function syncTeam(){
     return new Intl.NumberFormat('fr-FR').format(Math.round(val)) + ' km';
   }
 
-  // km / convois / anciennete arrivent déjà prêts depuis /api/team (data-km,
-  // data-convois, data-anciennete posés par memberDataAttrs). Pas de second
-  // fetch : on les lit directement sur la carte cliquée.
   function fillStats(card){
     const kmRaw = card.dataset.km;
     const convoisRaw = card.dataset.convois;
