@@ -8,7 +8,6 @@
 <link rel="stylesheet" href="styles-theme.css">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
-
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth;}
   body{min-height:100vh; overflow-x:hidden;}
@@ -20,11 +19,8 @@
   nav a::before{content:""; width:5px; height:5px; border-radius:50%; background:var(--chrome-3); flex-shrink:0; transition:background .2s ease, box-shadow .2s ease;}
   nav a:hover, nav a.active{color:var(--chrome-1); background:rgba(93,168,255,.12); border-color:rgba(93,168,255,.28); transform:translateY(-1px);}
   nav a:hover::before, nav a.active::before{background:var(--amber); box-shadow:0 0 8px rgba(93,168,255,.24);}
-  @media (max-width:760px){header{padding:16px 5vw;} nav ul{gap:6px;} nav a{font-size:10.5px; padding:7px 10px;}}
-
   body{background:radial-gradient(ellipse at 15% -10%, #12233a 0%, transparent 55%), radial-gradient(ellipse at 85% 110%, #0b1726 0%, transparent 55%), #07111d; color:#dfe7f2; font-family:'Work Sans', sans-serif;}
   body::before{content:''; position:fixed; inset:0; background-image:repeating-linear-gradient(35deg, rgba(255,255,255,.014) 0px, rgba(255,255,255,.014) 1px, transparent 1px, transparent 4px); pointer-events:none; z-index:1;}
-
   .hero{position:relative; min-height:auto; display:flex; align-items:center; justify-content:center; padding:12px 1.5vw 8px;}
   .hero-shell{width:100%; max-width:1400px; margin:0 auto; display:grid; grid-template-columns:1fr; gap:22px; align-items:start; padding:clamp(10px,1vw,16px); border-radius:20px; border:1px solid rgba(93,168,255,.14); background:linear-gradient(135deg, rgba(15,23,38,.94), rgba(9,17,29,.96)); box-shadow:0 14px 38px rgba(2,10,20,.28); backdrop-filter:blur(16px); position:relative; overflow:hidden;}
   .hero-shell::before{content:''; position:absolute; inset:0; background:radial-gradient(circle at top right, rgba(93,168,255,.12), transparent 38%); pointer-events:none;}
@@ -36,18 +32,11 @@
   .btn{display:inline-flex; align-items:center; gap:10px; padding:12px 18px; font-size:12px; letter-spacing:1.3px; text-transform:uppercase; font-weight:700; border-radius:999px; cursor:pointer; border:none; font-family:'Work Sans', sans-serif; transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;}
   .btn:hover{transform:translateY(-2px); filter:brightness(1.04);}
   .btn-discord{background:linear-gradient(135deg, #4c7dff 0%, #2d5ddf 100%); color:#fff; box-shadow:0 12px 28px rgba(37,88,215,.24), inset 0 1px 0 rgba(255,255,255,.22);}
-
   .rank-shell{width:100%; max-width:1200px; margin:0 auto; display:grid; grid-template-columns:1.55fr 1fr; grid-template-areas:"intro info" "listing info"; gap:20px; align-items:start; justify-items:stretch;}
   .rank-intro{grid-area:intro; padding:8px 10px; border-radius:18px; border:1px solid rgba(255,255,255,.08); background:linear-gradient(160deg, rgba(15,23,38,.94), rgba(9,17,29,.98)); box-shadow:0 12px 24px rgba(2,10,20,.20);}
   .rank-intro h2{font-family:'Anton', sans-serif; font-size:clamp(22px,4vw,30px); color:var(--chrome-1); margin-bottom:8px;}
   .rank-intro p{font-size:13.5px; line-height:1.55; color:var(--chrome-3);}
   .rank-listing{grid-area:listing; display:grid; gap:16px;}
-
-  .rank-card{padding:14px; border-radius:18px; border:1px solid rgba(255,255,255,.08); background:linear-gradient(160deg, rgba(18,34,58,.96), rgba(10,18,29,.98)); box-shadow:inset 0 1px 0 rgba(255,255,255,.04), 0 16px 28px rgba(0,0,0,.18);}
-  .rank-card h3{font-family:'Anton', sans-serif; font-size:15px; text-transform:uppercase; letter-spacing:.5px; color:var(--chrome-1); margin-bottom:10px;}
-  .rank-card p{color:var(--chrome-3); font-size:13px; line-height:1.55;}
-  .rank-card::before{content:'🏆'; display:inline-block; margin-right:10px;}
-
   .ranking-panel{padding:14px 16px; border-radius:20px; border:1px solid rgba(255,255,255,.08); background:linear-gradient(160deg, rgba(18,34,58,.96), rgba(10,18,29,.98)); box-shadow:0 18px 38px rgba(0,0,0,.18);}
   .ranking-header{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;}
   .ranking-header h3{font-family:'Anton', sans-serif; font-size:15px; text-transform:uppercase; color:var(--chrome-1); margin:0; letter-spacing:.5px;}
@@ -62,41 +51,26 @@
   .rank-mini-list .rank-name{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .rank-mini-list .rank-value{font-family:'Space Mono', monospace; font-size:11.5px; color:var(--chrome-1); flex-shrink:0;}
   .rank-mini-list .rank-empty{color:var(--chrome-3); font-size:12px;}
-  @media (max-width:640px){.rank-columns{grid-template-columns:1fr;}}
-
   .info-panel{grid-area:info; display:grid; gap:10px; align-content:start; padding:14px; border-radius:22px; border:1px solid rgba(93,168,255,.18); background:linear-gradient(135deg, rgba(41,68,118,.22), rgba(12,26,44,.94));}
   .info-panel h3{font-family:'Anton', sans-serif; font-size:16px; text-transform:uppercase; color:var(--chrome-1);}
   .info-panel p{color:var(--chrome-2); line-height:1.55; font-size:13px;}
   .info-panel ul{list-style:none; display:grid; gap:7px; margin-top:12px; padding-left:0;}
   .info-panel li{display:flex; align-items:flex-start; gap:8px; color:var(--chrome-3); font-size:13px;}
   .info-panel li::before{content:''; width:8px; height:8px; margin-top:6px; border-radius:50%; background:var(--amber); flex-shrink:0;}
-
   #particles{position:fixed; inset:0; z-index:0; pointer-events:none; width:100%; height:100%;}
-
-  #preloader{
-    position:fixed; inset:0; z-index:999; background:var(--asphalt);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px;
-    transition:opacity .6s ease, visibility .6s ease;
-  }
+  #preloader{position:fixed; inset:0; z-index:999; background:var(--asphalt); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; transition:opacity .6s ease, visibility .6s ease;}
   #preloader.hidden{opacity:0; visibility:hidden; pointer-events:none;}
-  .preloader-logo{
-    font-family:'Anton', sans-serif; font-size:16px; letter-spacing:3px;
-    background:linear-gradient(180deg, #fff 0%, #e8e0d2 40%, #8a7f70 50%, #f3ede1 62%, #fff 100%);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
+  .preloader-logo{font-family:'Anton', sans-serif; font-size:16px; letter-spacing:3px; background:linear-gradient(180deg, #fff 0%, #e8e0d2 40%, #8a7f70 50%, #f3ede1 62%, #fff 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .preloader-ring{width:50px; height:50px; border-radius:50%; border:2px solid rgba(255,255,255,.08); border-top-color:var(--amber); animation:preloaderSpin .9s linear infinite;}
   .preloader-bar{width:220px; height:3px; background:rgba(255,255,255,.08); border-radius:3px; overflow:hidden; position:relative;}
   .preloader-bar-fill{height:100%; width:0%; border-radius:3px; background:linear-gradient(90deg, var(--amber-dim), var(--amber)); box-shadow:0 0 12px var(--amber-glow); transition:width .25s ease-out;}
   .preloader-percent{font-family:'Space Mono', monospace; font-size:13px; letter-spacing:1px; color:var(--chrome-3); font-variant-numeric:tabular-nums; min-width:42px; text-align:center;}
   @keyframes preloaderSpin{to{transform:rotate(360deg);}}
-
-  body.push-footer{display:flex; flex-direction:column; min-height:100vh;}
-  body.push-footer footer{margin-top:auto;}
-
+  body.push-footer{display:flex; flex-direction:column; min-height:100vh;} body.push-footer footer{margin-top:auto;}
   footer{padding:0 5vw 18px; position:relative; z-index:2;}
   footer .footer-shell{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding:14px 16px; border:1px solid rgba(255,255,255,.10); border-radius:18px; background:linear-gradient(135deg, rgba(255,255,255,.04), rgba(255,255,255,.025)); color:var(--chrome-3); font-size:11px; letter-spacing:.5px; font-family:'Space Mono', monospace; box-shadow:0 10px 24px rgba(2,10,20,.16);}
-
   @media (max-width:840px){.rank-shell{grid-template-columns:1fr; grid-template-areas:"intro" "listing" "info";}.rank-metrics{grid-template-columns:1fr;}}
+  @media (max-width:760px){header{padding:16px 5vw;} nav ul{gap:6px;} nav a{font-size:10.5px; padding:7px 10px;}}
 </style>
 </head>
 <body class="push-footer">
@@ -171,16 +145,7 @@
 </section>
 <script>
 (function(){
-  // ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
-  // ⚠️ 1. RELANCE TON BOT.
-  // ⚠️ 2. REGARDE LE TERMINAL, IL VA AFFICHER :
-  // ⚠️    "[team-api] tunnel cloudflared actif : https://XXXXXXXX.trycloudflare.com"
-  // ⚠️ 3. COPIE CETTE ADRESSE ET COLLE-LA CI-DESSOUS À LA PLACE DE :
-  // ⚠️    'COLLE_TA_NOUVELLE_URL_NGROK_ICI'
-  // ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
-  const BASE_URL = 'COLLE_TA_NOUVELLE_URL_NGROK_ICI'; 
-  
-  const CLASSEMENT_API_URL = BASE_URL + '/api/classement';
+  const CLASSEMENT_API_URL = "https://bears-jeremy-competent-sources.trycloudflare.com/api/classement";
 
   const colKm = document.getElementById('rank-km');
   const colMissions = document.getElementById('rank-missions');
@@ -209,10 +174,7 @@
     loading.textContent = 'Chargement du classement…';
     try{
       const res = await fetch(CLASSEMENT_API_URL, {
-        cache: 'no-store',
-        headers: {
-          'ngrok-skip-browser-warning': 'true'
-        }
+        cache: 'no-store'
       });
       if(!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
