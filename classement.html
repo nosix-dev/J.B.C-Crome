@@ -171,8 +171,10 @@
 </section>
 <script>
 (function(){
-  // Remplace par le domaine ngrok fixe de ton bot (même base que /api/stats).
-  const CLASSEMENT_API_URL = "https://caviar-gatherer-matriarch.ngrok-free.dev/api/classement";
+  // ⚠️ IMPORTANT : Remplace par la NOUVELLE URL Ngrok affichée dans ton terminal !
+  const BASE_URL = 'COLLE_TA_NOUVELLE_URL_NGROK_ICI'; 
+  
+  const CLASSEMENT_API_URL = BASE_URL + '/api/classement';
 
   const colKm = document.getElementById('rank-km');
   const colMissions = document.getElementById('rank-missions');
@@ -200,14 +202,9 @@
     loading.style.display = 'block';
     loading.textContent = 'Chargement du classement…';
     try{
-      const url = CLASSEMENT_API_URL + (CLASSEMENT_API_URL.includes('?') ? '&' : '?') + 'ngrok-skip-browser-warning=true';
-      const res = await fetch(url, {
+      const res = await fetch(CLASSEMENT_API_URL, {
         cache: 'no-store',
         headers: {
-          // Le paramètre d'URL ci-dessus ne suffit plus à contourner la page
-          // d'avertissement ngrok : il faut aussi l'en-tête dédié, sinon
-          // ngrok renvoie une page HTML sans en-têtes CORS et le navigateur
-          // bloque la réponse (erreur "blocked by CORS policy").
           'ngrok-skip-browser-warning': 'true'
         }
       });
