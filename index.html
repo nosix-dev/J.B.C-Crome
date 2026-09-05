@@ -114,18 +114,17 @@
     flex:1; min-width:200px; position:relative; overflow:hidden;
     height:38px;
   }
+  #next-event-banner .neb-track{
+    display:flex;
+    height:100%;
+    transition:transform .5s cubic-bezier(.4,0,.2,1);
+    will-change:transform;
+  }
   #next-event-banner .neb-slide{
-    position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; gap:2px;
-    opacity:0; transform:translateX(24px);
-    transition:opacity .45s ease, transform .45s ease;
-    pointer-events:none;
-  }
-  #next-event-banner .neb-slide.active{
-    opacity:1; transform:translateX(0);
-    pointer-events:auto;
-  }
-  #next-event-banner .neb-slide.leaving{
-    opacity:0; transform:translateX(-24px);
+    flex:0 0 100%;
+    width:100%;
+    display:flex; flex-direction:column; justify-content:center; gap:2px;
+    min-width:0;
   }
   #next-event-banner .neb-title{font-family:'Anton', sans-serif; font-size:16px; text-transform:uppercase; letter-spacing:.3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   #next-event-banner .neb-meta{font-size:12.5px; color:rgba(255,255,255,.85); font-family:'Space Mono', monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
@@ -500,7 +499,7 @@
 
 <div id="next-event-banner">
   <span class="neb-label">Prochain événement</span>
-  <div class="neb-slider" id="neb-slider"></div>
+  <div class="neb-slider" id="neb-slider"><div class="neb-track" id="neb-track"></div></div>
   <span class="neb-countdown" id="neb-countdown"></span>
   <div class="neb-dots" id="neb-dots"></div>
   <a class="neb-btn" id="neb-btn" href="evenements.html">Voir l'événement</a>
@@ -744,7 +743,7 @@
   const banner = document.getElementById('next-event-banner');
   if(!banner) return;
 
-  const sliderEl = document.getElementById('neb-slider');
+  const trackEl = document.getElementById('neb-track');
   const countdownEl = document.getElementById('neb-countdown');
   const dotsEl = document.getElementById('neb-dots');
   const btnEl = document.getElementById('neb-btn');
@@ -770,9 +769,9 @@
   let intervalleCompteARebours = null;
 
   function construireSlides(){
-    sliderEl.innerHTML = evenementsFuturs.map(function(ev, i){
+    trackEl.innerHTML = evenementsFuturs.map(function(ev){
       const d = new Date(ev.date);
-      return '<div class="neb-slide' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">'
+      return '<div class="neb-slide">'
         + '<span class="neb-title">' + (ev.titre || '') + '</span>'
         + '<span class="neb-meta">' + formaterDate(d) + (ev.lieu ? ' — ' + ev.lieu : '') + '</span>'
         + '</div>';
@@ -799,19 +798,9 @@
   }
 
   function allerVersSlide(nouvelIndex){
-    if(nouvelIndex === indexActif || !evenementsFuturs.length) return;
+    if(!evenementsFuturs.length) return;
 
-    const slideActuelle = sliderEl.querySelector('.neb-slide.active');
-    const slideSuivante = sliderEl.querySelector('.neb-slide[data-index="' + nouvelIndex + '"]');
-
-    if(slideActuelle){
-      slideActuelle.classList.remove('active');
-      slideActuelle.classList.add('leaving');
-      setTimeout(function(){ slideActuelle.classList.remove('leaving'); }, 460);
-    }
-    if(slideSuivante){
-      slideSuivante.classList.add('active');
-    }
+    trackEl.style.transform = 'translateX(-' + (nouvelIndex * 100) + '%)';
 
     dotsEl.querySelectorAll('.neb-dot').forEach(function(dot){
       dot.classList.toggle('active', parseInt(dot.dataset.index, 10) === nouvelIndex);
