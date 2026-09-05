@@ -102,6 +102,7 @@
     color:#fff5ee;
     flex-wrap:wrap;
     border-bottom:1px solid rgba(0,0,0,.3);
+    overflow:hidden;
   }
   #next-event-banner.visible{display:flex;}
   #next-event-banner .neb-label{
@@ -109,9 +110,25 @@
     background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.3);
     border-radius:3px; padding:6px 12px; flex-shrink:0;
   }
-  #next-event-banner .neb-info{flex:1; min-width:200px; display:flex; flex-direction:column; gap:2px;}
-  #next-event-banner .neb-title{font-family:'Anton', sans-serif; font-size:16px; text-transform:uppercase; letter-spacing:.3px;}
-  #next-event-banner .neb-meta{font-size:12.5px; color:rgba(255,255,255,.85); font-family:'Space Mono', monospace;}
+  #next-event-banner .neb-slider{
+    flex:1; min-width:200px; position:relative; overflow:hidden;
+    height:38px;
+  }
+  #next-event-banner .neb-slide{
+    position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; gap:2px;
+    opacity:0; transform:translateX(24px);
+    transition:opacity .45s ease, transform .45s ease;
+    pointer-events:none;
+  }
+  #next-event-banner .neb-slide.active{
+    opacity:1; transform:translateX(0);
+    pointer-events:auto;
+  }
+  #next-event-banner .neb-slide.leaving{
+    opacity:0; transform:translateX(-24px);
+  }
+  #next-event-banner .neb-title{font-family:'Anton', sans-serif; font-size:16px; text-transform:uppercase; letter-spacing:.3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  #next-event-banner .neb-meta{font-size:12.5px; color:rgba(255,255,255,.85); font-family:'Space Mono', monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   #next-event-banner .neb-countdown{
     font-family:'Space Mono', monospace; font-size:13px; font-weight:700;
     background:rgba(0,0,0,.28); border-radius:4px; padding:8px 14px; text-align:center; flex-shrink:0; white-space:nowrap;
@@ -122,6 +139,14 @@
     transition:transform .2s ease;
   }
   #next-event-banner .neb-btn:hover{transform:translateY(-2px);}
+  #next-event-banner .neb-dots{
+    display:flex; gap:6px; flex-shrink:0; align-items:center;
+  }
+  #next-event-banner .neb-dot{
+    width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.35);
+    transition:background .2s ease, transform .2s ease; cursor:pointer;
+  }
+  #next-event-banner .neb-dot.active{background:#fff; transform:scale(1.25);}
 
   .hero{
     position:relative; min-height:88vh;
@@ -475,11 +500,9 @@
 
 <div id="next-event-banner">
   <span class="neb-label">Prochain événement</span>
-  <div class="neb-info">
-    <span class="neb-title" id="neb-title"></span>
-    <span class="neb-meta" id="neb-meta"></span>
-  </div>
+  <div class="neb-slider" id="neb-slider"></div>
   <span class="neb-countdown" id="neb-countdown"></span>
+  <div class="neb-dots" id="neb-dots"></div>
   <a class="neb-btn" id="neb-btn" href="evenements.html">Voir l'événement</a>
 </div>
 
@@ -710,13 +733,20 @@
 
 <script>
 (function(){
+  // ============================================================
+  // Bannière "prochain événement" : fait défiler TOUS les
+  // événements à venir (pas juste le plus proche), en glissant
+  // d'un événement à l'autre toutes les quelques secondes.
+  // ============================================================
   const EVENTS_URL = 'events.json';
+  const ROTATION_MS = 6000; // délai entre deux événements affichés
+
   const banner = document.getElementById('next-event-banner');
   if(!banner) return;
 
-  const titleEl = document.getElementById('neb-title');
-  const metaEl = document.getElementById('neb-meta');
+  const sliderEl = document.getElementById('neb-slider');
   const countdownEl = document.getElementById('neb-countdown');
+  const dotsEl = document.getElementById('neb-dots');
   const btnEl = document.getElementById('neb-btn');
 
   const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
@@ -734,19 +764,76 @@
     return Math.max(0, minutes) + ' min';
   }
 
-  let evenementCible = null;
+  let evenementsFuturs = [];
+  let indexActif = 0;
+  let intervalleRotation = null;
+  let intervalleCompteARebours = null;
 
-  function majCompteARebours(){
-    if(!evenementCible) return;
-    const reste = new Date(evenementCible.date) - new Date();
-    if(reste <= 0){
-      countdownEl.textContent = 'En cours';
-      return;
-    }
-    countdownEl.textContent = formaterCompteARebours(reste);
+  function construireSlides(){
+    sliderEl.innerHTML = evenementsFuturs.map(function(ev, i){
+      const d = new Date(ev.date);
+      return '<div class="neb-slide' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">'
+        + '<span class="neb-title">' + (ev.titre || '') + '</span>'
+        + '<span class="neb-meta">' + formaterDate(d) + (ev.lieu ? ' — ' + ev.lieu : '') + '</span>'
+        + '</div>';
+    }).join('');
+
+    dotsEl.innerHTML = evenementsFuturs.map(function(_, i){
+      return '<span class="neb-dot' + (i === 0 ? ' active' : '') + '" data-index="' + i + '"></span>';
+    }).join('');
+
+    dotsEl.querySelectorAll('.neb-dot').forEach(function(dot){
+      dot.addEventListener('click', function(){
+        allerVersSlide(parseInt(dot.dataset.index, 10));
+        redemarrerRotation();
+      });
+    });
   }
 
-  async function chargerProchainEvenement(){
+  function majCompteAReboursEtBouton(){
+    const ev = evenementsFuturs[indexActif];
+    if(!ev) return;
+    const reste = new Date(ev.date) - new Date();
+    countdownEl.textContent = reste <= 0 ? 'En cours' : formaterCompteARebours(reste);
+    if(ev.lien) btnEl.href = ev.lien;
+  }
+
+  function allerVersSlide(nouvelIndex){
+    if(nouvelIndex === indexActif || !evenementsFuturs.length) return;
+
+    const slideActuelle = sliderEl.querySelector('.neb-slide.active');
+    const slideSuivante = sliderEl.querySelector('.neb-slide[data-index="' + nouvelIndex + '"]');
+
+    if(slideActuelle){
+      slideActuelle.classList.remove('active');
+      slideActuelle.classList.add('leaving');
+      setTimeout(function(){ slideActuelle.classList.remove('leaving'); }, 460);
+    }
+    if(slideSuivante){
+      slideSuivante.classList.add('active');
+    }
+
+    dotsEl.querySelectorAll('.neb-dot').forEach(function(dot){
+      dot.classList.toggle('active', parseInt(dot.dataset.index, 10) === nouvelIndex);
+    });
+
+    indexActif = nouvelIndex;
+    majCompteAReboursEtBouton();
+  }
+
+  function slideSuivant(){
+    const prochain = (indexActif + 1) % evenementsFuturs.length;
+    allerVersSlide(prochain);
+  }
+
+  function redemarrerRotation(){
+    if(intervalleRotation) clearInterval(intervalleRotation);
+    if(evenementsFuturs.length > 1){
+      intervalleRotation = setInterval(slideSuivant, ROTATION_MS);
+    }
+  }
+
+  async function chargerEvenements(){
     try{
       const res = await fetch(EVENTS_URL, { cache: 'no-store' });
       if(!res.ok) throw new Error('HTTP ' + res.status);
@@ -754,21 +841,18 @@
       if(!Array.isArray(events)) return;
 
       const maintenant = new Date();
-      const futurs = events
+      evenementsFuturs = events
         .filter(ev => ev && ev.date && !isNaN(new Date(ev.date)) && new Date(ev.date) > maintenant)
         .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-      if(!futurs.length) return;
+      if(!evenementsFuturs.length) return;
 
-      evenementCible = futurs[0];
-      const d = new Date(evenementCible.date);
+      construireSlides();
+      indexActif = 0;
+      majCompteAReboursEtBouton();
 
-      titleEl.textContent = evenementCible.titre || '';
-      metaEl.textContent = formaterDate(d) + (evenementCible.lieu ? ' — ' + evenementCible.lieu : '');
-      if(evenementCible.lien) btnEl.href = evenementCible.lien;
-
-      majCompteARebours();
-      setInterval(majCompteARebours, 60 * 1000);
+      intervalleCompteARebours = setInterval(majCompteAReboursEtBouton, 60 * 1000);
+      redemarrerRotation();
 
       banner.classList.add('visible');
     }catch(err){
@@ -776,7 +860,7 @@
     }
   }
 
-  chargerProchainEvenement();
+  chargerEvenements();
 })();
 </script>
 
