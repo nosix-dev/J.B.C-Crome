@@ -125,7 +125,7 @@
     filter:grayscale(.12) contrast(1.06) saturate(1.05); border:1px solid rgba(255,255,255,.06);
   }
   .filmstrip-title{font-family:'Anton', sans-serif; font-size:15.5px; text-transform:uppercase; color:var(--chrome-1); line-height:1.25;}
-  .led-desc{font-size:12.5px; color:var(--chrome-3); margin-top:9px; line-height:1.55; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .filmstrip-desc{font-size:12.5px; color:var(--chrome-3); margin-top:9px; line-height:1.55; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
   .filmstrip-meta{
     display:flex; justify-content:space-between; margin-top:12px; padding-bottom:4px;
     font-family:'Space Mono', monospace; font-size:9.5px; letter-spacing:1px; text-transform:uppercase; color:var(--amber); font-weight:700;
@@ -215,7 +215,7 @@
     <ul>
       <li><a href="index.html">Accueil</a></li>
       <li><a href="apropos.html">A propos</a></li>
-      <li><a href="calendrier.html" class=>Calendrier</a></li>
+      <li><a href="calendrier.html">Calendrier</a></li>
       <li><a href="galerie.html" class="active">Galerie</a></li>
       <li><a href="discord.html">Discord</a></li>
     </ul>
@@ -344,13 +344,9 @@
   // API Git Trees de GitHub : un seul appel recursive=1 renvoie tout
   // l'arbre du dépôt (au lieu d'un appel par dossier comme avant), ce qui
   // reste largement sous la limite de 60 requêtes/heure non-authentifiées.
-  // (jsDelivr a été essayé mais son API bloque volontairement le listing
-  // de fichiers avec un 403 systématique, donc abandonné.)
   const GITHUB_TREE_URL = "https://api.github.com/repos/" + GITHUB_USER + "/" + GITHUB_REPO + "/git/trees/" + GITHUB_BRANCH + "?recursive=1";
 
   function urlFichier(chemin){
-    // raw.githubusercontent.com n'est pas soumis à la limite de 60 req/h
-    // de api.github.com : on peut charger autant d'images que nécessaire.
     return "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/" + chemin;
   }
 
@@ -424,7 +420,6 @@
     if(e.key === 'ArrowRight') suivant(1);
   });
 
-  
   function afficherAlbums(){
     if(!albums.length){ afficherVide(); return; }
     grid.innerHTML = albums.map(function(album, i){
@@ -469,8 +464,6 @@
   }
 
   function construireAlbum(nomDossier, cheminAffichage, fichiersImages, meta){
-    // fichiersImages : liste de {name, chemin} — chemin relatif au dépôt,
-    // utilisé pour construire l'URL cdn.jsdelivr.net.
     const infos = meta[nomDossier] || {};
     const descriptionsPhotos = infos.photos || {};
     const photos = fichiersImages.map(f => ({
@@ -504,9 +497,6 @@
   async function chargerAlbums(){
     const [arbo, meta] = await Promise.all([chargerArborescence(), chargerMeta()]);
 
-    // L'API Git Trees renvoie une liste PLATE de chemins complets, ex :
-    // "galerie/photo.jpg", "galerie/convoi/photo1.jpg", chacun avec un
-    // type "blob" (fichier) ou "tree" (dossier).
     const entrees = Array.isArray(arbo.tree) ? arbo.tree : [];
     const prefixe = GITHUB_FOLDER + "/";
 
@@ -521,24 +511,31 @@
 
       const segments = reste.split('/');
       if(segments.length === 1){
-        // Directement dans galerie/ (album racine)
         fichiersRacine.push({ name: segments[0], chemin: entree.path });
       } else {
-        // galerie/<dossier>/.../fichier.jpg -> on regroupe par premier
-        // niveau de sous-dossier uniquement.
         const dossier = segments[0];
         if(!parDossier[dossier]) parDossier[dossier] = [];
         parDossier[dossier].push({ name: segments[segments.length - 1], chemin: entree.path });
       }
     });
 
-    const albumsDossiers = Object.keys(parDossier)
-      .filter(dossier => !DOSSIERS_MASQUES.includes(dossier))
-      .map(dossier => construireAlbum(dossier, dossier, parDossier[dossier], meta))
-      .filter(album => album.photos.length > 0);
+    // === MODIFICATION ICI ===
+    // On utilise la liste des dossiers définis dans le JSON, mais on ne garde
+    // que ceux qui ont des photos dans le dépôt.
+    const dossiersMeta = Object.keys(meta);
+    const albumsDossiers = [];
+
+    // On parcourt les dossiers du JSON dans l'ordre défini
+    dossiersMeta.forEach(function(dossier){
+      if (DOSSIERS_MASQUES.includes(dossier)) return;
+      const images = parDossier[dossier] || [];
+      if (images.length === 0) return;
+      albumsDossiers.push(construireAlbum(dossier, dossier, images, meta));
+    });
 
     const albums = [...albumsDossiers];
 
+    // On garde l'album racine s'il existe
     if(fichiersRacine.length > 0){
       const albumRacine = construireAlbum(ALBUM_RACINE_CLE, null, fichiersRacine, meta);
       albums.unshift(albumRacine);
