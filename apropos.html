@@ -369,10 +369,15 @@
   #lightbox-prev{left:4vw;} #lightbox-next{right:4vw;}
 
   footer{
-    padding:24px 6vw 20px; border-top:1px solid var(--hairline);
-    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;
-    color:var(--chrome-3); font-size:11px; letter-spacing:.5px; position:relative; z-index:2;
+    padding:0 6vw 28px; position:relative; z-index:2;
+  }
+  footer .footer-shell{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+    padding:18px 22px; border:1px solid var(--hairline); border-radius:18px;
+    background:linear-gradient(135deg, rgba(255,255,255,.04), rgba(255,255,255,.025));
+    color:var(--chrome-3); font-size:11px; letter-spacing:.5px;
     font-family:'Space Mono', monospace;
+    box-shadow:0 10px 24px rgba(2,10,20,.16);
   }
   body.push-footer{display:flex; flex-direction:column; min-height:100vh;}
   body.push-footer footer{margin-top:auto;}
@@ -480,6 +485,7 @@
     <ul>
       <li><a href="index.html">Accueil</a></li>
       <li><a href="apropos.html" class="active">A propos</a></li>
+      <li><a href="equipe.html">Équipe</a></li>
       <li><a href="calendrier.html" class=>Calendrier</a></li>
       <li><a href="galerie.html">Galerie</a></li>
       <li><a href="discord.html">Discord</a></li>
