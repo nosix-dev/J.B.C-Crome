@@ -331,24 +331,11 @@
 
 <script>
 (function(){
+  // Configuration GitHub - À MODIFIER AVEC VOS INFOS
   const GITHUB_USER = "nosix-dev";
   const GITHUB_REPO = "JBC-Crome";
   const GITHUB_BRANCH = "main";
   const GITHUB_FOLDER = "galerie";
-  const DOSSIERS_MASQUES = ["couverture"];
-  const ALBUMS_META_URL = "albums.json";
-  const CATEGORIE_DEFAUT = "Convoi";
-  const ALBUM_RACINE_CLE = "_racine";
-  const ALBUM_RACINE_TITRE = "Photos";
-
-  // API Git Trees de GitHub : un seul appel recursive=1 renvoie tout
-  // l'arbre du dépôt (au lieu d'un appel par dossier comme avant), ce qui
-  // reste largement sous la limite de 60 requêtes/heure non-authentifiées.
-  const GITHUB_TREE_URL = "https://api.github.com/repos/" + GITHUB_USER + "/" + GITHUB_REPO + "/git/trees/" + GITHUB_BRANCH + "?recursive=1";
-
-  function urlFichier(chemin){
-    return "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/" + chemin;
-  }
 
   const grid = document.getElementById('albums-grid');
   const lightbox = document.getElementById('lightbox');
@@ -367,20 +354,16 @@
     return /\.(jpe?g|png|webp|gif)$/i.test(nom);
   }
 
-  function prettifier(nomDossier){
-    return nomDossier
-      .replace(/[-_]+/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .replace(/\b\w/g, c => c.toUpperCase());
+  function urlFichier(chemin){
+    return "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/" + chemin;
   }
 
-  function afficherErreur(){
-    grid.innerHTML = '<div class="empty-state">Impossible de charger la galerie pour le moment. Réessaie plus tard.</div>';
+  function afficherErreur(message){
+    grid.innerHTML = '<div class="empty-state">' + message + '</div>';
   }
 
   function afficherVide(){
-    grid.innerHTML = '<div class="empty-state">Aucun album pour le moment. Ajoute des photos dans "galerie" (ou crée un sous-dossier) sur GitHub pour en ajouter un.</div>';
+    grid.innerHTML = '<div class="empty-state">Aucun album pour le moment. Ajoute des photos dans le dossier "galerie" sur GitHub.</div>';
   }
 
   function ouvrirLightbox(album, index){
@@ -422,13 +405,15 @@
 
   function afficherAlbums(){
     if(!albums.length){ afficherVide(); return; }
+    
     grid.innerHTML = albums.map(function(album, i){
       const nbPhotos = album.photos.length;
       const desc = album.description ? '<p class="filmstrip-desc">' + album.description + '</p>' : '';
       const numFrame = String(i + 1).padStart(2, '0');
+      const couverture = album.couverture || album.photos[0]?.url || '';
       return '<div class="filmstrip-card" data-album-index="' + i + '">'
         + '<div class="filmstrip-frame-num">FRAME N&deg;' + numFrame + '</div>'
-        + '<div class="filmstrip-photo" style="background-image:url(\'' + album.couverture + '\')"></div>'
+        + '<div class="filmstrip-photo" style="background-image:url(\'' + couverture + '\')"></div>'
         + '<h3 class="filmstrip-title">' + album.titre + '</h3>'
         + desc
         + '<div class="filmstrip-meta"><span>' + album.categorie + '</span><span>' + nbPhotos + ' PH</span></div>'
@@ -438,121 +423,133 @@
     grid.querySelectorAll('.filmstrip-card').forEach(function(card){
       card.addEventListener('click', function(){
         const album = albums[parseInt(card.dataset.albumIndex, 10)];
-        ouvrirLightbox(album, 0);
+        if(album && album.photos.length > 0) {
+          ouvrirLightbox(album, 0);
+        }
       });
     });
   }
 
   async function chargerArborescence(){
-    const res = await fetch(GITHUB_TREE_URL, { cache: 'no-store' });
-    if(!res.ok) throw new Error("Erreur API GitHub (" + res.status + ")");
+    const url = "https://api.github.com/repos/" + GITHUB_USER + "/" + GITHUB_REPO + "/contents/" + GITHUB_FOLDER + "?ref=" + GITHUB_BRANCH;
+    console.log("Chargement depuis :", url);
+    
+    const res = await fetch(url);
+    if(!res.ok) throw new Error("Erreur API GitHub (" + res.status + ") - " + res.statusText);
     return res.json();
   }
 
-  async function chargerMeta(){
-    try{
-      const res = await fetch(ALBUMS_META_URL, { cache: 'no-store' });
-      if(!res.ok) return {};
-      const liste = await res.json();
-      const map = {};
-      liste.forEach(function(entree){ map[entree.dossier] = entree; });
-      return map;
-    }catch(err){
-      console.warn('[galerie] Pas de albums.json (optionnel) :', err);
-      return {};
-    }
+  async function chargerDossier(chemin){
+    const url = "https://api.github.com/repos/" + GITHUB_USER + "/" + GITHUB_REPO + "/contents/" + chemin + "?ref=" + GITHUB_BRANCH;
+    const res = await fetch(url);
+    if(!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
   }
 
-  function construireAlbum(nomDossier, cheminAffichage, fichiersImages, meta){
-    const infos = meta[nomDossier] || {};
-    const descriptionsPhotos = infos.photos || {};
-    const photos = fichiersImages.map(f => ({
-      name: f.name,
-      url: urlFichier(f.chemin),
-      description: descriptionsPhotos[f.name] || ''
-    }));
+  function extraireImages(fichiers){
+    return fichiers.filter(f => f.type === 'file' && estImage(f.name));
+  }
 
-    let couverture = photos[0] ? photos[0].url : '';
-    if(infos.couverture){
-      const trouvee = photos.find(p => p.name === infos.couverture);
-      if(trouvee){
-        couverture = trouvee.url;
-      } else if(/^https?:\/\//i.test(infos.couverture)){
-        couverture = infos.couverture;
-      } else {
-        couverture = urlFichier(infos.couverture.replace(/^\/+/, ''));
-      }
-    }
-
-    return {
-      dossier: nomDossier,
-      categorie: infos.categorie || CATEGORIE_DEFAUT,
-      titre: infos.titre || (cheminAffichage === null ? ALBUM_RACINE_TITRE : prettifier(nomDossier)),
-      description: infos.description || '',
-      couverture: couverture,
-      photos: photos,
-    };
+  function prettifier(nomDossier){
+    return nomDossier
+      .replace(/[-_]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/\b\w/g, c => c.toUpperCase());
   }
 
   async function chargerAlbums(){
-    const [arbo, meta] = await Promise.all([chargerArborescence(), chargerMeta()]);
-
-    const entrees = Array.isArray(arbo.tree) ? arbo.tree : [];
-    const prefixe = GITHUB_FOLDER + "/";
-
-    const fichiersRacine = [];
-    const parDossier = {};
-
-    entrees.forEach(function(entree){
-      if(entree.type !== 'blob') return;
-      if(!entree.path.startsWith(prefixe)) return;
-      const reste = entree.path.slice(prefixe.length);
-      if(!estImage(reste)) return;
-
-      const segments = reste.split('/');
-      if(segments.length === 1){
-        fichiersRacine.push({ name: segments[0], chemin: entree.path });
-      } else {
-        const dossier = segments[0];
-        if(!parDossier[dossier]) parDossier[dossier] = [];
-        parDossier[dossier].push({ name: segments[segments.length - 1], chemin: entree.path });
+    try {
+      const contenu = await chargerArborescence();
+      
+      if(!Array.isArray(contenu) || contenu.length === 0) {
+        afficherVide();
+        return;
       }
-    });
 
-    // === MODIFICATION ICI ===
-    // On utilise la liste des dossiers définis dans le JSON, mais on ne garde
-    // que ceux qui ont des photos dans le dépôt.
-    const dossiersMeta = Object.keys(meta);
-    const albumsDossiers = [];
+      // Dossiers dans galerie/
+      const dossiers = contenu.filter(item => item.type === 'dir');
+      
+      // Images directement dans galerie/ (album racine)
+      const imagesRacine = extraireImages(contenu);
 
-    // On parcourt les dossiers du JSON dans l'ordre défini
-    dossiersMeta.forEach(function(dossier){
-      if (DOSSIERS_MASQUES.includes(dossier)) return;
-      const images = parDossier[dossier] || [];
-      if (images.length === 0) return;
-      albumsDossiers.push(construireAlbum(dossier, dossier, images, meta));
-    });
+      const albumsTemp = [];
 
-    const albums = [...albumsDossiers];
+      // Pour chaque dossier, on va chercher son contenu
+      for(const dossier of dossiers) {
+        const fichiers = await chargerDossier(dossier.path);
+        const images = extraireImages(fichiers);
+        
+        if(images.length > 0) {
+          // On essaie de charger albums.json s'il existe dans le dossier
+          let meta = {};
+          try {
+            const metaFile = fichiers.find(f => f.name === 'albums.json');
+            if(metaFile) {
+              const resp = await fetch(metaFile.download_url);
+              if(resp.ok) {
+                meta = await resp.json();
+              }
+            }
+          } catch(e) {
+            // Pas de meta, on continue
+          }
 
-    // On garde l'album racine s'il existe
-    if(fichiersRacine.length > 0){
-      const albumRacine = construireAlbum(ALBUM_RACINE_CLE, null, fichiersRacine, meta);
-      albums.unshift(albumRacine);
+          const titre = meta.titre || prettifier(dossier.name);
+          const categorie = meta.categorie || "Album";
+          const description = meta.description || "";
+          
+          let couverture = '';
+          if(meta.couverture) {
+            const found = images.find(img => img.name === meta.couverture);
+            if(found) couverture = found.download_url;
+          }
+          if(!couverture && images.length > 0) {
+            couverture = images[0].download_url;
+          }
+
+          albumsTemp.push({
+            dossier: dossier.name,
+            titre: titre,
+            categorie: categorie,
+            description: description,
+            couverture: couverture,
+            photos: images.map(img => ({
+              name: img.name,
+              url: img.download_url,
+              description: (meta.photos && meta.photos[img.name]) || ''
+            }))
+          });
+        }
+      }
+
+      // Album racine (photos directement dans galerie/)
+      if(imagesRacine.length > 0) {
+        albumsTemp.unshift({
+          dossier: "_racine",
+          titre: "Photos",
+          categorie: "Général",
+          description: "Photos diverses",
+          couverture: imagesRacine[0].download_url,
+          photos: imagesRacine.map(img => ({
+            name: img.name,
+            url: img.download_url,
+            description: ''
+          }))
+        });
+      }
+
+      albums = albumsTemp;
+      afficherAlbums();
+
+    } catch(err) {
+      console.error("Erreur détaillée :", err);
+      afficherErreur("Impossible de charger la galerie. Vérifiez que le dépôt GitHub existe et que le dossier 'galerie' contient des images.<br><br>Erreur : " + err.message);
     }
-
-    return albums;
   }
 
-  chargerAlbums()
-    .then(function(liste){
-      albums = liste;
-      afficherAlbums();
-    })
-    .catch(function(err){
-      console.error(err);
-      afficherErreur();
-    });
+  chargerAlbums();
 })();
 </script>
 
