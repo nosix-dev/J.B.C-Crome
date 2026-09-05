@@ -338,6 +338,10 @@
   const GITHUB_BRANCH = "main";
   const GITHUB_FOLDER = "galerie";
 
+  // Proxy Cloudflare Worker : évite le rate limit de l'API GitHub non authentifiée
+  // et cache le token GitHub côté serveur.
+  const PROXY_BASE = "https://jbc-crome-proxy.levrailuciferms.workers.dev";
+
   const grid = document.getElementById('albums-grid');
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightbox-img');
@@ -432,7 +436,7 @@
   }
 
   async function chargerArborescence(){
-    const url = "https://api.github.com/repos/" + GITHUB_USER + "/" + GITHUB_REPO + "/contents/" + GITHUB_FOLDER + "?ref=" + GITHUB_BRANCH;
+    const url = PROXY_BASE + "/gh/repos/" + GITHUB_USER + "/" + GITHUB_REPO + "/contents/" + GITHUB_FOLDER + "?ref=" + GITHUB_BRANCH;
     console.log("Chargement depuis :", url);
 
     const res = await fetch(url);
@@ -441,7 +445,7 @@
   }
 
   async function chargerDossier(chemin){
-    const url = "https://api.github.com/repos/" + GITHUB_USER + "/" + GITHUB_REPO + "/contents/" + chemin + "?ref=" + GITHUB_BRANCH;
+    const url = PROXY_BASE + "/gh/repos/" + GITHUB_USER + "/" + GITHUB_REPO + "/contents/" + chemin + "?ref=" + GITHUB_BRANCH;
     const res = await fetch(url);
     if(!res.ok) return [];
     const data = await res.json();
@@ -466,6 +470,8 @@
 
   // Charge le fichier unique albums.json et retourne un objet { nomDossier: meta }.
   // On essaie d'abord à la racine du repo, puis dans galerie/ en secours (compatibilité).
+  // Ces fichiers passent par raw.githubusercontent.com, pas soumis au rate limit de l'API,
+  // donc pas besoin du proxy ici.
   async function chargerMetaGlobale(){
     const emplacements = [
       "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/albums.json",
@@ -610,4 +616,3 @@
 
 </body>
 </html>
- 
