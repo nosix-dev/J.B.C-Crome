@@ -215,6 +215,7 @@
     <ul>
       <li><a href="index.html">Accueil</a></li>
       <li><a href="apropos.html">A propos</a></li>
+      <li><a href="equipe.html">Équipe</a></li>
       <li><a href="calendrier.html">Calendrier</a></li>
       <li><a href="galerie.html" class="active">Galerie</a></li>
       <li><a href="discord.html">Discord</a></li>
@@ -405,7 +406,7 @@
 
   function afficherAlbums(){
     if(!albums.length){ afficherVide(); return; }
-    
+
     grid.innerHTML = albums.map(function(album, i){
       const nbPhotos = album.photos.length;
       const desc = album.description ? '<p class="filmstrip-desc">' + album.description + '</p>' : '';
@@ -433,7 +434,7 @@
   async function chargerArborescence(){
     const url = "https://api.github.com/repos/" + GITHUB_USER + "/" + GITHUB_REPO + "/contents/" + GITHUB_FOLDER + "?ref=" + GITHUB_BRANCH;
     console.log("Chargement depuis :", url);
-    
+
     const res = await fetch(url);
     if(!res.ok) throw new Error("Erreur API GitHub (" + res.status + ") - " + res.statusText);
     return res.json();
@@ -459,18 +460,72 @@
       .replace(/\b\w/g, c => c.toUpperCase());
   }
 
+  // Dossiers à ignorer : ce sont des dossiers d'assets (ex: images de couverture),
+  // pas de vrais albums à afficher dans la grille.
+  const DOSSIERS_IGNORES = ["couverture"];
+
+  // Charge le fichier unique albums.json et retourne un objet { nomDossier: meta }.
+  // On essaie d'abord à la racine du repo, puis dans galerie/ en secours (compatibilité).
+  async function chargerMetaGlobale(){
+    const emplacements = [
+      "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/albums.json",
+      "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/" + GITHUB_FOLDER + "/albums.json"
+    ];
+
+    for(const url of emplacements){
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if(!res.ok) continue;
+        const liste = await res.json();
+        if(!Array.isArray(liste)) continue;
+        const map = {};
+        liste.forEach(function(entry){
+          if(entry && entry.dossier) map[entry.dossier] = entry;
+        });
+        return map;
+      } catch(e) {
+        // On tente l'emplacement suivant
+      }
+    }
+
+    console.warn("Aucun albums.json trouvé (ni à la racine, ni dans " + GITHUB_FOLDER + "/).");
+    return {};
+  }
+
+  // Résout l'URL de couverture : chemin absolu type "/galerie/couverture/xxx.jpg" -> raw GitHub,
+  // simple nom de fichier -> cherché dans les images du dossier de l'album.
+  function resoudreCouverture(valeurCouverture, imagesDuDossier){
+    if(!valeurCouverture) return '';
+
+    if(/^https?:\/\//i.test(valeurCouverture)) {
+      return valeurCouverture;
+    }
+
+    if(valeurCouverture.startsWith('/')) {
+      return urlFichier(valeurCouverture.slice(1));
+    }
+
+    const trouve = imagesDuDossier.find(img => img.name === valeurCouverture);
+    if(trouve) return trouve.download_url;
+
+    return '';
+  }
+
   async function chargerAlbums(){
     try {
       const contenu = await chargerArborescence();
-      
+
       if(!Array.isArray(contenu) || contenu.length === 0) {
         afficherVide();
         return;
       }
 
-      // Dossiers dans galerie/
-      const dossiers = contenu.filter(item => item.type === 'dir');
-      
+      // Meta globale depuis galerie/albums.json
+      const metaGlobale = await chargerMetaGlobale();
+
+      // Dossiers dans galerie/ (on exclut les dossiers d'assets comme "couverture")
+      const dossiers = contenu.filter(item => item.type === 'dir' && !DOSSIERS_IGNORES.includes(item.name.toLowerCase()));
+
       // Images directement dans galerie/ (album racine)
       const imagesRacine = extraireImages(contenu);
 
@@ -480,31 +535,31 @@
       for(const dossier of dossiers) {
         const fichiers = await chargerDossier(dossier.path);
         const images = extraireImages(fichiers);
-        
+
         if(images.length > 0) {
-          // On essaie de charger albums.json s'il existe dans le dossier
-          let meta = {};
-          try {
-            const metaFile = fichiers.find(f => f.name === 'albums.json');
-            if(metaFile) {
-              const resp = await fetch(metaFile.download_url);
-              if(resp.ok) {
-                meta = await resp.json();
+          // Priorité : meta globale (galerie/albums.json) sur ce dossier,
+          // sinon on retente un albums.json local au dossier (compatibilité ancienne méthode)
+          let meta = metaGlobale[dossier.name] || {};
+
+          if(!metaGlobale[dossier.name]) {
+            try {
+              const metaFile = fichiers.find(f => f.name === 'albums.json');
+              if(metaFile) {
+                const resp = await fetch(metaFile.download_url);
+                if(resp.ok) {
+                  meta = await resp.json();
+                }
               }
+            } catch(e) {
+              // Pas de meta locale non plus, on continue avec les valeurs par défaut
             }
-          } catch(e) {
-            // Pas de meta, on continue
           }
 
           const titre = meta.titre || prettifier(dossier.name);
           const categorie = meta.categorie || "Album";
           const description = meta.description || "";
-          
-          let couverture = '';
-          if(meta.couverture) {
-            const found = images.find(img => img.name === meta.couverture);
-            if(found) couverture = found.download_url;
-          }
+
+          let couverture = resoudreCouverture(meta.couverture, images);
           if(!couverture && images.length > 0) {
             couverture = images[0].download_url;
           }
