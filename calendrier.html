@@ -531,9 +531,13 @@
 <script>
 (function(){
   // ============================================================
-  // 🔧 METS À JOUR CETTE URL AVEC TON URL NGROK
+  // events.json est lu directement depuis GitHub (raw) —
+  // plus besoin de serveur local, ni de ngrok, ni de tunnel.
   // ============================================================
-  const EVENTS_API_URL = "https://random-words-1234.trycloudflare.com/api/events";
+  const GITHUB_USER = "nosix-dev";
+  const GITHUB_REPO = "J.B.C-Crome";
+  const GITHUB_BRANCH = "main";
+  const EVENTS_API_URL = "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/events.json";
 
   const grid = document.getElementById('cal-grid');
   const titleEl = document.getElementById('cal-title');
@@ -627,51 +631,19 @@
     ouvrirModalDetail(ev);
   };
 
-  function chargerDonneesSimulees() {
-    console.log('[calendrier] Utilisation des données simulées');
-    const eventsSimules = [
-      {
-        id: 1,
-        date: '2026-09-12',
-        titre: '🚛 CONVOI DE LA J.B.C CROME',
-        lieu: 'Calais → TruckersMP HQ',
-        categorie: 'Convoi • Simulation 1',
-        description: [
-          '🚀 Départ : Calais → TruckersMP HQ',
-          '📍 Rassemblement : 20h00',
-          '⏰ Départ : 20h30',
-          '🛣️ Distance : 150 km',
-          '📦 Prise en charge : Calais',
-          '🏭 Livraison : TruckersMP HQ',
-          '👥 0 inscrits'
-        ],
-        lien: 'https://truckersmp.com/events',
-        image: null,
-        _isConvoi: true
-      }
-    ];
-    indexerEvenements(eventsSimules);
-    evenementsCharges = true;
-    rendreCalendrier();
-  }
-
   async function chargerEvenements(){
     try{
       console.log('[calendrier] Tentative de chargement depuis:', EVENTS_API_URL);
-      const url = EVENTS_API_URL + (EVENTS_API_URL.includes('?') ? '&' : '?') + 'ngrok-skip-browser-warning=true';
-      const res = await fetch(url, {
-        cache: 'no-store',
-        headers: { 'ngrok-skip-browser-warning': 'true' }
-      });
+      const res = await fetch(EVENTS_API_URL, { cache: 'no-store' });
       if(!res.ok) throw new Error('HTTP ' + res.status);
       const events = await res.json();
       console.log('[calendrier] Événements reçus:', events.length);
       indexerEvenements(Array.isArray(events) ? events : []);
       evenementsCharges = true;
     }catch(err){
-      console.warn('[calendrier] Échec chargement /api/events:', err.message);
-      chargerDonneesSimulees();
-      return;
+      console.warn('[calendrier] Échec chargement events.json:', err.message);
+      indexerEvenements([]);
+      evenementsCharges = true;
     }
     rendreCalendrier();
   }
