@@ -740,12 +740,11 @@
 <script>
 (function(){
   // ============================================================
-  // Bannière "prochain événement" : fait défiler TOUS les
-  // événements à venir (pas juste le plus proche), en glissant
-  // d'un événement à l'autre toutes les quelques secondes.
+  // Bannière "prochain événement" - Version dynamique avec events.json
   // ============================================================
+
   const EVENTS_URL = 'events.json';
-  const ROTATION_MS = 6000; // délai entre deux événements affichés
+  const ROTATION_MS = 6000;
 
   const banner = document.getElementById('next-event-banner');
   if(!banner) return;
@@ -757,17 +756,24 @@
 
   const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 
-  function formaterDate(d){
+  function formaterDate(d) {
     return d.getDate() + ' ' + MOIS[d.getMonth()] + ' ' + d.getFullYear();
   }
 
-  function formaterCompteARebours(msRestant){
+  function formaterCompteARebours(msRestant) {
+    if(msRestant <= 0) return 'En cours';
+    
     const jours = Math.floor(msRestant / (1000 * 60 * 60 * 24));
     const heures = Math.floor((msRestant / (1000 * 60 * 60)) % 24);
-    if(jours > 0) return jours + ' j ' + heures + ' h';
     const minutes = Math.floor((msRestant / (1000 * 60)) % 60);
-    if(heures > 0) return heures + ' h ' + minutes + ' min';
-    return Math.max(0, minutes) + ' min';
+    
+    if(jours > 0) {
+      return jours + ' j ' + heures + ' h ' + minutes + ' min';
+    } else if(heures > 0) {
+      return heures + ' h ' + minutes + ' min';
+    } else {
+      return minutes + ' min';
+    }
   }
 
   let evenementsFuturs = [];
@@ -775,8 +781,8 @@
   let intervalleRotation = null;
   let intervalleCompteARebours = null;
 
-  function construireSlides(){
-    trackEl.innerHTML = evenementsFuturs.map(function(ev){
+  function construireSlides() {
+    trackEl.innerHTML = evenementsFuturs.map(function(ev) {
       const d = new Date(ev.date);
       return '<div class="neb-slide">'
         + '<span class="neb-title">' + (ev.titre || '') + '</span>'
@@ -784,32 +790,36 @@
         + '</div>';
     }).join('');
 
-    dotsEl.innerHTML = evenementsFuturs.map(function(_, i){
+    dotsEl.innerHTML = evenementsFuturs.map(function(_, i) {
       return '<span class="neb-dot' + (i === 0 ? ' active' : '') + '" data-index="' + i + '"></span>';
     }).join('');
 
-    dotsEl.querySelectorAll('.neb-dot').forEach(function(dot){
-      dot.addEventListener('click', function(){
+    dotsEl.querySelectorAll('.neb-dot').forEach(function(dot) {
+      dot.addEventListener('click', function() {
         allerVersSlide(parseInt(dot.dataset.index, 10));
         redemarrerRotation();
       });
     });
   }
 
-  function majCompteAReboursEtBouton(){
+  function majCompteAReboursEtBouton() {
     const ev = evenementsFuturs[indexActif];
     if(!ev) return;
-    const reste = new Date(ev.date) - new Date();
-    countdownEl.textContent = reste <= 0 ? 'En cours' : formaterCompteARebours(reste);
+    
+    const dateEvent = new Date(ev.date);
+    const maintenant = new Date();
+    const reste = dateEvent - maintenant;
+    
+    countdownEl.textContent = formaterCompteARebours(reste);
     if(ev.lien) btnEl.href = ev.lien;
   }
 
-  function allerVersSlide(nouvelIndex){
+  function allerVersSlide(nouvelIndex) {
     if(!evenementsFuturs.length) return;
 
     trackEl.style.transform = 'translateX(-' + (nouvelIndex * 100) + '%)';
 
-    dotsEl.querySelectorAll('.neb-dot').forEach(function(dot){
+    dotsEl.querySelectorAll('.neb-dot').forEach(function(dot) {
       dot.classList.toggle('active', parseInt(dot.dataset.index, 10) === nouvelIndex);
     });
 
@@ -817,20 +827,20 @@
     majCompteAReboursEtBouton();
   }
 
-  function slideSuivant(){
+  function slideSuivant() {
     const prochain = (indexActif + 1) % evenementsFuturs.length;
     allerVersSlide(prochain);
   }
 
-  function redemarrerRotation(){
+  function redemarrerRotation() {
     if(intervalleRotation) clearInterval(intervalleRotation);
-    if(evenementsFuturs.length > 1){
+    if(evenementsFuturs.length > 1) {
       intervalleRotation = setInterval(slideSuivant, ROTATION_MS);
     }
   }
 
-  async function chargerEvenements(){
-    try{
+  async function chargerEvenements() {
+    try {
       const res = await fetch(EVENTS_URL, { cache: 'no-store' });
       if(!res.ok) throw new Error('HTTP ' + res.status);
       const events = await res.json();
@@ -838,21 +848,38 @@
 
       const maintenant = new Date();
       evenementsFuturs = events
-        .filter(ev => ev && ev.date && !isNaN(new Date(ev.date)) && new Date(ev.date) > maintenant)
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+        .filter(function(ev) {
+          if(!ev || !ev.date) return false;
+          const dateEv = new Date(ev.date);
+          return !isNaN(dateEv) && dateEv > maintenant;
+        })
+        .sort(function(a, b) {
+          return new Date(a.date) - new Date(b.date);
+        });
 
-      if(!evenementsFuturs.length) return;
+      if(!evenementsFuturs.length) {
+        // Si aucun événement futur, afficher un message
+        trackEl.innerHTML = '<div class="neb-slide"><span class="neb-title">Aucun événement à venir</span></div>';
+        countdownEl.textContent = '--:--';
+        return;
+      }
 
       construireSlides();
       indexActif = 0;
       majCompteAReboursEtBouton();
 
-      intervalleCompteARebours = setInterval(majCompteAReboursEtBouton, 60 * 1000);
+      // Mise à jour du compte à rebours toutes les 30 secondes
+      if(intervalleCompteARebours) clearInterval(intervalleCompteARebours);
+      intervalleCompteARebours = setInterval(majCompteAReboursEtBouton, 30000);
+      
       redemarrerRotation();
 
       banner.classList.add('visible');
-    }catch(err){
+    } catch(err) {
       console.warn('[next-event-banner] Échec chargement events.json', err);
+      // Affichage d'un message d'erreur
+      trackEl.innerHTML = '<div class="neb-slide"><span class="neb-title">⚠️ Erreur de chargement</span></div>';
+      countdownEl.textContent = '--:--';
     }
   }
 
