@@ -178,14 +178,25 @@
     display:block; font-size:10.5px; line-height:1.3; padding:5px 8px; border-radius:5px;
     background:rgba(255,255,255,.06); color:var(--chrome-1); font-weight:600;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-    border-left:3px solid var(--chrome-3); transition:transform .15s ease;
+    border-left:3px solid var(--chrome-3); transition:transform .15s ease, background .15s ease;
   }
-  a.cal-event-pill:hover{transform:translateX(2px);}
+  .cal-event-pill:hover{
+    transform:translateX(2px);
+    background:rgba(255,255,255,.12);
+  }
   .cal-event-pill.open{border-left-color:var(--open-color);}
   .cal-event-pill.closed{border-left-color:var(--closed-color); opacity:.7;}
+  .cal-event-pill.convoi{border-left-color:#f39c12;}
+  .cal-event-pill.convoi::before{content:"🚛 ";}
 
   .cal-loading, .cal-error{
     text-align:center; padding:40px 20px; color:var(--chrome-3); font-size:14px;
+  }
+
+  /* Animation pour le modal */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(.95); }
+    to { opacity: 1; transform: scale(1); }
   }
 
   @media (max-width:760px){
@@ -198,10 +209,15 @@
   }
 
   footer{
-    padding:24px 6vw 20px; border-top:1px solid var(--hairline);
-    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;
-    color:var(--chrome-3); font-size:11px; letter-spacing:.5px; position:relative; z-index:2;
+    padding:0 6vw 28px; position:relative; z-index:2;
+  }
+  footer .footer-shell{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+    padding:18px 22px; border:1px solid var(--hairline); border-radius:18px;
+    background:linear-gradient(135deg, rgba(255,255,255,.04), rgba(255,255,255,.025));
+    color:var(--chrome-3); font-size:11px; letter-spacing:.5px;
     font-family:'Space Mono', monospace;
+    box-shadow:0 10px 24px rgba(2,10,20,.16);
   }
   body.push-footer{display:flex; flex-direction:column; min-height:100vh;}
   body.push-footer footer{margin-top:auto;}
@@ -224,6 +240,147 @@
   .preloader-status{font-family:'Space Mono', monospace; font-size:9.5px; letter-spacing:2px; text-transform:uppercase; color:rgba(214,205,190,.4);}
   @keyframes preloaderSpin{to{transform:rotate(360deg);}}
 
+  /* ===== STYLES POUR LE MODAL ===== */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(7,17,29,.92);
+    backdrop-filter: blur(20px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn .3s ease;
+  }
+  .modal-content {
+    background: linear-gradient(160deg, #142338, #0f1726);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 16px;
+    max-width: 520px;
+    width: 100%;
+    padding: 32px;
+    box-shadow: 0 24px 60px rgba(0,0,0,.6);
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-close {
+    position: sticky;
+    top: 0;
+    float: right;
+    background: none;
+    border: none;
+    color: #8ea0b7;
+    font-size: 24px;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    z-index: 10;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background .2s;
+  }
+  .modal-close:hover {
+    background: rgba(255,255,255,.06);
+  }
+  .modal-title {
+    font-family: 'Anton', sans-serif;
+    font-size: 24px;
+    color: #f5f7fb;
+    margin-bottom: 8px;
+    clear: both;
+  }
+  .modal-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .modal-tag {
+    background: rgba(93,168,255,.15);
+    color: #5da8ff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .modal-tag-date {
+    background: rgba(255,255,255,.06);
+    color: #dfe7f2;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .modal-lieu {
+    color: #8ea0b7;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  .modal-description {
+    color: #dfe7f2;
+    font-size: 14px;
+    line-height: 1.6;
+    background: rgba(255,255,255,.03);
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-left: 3px solid #5da8ff;
+    margin-bottom: 16px;
+    white-space: pre-wrap;
+  }
+  .modal-convoi-badge {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: rgba(243,156,18,.1);
+    border-radius: 8px;
+    border-left: 3px solid #f39c12;
+    font-size: 13px;
+    color: #f39c12;
+  }
+  .modal-image {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    max-height: 200px;
+    object-fit: cover;
+  }
+  .modal-btn {
+    display: inline-block;
+    background: #5da8ff;
+    color: #07111d;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background .2s, transform .15s;
+    border: none;
+    cursor: pointer;
+  }
+  .modal-btn:hover {
+    background: #7ab9ff;
+    transform: translateY(-1px);
+  }
+  .modal-btn-discord {
+    background: #5865F2;
+    color: #fff;
+  }
+  .modal-btn-discord:hover {
+    background: #6d7af5;
+  }
+  .modal-btn-event {
+    background: #f39c12;
+    color: #07111d;
+  }
+  .modal-btn-event:hover {
+    background: #f5b342;
+  }
+  .modal-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+  }
 </style>
 </head>
 <body>
@@ -267,6 +424,7 @@
         <div class="cal-legend">
           <span class="cal-legend-item"><span class="cal-legend-dot open"></span>Ouvert</span>
           <span class="cal-legend-item"><span class="cal-legend-dot closed"></span>Terminé</span>
+          <span class="cal-legend-item" style="border-left:3px solid #f39c12; padding-left:8px;">🚛 Convoi</span>
         </div>
       </div>
 
@@ -371,8 +529,10 @@
 
 <script>
 (function(){
-  // Même API que evenements.html — remplace par le domaine ngrok fixe de ton bot si besoin.
-  const EVENTS_API_URL = "https://caviar-gatherer-matriarch.ngrok-free.dev/api/events";
+  // ============================================================
+  // 🔧 METS À JOUR CETTE URL AVEC TON URL NGROK
+  // ============================================================
+  const EVENTS_API_URL = "https://ton-ngrok-url.ngrok-free.dev/api/events";
 
   const grid = document.getElementById('cal-grid');
   const titleEl = document.getElementById('cal-title');
@@ -387,8 +547,8 @@
   aujourdhui.setHours(0,0,0,0);
 
   let vueAnnee = aujourdhui.getFullYear();
-  let vueMois = aujourdhui.getMonth(); // 0-11
-  let eventsParJour = {}; // "YYYY-M-D" -> [events]
+  let vueMois = aujourdhui.getMonth();
+  let eventsParJour = {};
   let evenementsCharges = false;
 
   function escapeHtml(str){
@@ -412,8 +572,91 @@
     });
   }
 
+  function estConvoi(ev) {
+    return ev._isConvoi === true || (ev.titre && ev.titre.startsWith('🚛 '));
+  }
+
+  // ============================================================
+  // FONCTION POUR OUVRIR LE MODAL
+  // ============================================================
+  function ouvrirModalDetail(ev) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    
+    const description = Array.isArray(ev.description) ? ev.description.map(l => `• ${l}`).join('\n') : ev.description || '';
+    const dateFormatee = ev.date ? ev.date.split('-').reverse().join('/') : '';
+    
+    const discordUrl = "https://discord.gg/4vHDSQBEhw";
+    const eventLink = ev.lien || null;
+    
+    overlay.innerHTML = `
+      <div class="modal-content">
+        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button>
+        
+        ${ev.image ? `<img src="${ev.image}" class="modal-image" alt="Image de l'événement">` : ''}
+        
+        <h2 class="modal-title">${escapeHtml(ev.titre || 'Événement')}</h2>
+        
+        <div class="modal-tags">
+          ${ev.categorie ? `<span class="modal-tag">${escapeHtml(ev.categorie)}</span>` : ''}
+          ${dateFormatee ? `<span class="modal-tag-date">📅 ${escapeHtml(dateFormatee)}</span>` : ''}
+        </div>
+        
+        ${ev.lieu ? `<p class="modal-lieu">📍 ${escapeHtml(ev.lieu)}</p>` : ''}
+        
+        ${description ? `<div class="modal-description">${escapeHtml(description)}</div>` : ''}
+        
+        ${ev._isConvoi ? `<div class="modal-convoi-badge">🚛 Convoi organisé par J.B.C Crome</div>` : ''}
+        
+        <div class="modal-buttons">
+          ${eventLink ? `<a href="${escapeHtml(eventLink)}" target="_blank" class="modal-btn modal-btn-event">🔗 Voir l'événement</a>` : ''}
+          <a href="${discordUrl}" target="_blank" class="modal-btn modal-btn-discord">💬 Discord</a>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    overlay.addEventListener('click', function(e) {
+      if (e.target === this) this.remove();
+    });
+  }
+
+  window.handleEventClick = function(ev) {
+    ouvrirModalDetail(ev);
+  };
+
+  function chargerDonneesSimulees() {
+    console.log('[calendrier] Utilisation des données simulées');
+    const eventsSimules = [
+      {
+        id: 1,
+        date: '2026-09-12',
+        titre: '🚛 CONVOI DE LA J.B.C CROME',
+        lieu: 'Calais → TruckersMP HQ',
+        categorie: 'Convoi • Simulation 1',
+        description: [
+          '🚀 Départ : Calais → TruckersMP HQ',
+          '📍 Rassemblement : 20h00',
+          '⏰ Départ : 20h30',
+          '🛣️ Distance : 150 km',
+          '📦 Prise en charge : Calais',
+          '🏭 Livraison : TruckersMP HQ',
+          '👥 0 inscrits'
+        ],
+        lien: 'https://truckersmp.com/events',
+        image: null,
+        _isConvoi: true
+      }
+    ];
+    indexerEvenements(eventsSimules);
+    evenementsCharges = true;
+    rendreCalendrier();
+  }
+
   async function chargerEvenements(){
     try{
+      console.log('[calendrier] Tentative de chargement depuis:', EVENTS_API_URL);
       const url = EVENTS_API_URL + (EVENTS_API_URL.includes('?') ? '&' : '?') + 'ngrok-skip-browser-warning=true';
       const res = await fetch(url, {
         cache: 'no-store',
@@ -421,11 +664,13 @@
       });
       if(!res.ok) throw new Error('HTTP ' + res.status);
       const events = await res.json();
+      console.log('[calendrier] Événements reçus:', events.length);
       indexerEvenements(Array.isArray(events) ? events : []);
       evenementsCharges = true;
     }catch(err){
-      console.warn('[calendrier] Échec chargement /api/events', err);
-      evenementsCharges = false;
+      console.warn('[calendrier] Échec chargement /api/events:', err.message);
+      chargerDonneesSimulees();
+      return;
     }
     rendreCalendrier();
   }
@@ -434,7 +679,6 @@
     titleEl.textContent = MOIS[vueMois] + ' ' + vueAnnee;
 
     const premierDuMois = new Date(vueAnnee, vueMois, 1);
-    // Lundi = 0 ... Dimanche = 6
     const decalage = (premierDuMois.getDay() + 6) % 7;
     const debutGrille = new Date(vueAnnee, vueMois, 1 - decalage);
 
@@ -448,6 +692,7 @@
       let classesCell = 'cal-cell';
       if(!estMoisCourant) classesCell += ' other-month';
       if(estAujourdhui) classesCell += ' today';
+      
       if(evenementsJour.some(ev => new Date(ev.date) >= aujourdhui)) classesCell += ' has-open';
       else if(evenementsJour.length) classesCell += ' has-closed';
 
@@ -455,12 +700,33 @@
       if(evenementsJour.length){
         pillsHtml = '<div class="cal-events">' + evenementsJour.map(function(ev){
           const ouvert = new Date(ev.date) >= aujourdhui;
-          const classe = 'cal-event-pill ' + (ouvert ? 'open' : 'closed');
-          const titre = escapeHtml(ev.titre || 'Événement');
-          if(ev.lien){
-            return '<a class="' + classe + '" href="' + escapeHtml(ev.lien) + '" target="_blank" rel="noopener" title="' + titre + '">' + titre + '</a>';
-          }
-          return '<span class="' + classe + '" title="' + titre + '">' + titre + '</span>';
+          const estUnConvoi = estConvoi(ev);
+          let classe = 'cal-event-pill ' + (ouvert ? 'open' : 'closed');
+          if(estUnConvoi) classe += ' convoi';
+          
+          let titre = escapeHtml(ev.titre || 'Événement');
+          
+          const evData = {
+            id: ev.id,
+            titre: ev.titre,
+            date: ev.date,
+            lieu: ev.lieu,
+            categorie: ev.categorie,
+            description: ev.description,
+            image: ev.image,
+            lien: ev.lien,
+            _isConvoi: ev._isConvoi || false
+          };
+          
+          const evDataStr = encodeURIComponent(JSON.stringify(evData));
+          
+          return `<span class="${classe}" 
+                      data-event='${evDataStr}'
+                      onclick="handleEventClick(JSON.parse(decodeURIComponent(this.dataset.event)))"
+                      style="cursor:pointer;"
+                      title="Cliquer pour voir les détails">
+                  ${titre}
+                </span>`;
         }).join('') + '</div>';
       }
 
@@ -470,11 +736,7 @@
         + '</div>';
     }
 
-    if(!evenementsCharges){
-      grid.innerHTML = '<div class="cal-error" style="grid-column:1/-1;">Événements indisponibles pour le moment — le calendrier s\'affiche quand même.</div>' + html;
-    } else {
-      grid.innerHTML = html;
-    }
+    grid.innerHTML = html;
   }
 
   btnPrev.addEventListener('click', function(){
