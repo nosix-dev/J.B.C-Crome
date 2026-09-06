@@ -2,15 +2,12 @@
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
-const trucksbookApi = require('./trucksbook');
 
-// Configuration GitHub
 const GITHUB_USER = "nosix-dev";
 const GITHUB_REPO = "J.B.C-Crome";
 const GITHUB_BRANCH = "main";
-const REPO_PATH = path.join(__dirname, '..', GITHUB_REPO); // Dossier du repo cloné
+const REPO_PATH = path.join(__dirname, '..', GITHUB_REPO);
 
-// IDs des rôles (à ajuster selon votre serveur)
 const ROLE_IDS = {
   patron: "1495109483028807740",
   gerants: "1495109879403385003",
@@ -19,17 +16,44 @@ const ROLE_IDS = {
   chauffeurs_essai: "1527806431519314183",
 };
 
-const ROLE_LABELS = {
-  patron: 'Patron',
-  gerants: 'Gérant',
-  discord: 'Responsable Discord',
-  chauffeurs: 'Chauffeur',
-  chauffeurs_essai: 'Chauffeur Test',
-};
-
 const ROLE_ORDER = ['patron', 'gerants', 'discord', 'chauffeurs', 'chauffeurs_essai'];
 
-// Fonction pour obtenir les membres d'un rôle
+// Données par défaut (fallback si le repo n'existe pas)
+const DEFAULT_TEAM = {
+  patron: [{ pseudo: "Jerem0982", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Fondateur" }],
+  gerants: [
+    { pseudo: "bobi79", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" },
+    { pseudo: "RastaTranKill", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" }
+  ],
+  discord: [{ pseudo: "Bratony", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" }],
+  chauffeurs: [
+    { pseudo: "bobi79", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" },
+    { pseudo: "Brique_decompote", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" },
+    { pseudo: "bruno", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" },
+    { pseudo: "Denis", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" },
+    { pseudo: "fastory 3", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" },
+    { pseudo: "gozy2025", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" },
+    { pseudo: "kik59", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" },
+    { pseudo: "Kylian972", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" },
+    { pseudo: "Ratah", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" },
+    { pseudo: "Soyeon", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" },
+    { pseudo: "Stuky", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" },
+    { pseudo: "zeox62", avatar: "", id: "", joinedAt: null, km: 0, convois: 0, anciennete: "Membre" }
+  ],
+  chauffeurs_essai: []
+};
+
+function calculerAnciennete(joinedAt) {
+  if (!joinedAt) return 'Nouveau';
+  const jours = Math.floor((Date.now() - new Date(joinedAt).getTime()) / (1000 * 60 * 60 * 24));
+  if (jours < 7) return 'Nouveau';
+  if (jours < 30) return '1 mois';
+  if (jours < 90) return '3 mois';
+  if (jours < 180) return '6 mois';
+  if (jours < 365) return '1 an';
+  return 'Vétéran';
+}
+
 async function getMembersByRole(guild, roleId) {
   if (!roleId) return [];
   const role = guild.roles.cache.get(roleId);
@@ -46,133 +70,83 @@ async function getMembersByRole(guild, roleId) {
   }));
 }
 
-// Calculer l'ancienneté
-function calculerAnciennete(joinedAt) {
-  if (!joinedAt) return 'Nouveau';
-  const now = new Date();
-  const diff = now - new Date(joinedAt);
-  const jours = Math.floor(diff / (1000 * 60 * 60 * 24));
-  
-  if (jours < 7) return 'Nouveau';
-  if (jours < 30) return '1 mois';
-  if (jours < 90) return '3 mois';
-  if (jours < 180) return '6 mois';
-  if (jours < 365) return '1 an';
-  return 'Vétéran';
-}
-
-// Générer le fichier team.json
 async function generateTeamJson(client, guildId) {
   try {
     const guild = client.guilds.cache.get(guildId) || client.guilds.cache.first();
     if (!guild) {
-      console.error('[team-sync] Aucun serveur trouvé');
-      return false;
+      console.log('[team-sync] ⚠️ Aucun serveur trouvé, utilisation des données par défaut');
+      return DEFAULT_TEAM;
     }
-
-    console.log(`[team-sync] Génération de team.json pour ${guild.name}...`);
 
     const teamData = {};
-    
     for (const key of ROLE_ORDER) {
-      const members = await getMembersByRole(guild, ROLE_IDS[key]);
-      teamData[key] = members;
-      console.log(`[team-sync] ${key}: ${members.length} membre(s)`);
+      teamData[key] = await getMembersByRole(guild, ROLE_IDS[key]);
+      // Si un rôle est vide, on garde les données par défaut
+      if (teamData[key].length === 0 && DEFAULT_TEAM[key]) {
+        teamData[key] = DEFAULT_TEAM[key];
+      }
     }
 
-    // Chemin du fichier team.json
-    const teamPath = path.join(REPO_PATH, 'team.json');
-    
-    // Écrire le fichier
-    fs.writeFileSync(teamPath, JSON.stringify(teamData, null, 2));
-    console.log(`[team-sync] team.json généré (${Object.values(teamData).reduce((a,b) => a + b.length, 0)} membres au total)`);
+    // Créer le dossier du repo s'il n'existe pas
+    if (!fs.existsSync(REPO_PATH)) {
+      fs.mkdirSync(REPO_PATH, { recursive: true });
+      console.log(`[team-sync] 📁 Dossier ${REPO_PATH} créé`);
+    }
 
-    return true;
+    // Écrire le fichier
+    const teamPath = path.join(REPO_PATH, 'team.json');
+    fs.writeFileSync(teamPath, JSON.stringify(teamData, null, 2));
+    console.log('[team-sync] ✅ team.json généré');
+    return teamData;
   } catch (err) {
-    console.error('[team-sync] Erreur génération team.json:', err.message);
-    return false;
+    console.error('[team-sync] Erreur génération:', err.message);
+    // En cas d'erreur, on utilise les données par défaut
+    const teamPath = path.join(REPO_PATH, 'team.json');
+    if (!fs.existsSync(REPO_PATH)) fs.mkdirSync(REPO_PATH, { recursive: true });
+    fs.writeFileSync(teamPath, JSON.stringify(DEFAULT_TEAM, null, 2));
+    return DEFAULT_TEAM;
   }
 }
 
-// Pousser sur GitHub
-async function pushToGitHub() {
+function pushToGitHub() {
   return new Promise((resolve) => {
-    const commands = [
-      `cd "${REPO_PATH}"`,
-      'git add team.json',
-      `git commit -m "Mise à jour automatique de l'équipe - ${new Date().toLocaleString('fr-FR')}"`,
-      'git push origin ' + GITHUB_BRANCH
-    ];
+    // Initialiser le repo git s'il n'existe pas
+    const gitPath = path.join(REPO_PATH, '.git');
+    let initCmd = '';
+    if (!fs.existsSync(gitPath)) {
+      initCmd = `cd "${REPO_PATH}" && git init && git remote add origin https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git && git branch -M ${GITHUB_BRANCH} && `;
+    }
 
-    const cmd = commands.join(' && ');
+    const cmd = `${initCmd}cd "${REPO_PATH}" && git add team.json && (git commit -m "Mise à jour équipe - ${new Date().toISOString()}" || echo "Rien à commiter") && git push -u origin ${GITHUB_BRANCH} 2>&1`;
     
     console.log('[team-sync] Push vers GitHub...');
-    
     exec(cmd, (error, stdout, stderr) => {
-      if (error) {
+      if (error && !error.message.includes('nothing to commit') && !error.message.includes('already exists')) {
         console.error('[team-sync] Erreur push:', error.message);
         resolve(false);
         return;
       }
-      if (stderr && !stderr.includes('nothing to commit')) {
-        console.warn('[team-sync] stderr:', stderr);
-      }
-      if (stdout) {
-        console.log('[team-sync] stdout:', stdout);
-      }
+      if (stdout) console.log('[team-sync]', stdout.trim());
       console.log('[team-sync] ✅ Push terminé');
       resolve(true);
     });
   });
 }
 
-// Fonction principale : génère ET push
 async function syncTeamToGitHub(client, guildId) {
-  console.log('[team-sync] Début synchronisation...');
-  const generated = await generateTeamJson(client, guildId);
-  if (!generated) {
-    console.error('[team-sync] ❌ Échec de la génération');
-    return false;
-  }
-  
-  // Attendre un peu pour que le fichier soit écrit
+  console.log('[team-sync] 🔄 Début synchronisation...');
+  await generateTeamJson(client, guildId);
   await new Promise(r => setTimeout(r, 500));
-  
-  const pushed = await pushToGitHub();
-  if (!pushed) {
-    console.error('[team-sync] ❌ Échec du push');
-    return false;
-  }
-  
-  console.log('[team-sync] ✅ Synchronisation complète');
-  return true;
+  return await pushToGitHub();
 }
 
-// Vérifier que le repo existe
 function ensureRepoExists() {
   if (!fs.existsSync(REPO_PATH)) {
-    console.log(`[team-sync] ⚠️ Le dossier ${REPO_PATH} n'existe pas.`);
-    console.log(`[team-sync] Clone le repo avec :`);
-    console.log(`git clone https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git "${REPO_PATH}"`);
-    return false;
+    fs.mkdirSync(REPO_PATH, { recursive: true });
+    console.log(`[team-sync] 📁 Dossier ${REPO_PATH} créé automatiquement`);
+    return true;
   }
-  
-  // Vérifier que c'est bien un repo git
-  const gitPath = path.join(REPO_PATH, '.git');
-  if (!fs.existsSync(gitPath)) {
-    console.log(`[team-sync] ⚠️ ${REPO_PATH} n'est pas un dépôt git.`);
-    return false;
-  }
-  
   return true;
 }
 
-module.exports = {
-  generateTeamJson,
-  pushToGitHub,
-  syncTeamToGitHub,
-  ensureRepoExists,
-  ROLE_IDS,
-  ROLE_LABELS,
-  ROLE_ORDER
-};
+module.exports = { syncTeamToGitHub, ensureRepoExists };
