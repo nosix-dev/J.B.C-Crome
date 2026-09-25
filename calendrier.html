@@ -593,7 +593,8 @@
     const dateFormatee = ev.date ? ev.date.split('-').reverse().join('/') : '';
     
     const discordUrl = "https://discord.gg/4vHDSQBEhw";
-    const eventLink = ev.lien || null;
+    const trucksbookLink = ev.lien || null;
+    const haulmpLink = ev.lienHaulmp || null;
     
     overlay.innerHTML = `
       <div class="modal-content">
@@ -617,7 +618,8 @@
         ${ev._isConvoi ? `<div class="modal-convoi-badge">🚛 Convoi organisé par J.B.C Crome</div>` : ''}
         
         <div class="modal-buttons">
-          ${eventLink ? `<a href="${escapeHtml(eventLink)}" target="_blank" class="modal-btn modal-btn-event">🔗 Voir l'événement</a>` : ''}
+          ${haulmpLink ? `<a href="${escapeHtml(haulmpLink)}" target="_blank" class="modal-btn modal-btn-event">🔗 HaulMP</a>` : ''}
+          ${trucksbookLink ? `<a href="${escapeHtml(trucksbookLink)}" target="_blank" class="modal-btn modal-btn-event">🔗 TrucksBook</a>` : ''}
           <a href="${discordUrl}" target="_blank" class="modal-btn modal-btn-discord">💬 Discord</a>
         </div>
       </div>
@@ -692,6 +694,7 @@
             règlement: ev.règlement,
             image: ev.image,
             lien: ev.lien,
+            lienHaulmp: ev.lienHaulmp,
             _isConvoi: ev._isConvoi || false
           };
           
