@@ -7,6 +7,8 @@
 <link rel="icon" type="image/png" href="LogoV3.png">
 <link rel="stylesheet" href="styles-theme.css">
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
   :root{
     --asphalt:#07111d;
     --panel:#0f1726;
@@ -530,12 +532,13 @@
   // ============================================================
   // events.json est lu directement depuis GitHub (raw) —
   // plus besoin de serveur local, ni de ngrok, ni de tunnel.
+  // Le paramètre ?t=Date.now() évite le cache du CDN GitHub.
   // ============================================================
   const GITHUB_USER = "nosix-dev";
   const GITHUB_REPO = "J.B.C-Crome";
   const GITHUB_BRANCH = "main";
   const EVENTS_API_URL = "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/events.json?t=" + Date.now();
-  
+
   const grid = document.getElementById('cal-grid');
   const titleEl = document.getElementById('cal-title');
   const btnPrev = document.getElementById('cal-prev');
@@ -586,6 +589,7 @@
     overlay.className = 'modal-overlay';
     
     const description = Array.isArray(ev.description) ? ev.description.map(l => `• ${l}`).join('\n') : ev.description || '';
+    const reglement = Array.isArray(ev.règlement) ? ev.règlement.map(l => `• ${l}`).join('\n') : ev.règlement || '';
     const dateFormatee = ev.date ? ev.date.split('-').reverse().join('/') : '';
     
     const discordUrl = "https://discord.gg/4vHDSQBEhw";
@@ -607,6 +611,8 @@
         ${ev.lieu ? `<p class="modal-lieu">📍 ${escapeHtml(ev.lieu)}</p>` : ''}
         
         ${description ? `<div class="modal-description">${escapeHtml(description)}</div>` : ''}
+        
+        ${reglement ? `<div class="modal-description" style="border-left-color:#f39c12;"><strong>Règlement :</strong>\n${escapeHtml(reglement)}</div>` : ''}
         
         ${ev._isConvoi ? `<div class="modal-convoi-badge">🚛 Convoi organisé par J.B.C Crome</div>` : ''}
         
@@ -683,6 +689,7 @@
             lieu: ev.lieu,
             categorie: ev.categorie,
             description: ev.description,
+            règlement: ev.règlement,
             image: ev.image,
             lien: ev.lien,
             _isConvoi: ev._isConvoi || false
