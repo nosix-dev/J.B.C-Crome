@@ -1,1 +1,25 @@
-
+[
+  {
+    "titre": "Convoi de la J.B.C Crome",
+    "date": "26/09/2026",
+    "description": [
+      "Heure de rassemblement : 20h00",
+      "Heure de départ : 21h00",
+      "Départ Ville : Ostrava",
+      "Entreprise : ITCC",
+      "Arrivée Ville : Amsterdam",
+      "Entreprise : Pas précisé",
+      "GPS : Aucun point GPS",
+      "Distance : 1 261 km (itinéraire le plus rapide)",
+      "Serveur : Server 1",
+      "Multijoueur : HaulMP"
+    ],
+    "règlement": [
+      "RESPECTEZ LE CODE DE LA ROUTE",
+      "SOYEZ COURTOIS ET RESPECTUEUX",
+      "PAS DE DÉPASSEMENTS DANGEREUX",
+      "AMUSEZ-VOUS ET PROFITEZ DU CONVOI"
+    ],
+    "lien": "https://trucksbook.eu/convoy/26464"
+  }
+]
