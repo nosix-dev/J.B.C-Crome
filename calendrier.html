@@ -7,8 +7,6 @@
 <link rel="icon" type="image/png" href="LogoV3.png">
 <link rel="stylesheet" href="styles-theme.css">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
-
   :root{
     --asphalt:#07111d;
     --panel:#0f1726;
@@ -536,8 +534,8 @@
   const GITHUB_USER = "nosix-dev";
   const GITHUB_REPO = "J.B.C-Crome";
   const GITHUB_BRANCH = "main";
-  const EVENTS_API_URL = "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/events.json";
-
+  const EVENTS_API_URL = "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/events.json?t=" + Date.now();
+  
   const grid = document.getElementById('cal-grid');
   const titleEl = document.getElementById('cal-title');
   const btnPrev = document.getElementById('cal-prev');
