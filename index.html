@@ -147,70 +147,64 @@
   }
   #next-event-banner .neb-dot.active{background:#fff; transform:scale(1.25);}
 
-  .hero{
+  /* ---- Hero façon "photo pleine largeur + cartes flottantes" ---- */
+  .hero-full{
     position:relative; min-height:88vh;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    padding:60px 6vw 90px; z-index:2;
+    display:flex; align-items:center;
+    padding:70px 6vw; z-index:2; overflow:hidden;
   }
-  .hero-shell{
-    width:min(1180px,100%);
-    display:grid; grid-template-columns:1.1fr .9fr; gap:28px;
-    align-items:center;
-    padding:clamp(24px,4vw,42px);
-    border-radius:28px;
-    border:1px solid rgba(93,168,255,.22);
-    background:linear-gradient(135deg, rgba(15,23,38,.96), rgba(9,17,29,.94));
-    box-shadow:0 24px 70px rgba(2,10,20,.45);
-    backdrop-filter:blur(18px);
-    position:relative; overflow:hidden;
+  .hero-bg{
+    position:absolute; inset:0;
+    /* Remplace par une vraie photo de convoi J.B.C Crome */
+    background-image:url('assets/hero-convoi.jpg');
+    background-size:cover; background-position:center;
+    filter:brightness(.55) saturate(1.05) contrast(1.05);
   }
-  .hero-shell::before{
-    content:""; position:absolute; inset:0;
-    background:radial-gradient(circle at top right, rgba(93,168,255,.16), transparent 38%);
-    pointer-events:none;
+  .hero-overlay{
+    position:absolute; inset:0;
+    background:linear-gradient(100deg, rgba(7,17,29,.92) 0%, rgba(7,17,29,.62) 42%, rgba(7,17,29,.15) 72%, transparent 100%);
   }
-  .hero-copy{text-align:left; position:relative; z-index:2;}
-  .hero-stats{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; margin:24px 0 0; opacity:1; animation:none;}
-  .hero-stat{
-    display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
-    padding:16px 16px; min-width:0;
-    background:rgba(255,255,255,.05);
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:14px;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 8px 16px rgba(0,0,0,.18);
+  .hero-content{
+    position:relative; z-index:2; width:100%;
+    display:grid; grid-template-columns:1.3fr .7fr; gap:28px; align-items:start;
   }
-  .hero-stat-value{
-    font-family:'Space Mono', monospace; font-weight:700;
-    font-size:clamp(18px,2.1vw,24px); letter-spacing:1px;
-    color:var(--chrome-1);
-    text-shadow:0 0 12px var(--amber-glow);
-    font-variant-numeric:tabular-nums;
+  .hero-main-card{
+    background:rgba(7,17,29,.55); backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,.09); border-radius:22px;
+    padding:clamp(26px,3.2vw,44px); max-width:660px;
+    box-shadow:var(--shadow-hard);
   }
-  .hero-stat-label{margin-top:8px; font-size:9.5px; letter-spacing:2px; text-transform:uppercase; color:var(--amber);}
-  .hero-stat-sep{display:none;}
-  @media (max-width:780px){ .hero-shell{grid-template-columns:1fr;} .hero-copy{text-align:center;} .hero-cta{justify-content:center;} }
-  @media (max-width:600px){ .hero-stat{padding:14px 12px;} .hero-stats{grid-template-columns:1fr;} }
-
   .hero-eyebrow{
-    font-family:'Space Mono', monospace;
-    font-size:11px; letter-spacing:3px; text-transform:uppercase;
-    color:var(--amber); font-weight:700; margin-bottom:20px;
-    display:inline-block; padding:6px 10px; border-radius:999px; background:rgba(93,168,255,.10); border:1px solid rgba(93,168,255,.22);
-    opacity:1; animation:none;
+    font-family:'Space Mono', monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase;
+    color:var(--amber); font-weight:700;
   }
-  .hero h1{
-    font-family:'Anton', sans-serif;
-    font-size:clamp(44px, 8vw, 92px);
-    line-height:.94; letter-spacing:1px; text-transform:uppercase;
-    background:linear-gradient(90deg,
-      #ffffff 0%, #dce8f6 18%, #9fc7f7 38%, #5da8ff 50%, #9fc7f7 62%, #dce8f6 82%, #ffffff 100%);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-    filter:drop-shadow(0 8px 20px rgba(0,0,0,.35));
+  .hero-main-card h1{
+    font-family:'Anton', sans-serif; font-size:clamp(30px,4.4vw,52px);
+    line-height:1.08; text-transform:uppercase; color:var(--chrome-1); margin:14px 0 18px;
   }
-  .hero h1 span{display:block;}
-  @keyframes riseIn{from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:translateY(0);}}
-  .hero p.tag{margin-top:20px; max-width:620px; font-size:16px; line-height:1.7; color:var(--chrome-3);}
-  .hero-cta{margin-top:28px; display:flex; gap:14px; flex-wrap:wrap; justify-content:flex-start;}
+  .hero-main-card p.tag{color:var(--chrome-3); font-size:15px; line-height:1.7; max-width:560px;}
+  .hero-cta{margin-top:26px; display:flex; gap:14px; flex-wrap:wrap;}
+  .hero-pills{margin-top:22px; display:flex; gap:10px; flex-wrap:wrap;}
+  .hero-pill{
+    font-size:11.5px; letter-spacing:.4px; color:var(--chrome-2);
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
+    border-radius:999px; padding:9px 17px;
+  }
+
+  .hero-side-card{
+    background:linear-gradient(160deg, rgba(15,23,38,.92), rgba(9,17,29,.9));
+    border:1px solid rgba(93,168,255,.22); border-radius:20px;
+    padding:30px 26px; text-align:center; box-shadow:var(--shadow-hard);
+  }
+  .hero-side-logo{width:60px; height:60px; object-fit:contain; margin-bottom:14px;}
+  .hero-side-card h3{font-family:'Anton', sans-serif; font-size:19px; letter-spacing:1px; text-transform:uppercase; color:var(--chrome-1);}
+  .hero-side-card p{margin-top:8px; font-size:12px; color:var(--chrome-3); letter-spacing:.3px;}
+
+  @media (max-width:780px){
+    .hero-content{grid-template-columns:1fr;}
+    .hero-side-card{order:-1;}
+    .hero-cta{justify-content:center;} .hero-main-card{text-align:left;}
+  }
 
   .btn{
     display:inline-flex; align-items:center; gap:10px;
@@ -237,26 +231,6 @@
   }
   .btn-truckbook:hover{box-shadow:0 16px 34px rgba(42,127,184,.32), inset 0 1px 0 rgba(255,255,255,.28);}
 
-  .hero-card{
-    position:relative; z-index:2;
-    display:flex; flex-direction:column; gap:16px;
-    padding:22px;
-    border-radius:20px;
-    border:1px solid rgba(255,255,255,.08);
-    background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
-  }
-  .hero-card .card-label{
-    display:inline-flex; align-self:flex-start; padding:6px 10px; border-radius:999px;
-    font-size:10px; letter-spacing:1.6px; text-transform:uppercase; font-weight:700;
-    color:#9ed0ff; background:rgba(93,168,255,.12); border:1px solid rgba(93,168,255,.2);
-  }
-  .hero-card h3{font-family:'Anton', sans-serif; font-size:20px; text-transform:uppercase; color:var(--chrome-1); letter-spacing:.4px;}
-  .hero-card p{font-size:14px; line-height:1.65; color:var(--chrome-3);}
-  .hero-highlights{list-style:none; display:grid; gap:10px;}
-  .hero-highlights li{display:flex; align-items:center; gap:10px; color:var(--chrome-2); font-size:13px;}
-  .hero-highlights li::before{content:"◆"; color:var(--amber); font-size:12px;}
-
   section{position:relative; z-index:2; padding:100px 6vw; scroll-margin-top:90px;}
   .section-head{max-width:640px; margin-bottom:52px;}
   .eyebrow{
@@ -269,6 +243,22 @@
     text-transform:uppercase; letter-spacing:.5px; color:var(--chrome-1);
   }
   .section-head p{margin-top:14px; color:var(--chrome-3); line-height:1.7; font-size:15px;}
+
+  /* ---- En chiffres (stats bot Discord / TrucksBook) ---- */
+  .stats-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; max-width:900px;}
+  .stat-card{
+    background:linear-gradient(160deg, var(--panel-2), var(--panel));
+    border:1px solid var(--hairline); border-radius:14px; padding:28px 24px;
+    transition:transform .22s ease, border-color .22s ease;
+  }
+  .stat-card:hover{transform:translateY(-4px); border-color:rgba(93,168,255,.3);}
+  .stat-value{
+    display:block; font-family:'Space Mono', monospace; font-weight:700;
+    font-size:clamp(24px,3vw,34px); color:var(--chrome-1); font-variant-numeric:tabular-nums;
+    text-shadow:0 0 12px var(--amber-glow);
+  }
+  .stat-label{display:block; margin-top:10px; font-size:11px; letter-spacing:1.6px; text-transform:uppercase; color:var(--amber);}
+  @media (max-width:700px){.stats-grid{grid-template-columns:1fr;}}
 
   .plates{display:grid; grid-template-columns:repeat(2,1fr); gap:20px; max-width:760px;}
   .plate{
@@ -511,41 +501,52 @@
   <a class="neb-btn" id="neb-btn" href="calendrier.html">Voir l'événement</a>
 </div>
 
-<section class="hero">
-  <div class="hero-shell">
-    <div class="hero-copy">
-      <span class="hero-eyebrow">Virtual Trucking Company — Euro Truck Simulator 2</span>
-      <h1><span>J.B.C</span><span>CROME</span></h1>
+<section class="hero-full">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-main-card">
+      <span class="hero-eyebrow">J.B.C Crome</span>
+      <h1>Un convoi propre, une organisation précise, une présence qui marque.</h1>
       <p class="tag">Une société de transport virtuelle sur Euro Truck Simulator 2 / TruckersMP. Rejoins le convoi, roule avec nous, laisse une finition chromée sur la route.</p>
       <div class="hero-cta">
         <a href="discord.html" class="btn btn-discord">Rejoindre le Discord</a>
+        <a href="calendrier.html" class="btn btn-ghost">Voir les événements</a>
         <a href="https://trucksbook.eu/company/223335" target="_blank" rel="noopener" class="btn btn-truckbook">Voir sur TruckBook</a>
+      </div>
+      <div class="hero-pills">
+        <span class="hero-pill">Convois organisés</span>
+        <span class="hero-pill">Ambiance sérieuse</span>
+        <span class="hero-pill">Staff actif</span>
       </div>
     </div>
 
-    <div class="hero-card">
-      <span class="card-label">Présentation</span>
-      <h3>Une expérience professionnelle sur la route</h3>
-      <p>Organisation claire, ambiance sérieuse et voyages entre compagnons de convoi.</p>
-      <div class="hero-stats" id="hero-stats">
-        <div class="hero-stat">
-          <span class="hero-stat-value" id="hs-chauffeurs">–</span>
-          <span class="hero-stat-label">Chauffeurs</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-value" id="hs-trajets">–</span>
-          <span class="hero-stat-label">Trajets</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-value" id="hs-km">–</span>
-          <span class="hero-stat-label">Km parcourus</span>
-        </div>
-      </div>
-      <ul class="hero-highlights">
-        <li>Convoi régulier et événements organisés</li>
-        <li>Ambiance professionnelle et conviviale</li>
-        <li>Équipe engagée autour du jeu</li>
-      </ul>
+    <div class="hero-side-card">
+      <img src="LogoV3.png" alt="Logo J.B.C Crome" class="hero-side-logo">
+      <h3>J.B.C Crome</h3>
+      <p>VTC validée · Escorte · Événements ETS2</p>
+    </div>
+  </div>
+</section>
+
+<section id="stats">
+  <div class="section-head">
+    <span class="eyebrow">En chiffres</span>
+    <h2>Une VTC visible aussi par ses stats</h2>
+    <p>Les compteurs de livraisons et de distance parcourue, synchronisés en direct avec le Discord et TrucksBook.</p>
+  </div>
+  <div class="stats-grid" id="hero-stats">
+    <div class="stat-card">
+      <span class="stat-value" id="hs-km">–</span>
+      <span class="stat-label">Distance totale</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="hs-trajets">–</span>
+      <span class="stat-label">Livraisons</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="hs-chauffeurs">–</span>
+      <span class="stat-label">Chauffeurs</span>
     </div>
   </div>
 </section>
