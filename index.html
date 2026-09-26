@@ -170,6 +170,7 @@
     font-family:'Anton', sans-serif; font-size:19px; line-height:1.25;
     text-transform:uppercase; letter-spacing:.3px; color:var(--chrome-1);
   }
+  .ec-desc{font-size:13px; line-height:1.65; color:var(--chrome-3); font-family:'Work Sans', sans-serif;}
   .ec-meta-row{display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--chrome-3);}
   .ec-meta-row svg{flex-shrink:0; width:15px; height:15px; color:var(--amber);}
   .ec-countdown{
@@ -747,10 +748,17 @@
   const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 
   const ICONE_CALENDRIER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
-  const ICONE_LIEU = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+  const ICONE_LIEU = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9a8 8 0 0 1 16 0c0 4-8 12-8 12S4 13 4 9z"/><circle cx="12" cy="9" r="2.3"/></svg>';
+  const ICONE_TICKET = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z"/><line x1="12" y1="6" x2="12" y2="18" stroke-dasharray="2 2"/></svg>';
 
   function formaterDate(d) {
     return d.getDate() + ' ' + MOIS[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  function formaterHeure(d) {
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    return h + 'h' + m;
   }
 
   function formaterCompteARebours(msRestant) {
@@ -779,8 +787,10 @@
       const d = new Date(ev.date);
       return '<div class="ec-slide">'
         + '<span class="ec-title">' + (ev.titre || '') + '</span>'
-        + '<span class="ec-meta-row">' + ICONE_CALENDRIER + '<span>' + formaterDate(d) + '</span></span>'
+        + (ev.description ? '<p class="ec-desc">' + ev.description + '</p>' : '')
+        + '<span class="ec-meta-row">' + ICONE_CALENDRIER + '<span>' + formaterDate(d) + ' - ' + formaterHeure(d) + '</span></span>'
         + (ev.lieu ? '<span class="ec-meta-row">' + ICONE_LIEU + '<span>' + ev.lieu + '</span></span>' : '')
+        + (ev.ticket ? '<span class="ec-meta-row">' + ICONE_TICKET + '<span>' + ev.ticket + '</span></span>' : '')
         + '</div>';
     }).join('');
 
