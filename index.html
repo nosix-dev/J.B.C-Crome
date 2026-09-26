@@ -55,12 +55,14 @@
     backdrop-filter:blur(14px);
     border-bottom:1px solid var(--hairline);
   }
+  .logo-link{display:inline-flex; align-items:center; gap:10px;}
+  .logo-img{width:34px; height:34px; object-fit:contain; flex-shrink:0;}
   .logo{
     font-family:'Anton', sans-serif;
     font-size:22px;
     letter-spacing:2px;
     text-transform:uppercase;
-    background:linear-gradient(90deg, #ffffff 0%, #dce8f6 35%, #8db7eb 60%, #ffffff 100%);
+    background:linear-gradient(180deg, #ffffff 0%, #f3f6fa 22%, #b8c4d1 42%, #7f8fa3 50%, #b8c4d1 58%, #f3f6fa 78%, #ffffff 100%);
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
   .logo::after{
@@ -468,7 +470,10 @@
 <canvas id="particles"></canvas>
 
 <header>
-  <a href="index.html" class="logo">J.B.C&nbsp;CROME</a>
+  <a href="index.html" class="logo-link">
+    <img src="LogoV3.png" alt="Logo J.B.C Crome" class="logo-img">
+    <span class="logo">J.B.C&nbsp;CROME</span>
+  </a>
   <nav>
     <ul>
       <li><a href="index.html" class="active">Accueil</a></li>
@@ -516,6 +521,36 @@
         <a class="ec-btn" id="neb-btn" href="calendrier.html">Voir l'événement</a>
         <div class="ec-dots" id="neb-dots"></div>
       </div>
+    </div>
+  </div>
+</section>
+
+<section id="stats">
+  <div class="section-head">
+    <span class="eyebrow">En chiffres</span>
+    <h2>Une VTC visible aussi par ses stats</h2>
+    <p>Les compteurs de livraisons et de distance parcourue, synchronisés en direct avec le Discord et TrucksBook.</p>
+  </div>
+  <div class="stats-grid" id="hero-stats">
+    <div class="stat-card">
+      <span class="stat-value" id="hs-km">–</span>
+      <span class="stat-label">Distance totale</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="hs-trajets">–</span>
+      <span class="stat-label">Livraisons</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="hs-chauffeurs">–</span>
+      <span class="stat-label">Chauffeurs</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="hs-km-mois">–</span>
+      <span class="stat-label">Distance ce mois-ci</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="hs-trajets-mois">–</span>
+      <span class="stat-label">Livraisons ce mois-ci</span>
     </div>
   </div>
 </section>
