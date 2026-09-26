@@ -100,7 +100,7 @@
   }
   .eyebrow::after{content:""; width:60px; height:1px; background:linear-gradient(90deg, var(--amber), transparent);}
   .section-head h2{
-    font-family:'Anton', sans-serif; font-size:clamp(30px,4.6vw,48px);
+    font-family:'Anton', sans-serif; font-size:clamp(28px,4vw,44px);
     text-transform:uppercase; letter-spacing:.5px; color:var(--chrome-1);
   }
   .section-head p{margin-top:14px; color:var(--chrome-3); line-height:1.7; font-size:15px;}
@@ -110,11 +110,11 @@
   /* ---- Album vedette (hero) ---- */
   .hero-card{
     position:relative; border-radius:14px; overflow:hidden; cursor:pointer;
-    margin:0 auto 36px; max-width:920px; box-shadow:var(--shadow-hard);
+    margin:0 auto 36px; max-width:1100px; box-shadow:var(--shadow-hard);
     border:1px solid var(--hairline);
   }
   .hero-photo{
-    aspect-ratio:auto; height:clamp(220px, 26vw, 320px);
+    aspect-ratio:auto; height:clamp(320px, 40vw, 480px);
     background-size:cover; background-position:center;
     filter:grayscale(.08) contrast(1.05) saturate(1.05);
     transition:opacity .25s ease;
@@ -130,7 +130,7 @@
   .hero-arrow:hover{background:rgba(93,168,255,.18); border-color:var(--amber);}
   .hero-prev{left:22px;} .hero-next{right:22px;}
   .hero-info{
-    position:absolute; left:0; right:0; bottom:0; padding:20px 24px;
+    position:absolute; left:0; right:0; bottom:0; padding:30px 34px;
     background:linear-gradient(0deg, rgba(2,9,17,.94) 10%, transparent 100%);
   }
   .hero-tag{
@@ -138,10 +138,10 @@
     text-transform:uppercase; color:var(--amber); font-weight:700;
   }
   .hero-info h3{
-    font-family:'Anton', sans-serif; font-size:clamp(18px,2.6vw,28px);
-    text-transform:uppercase; color:var(--chrome-1); margin:6px 0 8px; line-height:1.15;
+    font-family:'Anton', sans-serif; font-size:clamp(22px,3.2vw,34px);
+    text-transform:uppercase; color:var(--chrome-1); margin:8px 0 10px; line-height:1.15;
   }
-  .hero-info p{color:var(--chrome-3); font-size:13.5px; line-height:1.6; max-width:640px;}
+  .hero-info p{color:var(--chrome-3); font-size:14px; line-height:1.6; max-width:640px;}
   .hero-count{
     display:inline-block; margin-top:14px; font-family:'Space Mono', monospace;
     font-size:11px; letter-spacing:1px; color:var(--chrome-1);
