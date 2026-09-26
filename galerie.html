@@ -92,7 +92,7 @@
   }
 
   section{position:relative; z-index:2; padding:100px 6vw; scroll-margin-top:90px;}
-  .section-head{max-width:640px; margin:0 auto 52px; text-align:center;}
+  .section-head{max-width:980px; margin:0 auto 52px; text-align:center;}
   .eyebrow{
     font-family:'Space Mono', monospace;
     font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--amber);
@@ -100,8 +100,9 @@
   }
   .eyebrow::after{content:""; width:60px; height:1px; background:linear-gradient(90deg, var(--amber), transparent);}
   .section-head h2{
-    font-family:'Anton', sans-serif; font-size:clamp(28px,4vw,44px);
+    font-family:'Anton', sans-serif; font-size:clamp(24px,3vw,42px);
     text-transform:uppercase; letter-spacing:.5px; color:var(--chrome-1);
+    white-space:nowrap;
   }
   .section-head p{margin-top:14px; color:var(--chrome-3); line-height:1.7; font-size:15px;}
 
@@ -224,6 +225,7 @@
     header{padding:16px 5vw;} nav ul{gap:6px;} nav a{font-size:10.5px; padding:7px 10px;}
     .hero-info{padding:22px;}
     .hero-arrow{width:36px; height:36px; font-size:17px;}
+    .section-head h2{white-space:normal;}
   }
 
   #preloader{
