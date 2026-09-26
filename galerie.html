@@ -104,34 +104,77 @@
   }
   .section-head p{margin-top:14px; color:var(--chrome-3); line-height:1.7; font-size:15px;}
 
-  .albums-grid{
-    display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:26px;
-    padding:8px 0 26px;
-  }
-  .filmstrip-card{
-    background:#0c0b0a; border-radius:5px; padding:16px 14px 14px; position:relative; cursor:pointer;
-    transition:transform .25s ease, box-shadow .25s ease;
-  }
-  .filmstrip-card:hover{transform:translateY(-7px); box-shadow:var(--shadow-hard);}
-  .filmstrip-card::before, .filmstrip-card::after{
-    content:""; position:absolute; left:0; right:0; height:13px;
-    background-image:radial-gradient(circle, var(--asphalt) 3px, transparent 3.2px);
-    background-size:18px 13px; background-repeat:repeat-x; background-position:7px center;
-  }
-  .filmstrip-card::before{top:0;} .filmstrip-card::after{bottom:0;}
-  .filmstrip-frame-num{font-family:'Space Mono', monospace; font-size:10px; letter-spacing:1.5px; color:var(--chrome-3); padding-top:6px;}
-  .filmstrip-photo{
-    aspect-ratio:3/2; margin:12px 0; background-size:cover; background-position:center;
-    filter:grayscale(.12) contrast(1.06) saturate(1.05); border:1px solid rgba(255,255,255,.06);
-  }
-  .filmstrip-title{font-family:'Anton', sans-serif; font-size:15.5px; text-transform:uppercase; color:var(--chrome-1); line-height:1.25;}
-  .filmstrip-desc{font-size:12.5px; color:var(--chrome-3); margin-top:9px; line-height:1.55; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
-  .filmstrip-meta{
-    display:flex; justify-content:space-between; margin-top:12px; padding-bottom:4px;
-    font-family:'Space Mono', monospace; font-size:9.5px; letter-spacing:1px; text-transform:uppercase; color:var(--amber); font-weight:700;
-  }
-  .filmstrip-hint{font-family:'Space Mono', monospace; font-size:11px; letter-spacing:1px; color:var(--chrome-3); margin-bottom:14px; display:block;}
+  .filmstrip-hint{font-family:'Space Mono', monospace; font-size:11px; letter-spacing:1px; color:var(--chrome-3); margin-bottom:22px; display:block;}
 
+  /* ---- Album vedette (hero) ---- */
+  .hero-card{
+    position:relative; border-radius:14px; overflow:hidden; cursor:pointer;
+    margin-bottom:36px; box-shadow:var(--shadow-hard);
+    border:1px solid var(--hairline);
+  }
+  .hero-photo{
+    aspect-ratio:16/7; background-size:cover; background-position:center;
+    filter:grayscale(.08) contrast(1.05) saturate(1.05);
+    transition:opacity .25s ease;
+  }
+  .hero-arrow{
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:44px; height:44px; border-radius:50%;
+    background:rgba(7,17,29,.55); border:1px solid rgba(93,168,255,.28);
+    color:var(--chrome-1); display:flex; align-items:center; justify-content:center;
+    font-size:20px; cursor:pointer; z-index:3;
+    transition:background .2s ease, border-color .2s ease;
+  }
+  .hero-arrow:hover{background:rgba(93,168,255,.18); border-color:var(--amber);}
+  .hero-prev{left:22px;} .hero-next{right:22px;}
+  .hero-info{
+    position:absolute; left:0; right:0; bottom:0; padding:32px 34px;
+    background:linear-gradient(0deg, rgba(2,9,17,.94) 10%, transparent 100%);
+  }
+  .hero-tag{
+    font-family:'Space Mono', monospace; font-size:11px; letter-spacing:2.5px;
+    text-transform:uppercase; color:var(--amber); font-weight:700;
+  }
+  .hero-info h3{
+    font-family:'Anton', sans-serif; font-size:clamp(22px,3.4vw,36px);
+    text-transform:uppercase; color:var(--chrome-1); margin:8px 0 10px; line-height:1.15;
+  }
+  .hero-info p{color:var(--chrome-3); font-size:13.5px; line-height:1.6; max-width:640px;}
+  .hero-count{
+    display:inline-block; margin-top:14px; font-family:'Space Mono', monospace;
+    font-size:11px; letter-spacing:1px; color:var(--chrome-1);
+    background:rgba(255,255,255,.08); border:1px solid var(--hairline);
+    padding:5px 13px; border-radius:20px;
+  }
+
+  /* ---- Grille des autres albums ---- */
+  .albums-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:22px;
+  }
+  .mini-card{
+    position:relative; border-radius:10px; overflow:hidden; cursor:pointer;
+    transition:transform .25s ease, box-shadow .25s ease;
+    border:1px solid var(--hairline);
+  }
+  .mini-card:hover{transform:translateY(-6px); box-shadow:var(--shadow-hard);}
+  .mini-photo{
+    aspect-ratio:3/2; background-size:cover; background-position:center;
+    filter:grayscale(.1) contrast(1.05) saturate(1.05);
+    transition:transform .4s ease;
+  }
+  .mini-card:hover .mini-photo{transform:scale(1.07);}
+  .mini-info{
+    position:absolute; left:0; right:0; bottom:0; padding:14px 15px;
+    background:linear-gradient(0deg, rgba(2,9,17,.92) 15%, transparent 100%);
+  }
+  .mini-info h4{
+    font-family:'Anton', sans-serif; font-size:14.5px; text-transform:uppercase; color:var(--chrome-1);
+  }
+  .mini-meta{
+    margin-top:6px; display:flex; justify-content:space-between;
+    font-family:'Space Mono', monospace; font-size:9.5px; letter-spacing:1px;
+    text-transform:uppercase; color:var(--amber); font-weight:700;
+  }
 
   #lightbox{
     position:fixed; inset:0; z-index:200; background:rgba(8,7,6,.94); backdrop-filter:blur(6px);
@@ -177,6 +220,8 @@
 
   @media (max-width:760px){
     header{padding:16px 5vw;} nav ul{gap:6px;} nav a{font-size:10.5px; padding:7px 10px;}
+    .hero-info{padding:22px;}
+    .hero-arrow{width:36px; height:36px; font-size:17px;}
   }
 
   #preloader{
@@ -230,6 +275,9 @@
   </div>
 
   <span class="filmstrip-hint">Toute la flotte, album par album</span>
+
+  <div id="hero-wrap"></div>
+
   <div id="albums-grid" class="albums-grid">
     <div class="loading-state">Chargement des albums…</div>
   </div>
@@ -341,6 +389,7 @@
   // et cache le token GitHub côté serveur.
   const PROXY_BASE = "https://jbc-crome-proxy.levrailuciferms.workers.dev";
 
+  const heroWrap = document.getElementById('hero-wrap');
   const grid = document.getElementById('albums-grid');
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightbox-img');
@@ -353,6 +402,7 @@
   let albums = [];
   let albumOuvert = null;
   let currentIndex = 0;
+  let heroIndex = 0;
 
   function estImage(nom){
     return /\.(jpe?g|png|webp|gif)$/i.test(nom);
@@ -363,10 +413,12 @@
   }
 
   function afficherErreur(message){
+    heroWrap.innerHTML = '';
     grid.innerHTML = '<div class="empty-state">' + message + '</div>';
   }
 
   function afficherVide(){
+    heroWrap.innerHTML = '';
     grid.innerHTML = '<div class="empty-state">Aucun album pour le moment. Ajoute des photos dans le dossier "galerie" sur GitHub.</div>';
   }
 
@@ -407,26 +459,74 @@
     if(e.key === 'ArrowRight') suivant(1);
   });
 
+  // ---- Album vedette (hero) ----
+  function afficherHero(album){
+    heroIndex = 0;
+    heroWrap.innerHTML =
+      '<div class="hero-card" id="hero-card">'
+      + '<div class="hero-photo" id="hero-photo" style="background-image:url(\'' + album.photos[0].url + '\')"></div>'
+      + '<div class="hero-arrow hero-prev" id="hero-prev">‹</div>'
+      + '<div class="hero-arrow hero-next" id="hero-next">›</div>'
+      + '<div class="hero-info">'
+      + '<span class="hero-tag">' + album.categorie + '</span>'
+      + '<h3>' + album.titre + '</h3>'
+      + (album.description ? '<p>' + album.description + '</p>' : '')
+      + '<span class="hero-count" id="hero-count">🖼 1 / ' + album.photos.length + '</span>'
+      + '</div>'
+      + '</div>';
+
+    const heroPhoto = document.getElementById('hero-photo');
+    const heroCount = document.getElementById('hero-count');
+    const heroCard = document.getElementById('hero-card');
+    const heroPrev = document.getElementById('hero-prev');
+    const heroNext = document.getElementById('hero-next');
+
+    function majHero(){
+      heroPhoto.style.backgroundImage = "url('" + album.photos[heroIndex].url + "')";
+      heroCount.textContent = '🖼 ' + (heroIndex + 1) + ' / ' + album.photos.length;
+    }
+
+    heroPrev.addEventListener('click', function(e){
+      e.stopPropagation();
+      heroIndex = (heroIndex - 1 + album.photos.length) % album.photos.length;
+      majHero();
+    });
+    heroNext.addEventListener('click', function(e){
+      e.stopPropagation();
+      heroIndex = (heroIndex + 1) % album.photos.length;
+      majHero();
+    });
+    heroCard.addEventListener('click', function(){
+      ouvrirLightbox(album, heroIndex);
+    });
+  }
+
   function afficherAlbums(){
     if(!albums.length){ afficherVide(); return; }
 
-    grid.innerHTML = albums.map(function(album, i){
+    afficherHero(albums[0]);
+    const reste = albums.slice(1);
+
+    if(!reste.length){
+      grid.innerHTML = '';
+      return;
+    }
+
+    grid.innerHTML = reste.map(function(album, i){
       const nbPhotos = album.photos.length;
-      const desc = album.description ? '<p class="filmstrip-desc">' + album.description + '</p>' : '';
-      const numFrame = String(i + 1).padStart(2, '0');
       const couverture = album.couverture || album.photos[0]?.url || '';
-      return '<div class="filmstrip-card" data-album-index="' + i + '">'
-        + '<div class="filmstrip-frame-num">FRAME N&deg;' + numFrame + '</div>'
-        + '<div class="filmstrip-photo" style="background-image:url(\'' + couverture + '\')"></div>'
-        + '<h3 class="filmstrip-title">' + album.titre + '</h3>'
-        + desc
-        + '<div class="filmstrip-meta"><span>' + album.categorie + '</span><span>' + nbPhotos + ' PH</span></div>'
+      return '<div class="mini-card" data-album-index="' + i + '">'
+        + '<div class="mini-photo" style="background-image:url(\'' + couverture + '\')"></div>'
+        + '<div class="mini-info">'
+        + '<h4>' + album.titre + '</h4>'
+        + '<div class="mini-meta"><span>' + album.categorie + '</span><span>' + nbPhotos + ' PH</span></div>'
+        + '</div>'
         + '</div>';
     }).join('');
 
-    grid.querySelectorAll('.filmstrip-card').forEach(function(card){
+    grid.querySelectorAll('.mini-card').forEach(function(card){
       card.addEventListener('click', function(){
-        const album = albums[parseInt(card.dataset.albumIndex, 10)];
+        const album = reste[parseInt(card.dataset.albumIndex, 10)];
         if(album && album.photos.length > 0) {
           ouvrirLightbox(album, 0);
         }
