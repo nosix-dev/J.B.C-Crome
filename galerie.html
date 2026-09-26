@@ -92,12 +92,13 @@
   }
 
   section{position:relative; z-index:2; padding:100px 6vw; scroll-margin-top:90px;}
-  .section-head{max-width:640px; margin-bottom:52px;}
+  .section-head{max-width:640px; margin:0 auto 52px; text-align:center;}
   .eyebrow{
     font-family:'Space Mono', monospace;
     font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--amber);
-    font-weight:700; margin-bottom:14px; display:block;
+    font-weight:700; margin-bottom:14px; display:flex; align-items:center; justify-content:center; gap:12px;
   }
+  .eyebrow::after{content:""; width:60px; height:1px; background:linear-gradient(90deg, var(--amber), transparent);}
   .section-head h2{
     font-family:'Anton', sans-serif; font-size:clamp(30px,4.6vw,48px);
     text-transform:uppercase; letter-spacing:.5px; color:var(--chrome-1);
@@ -113,7 +114,7 @@
     border:1px solid var(--hairline);
   }
   .hero-photo{
-    aspect-ratio:16/7; background-size:cover; background-position:center;
+    aspect-ratio:3/1; background-size:cover; background-position:center;
     filter:grayscale(.08) contrast(1.05) saturate(1.05);
     transition:opacity .25s ease;
   }
@@ -128,7 +129,7 @@
   .hero-arrow:hover{background:rgba(93,168,255,.18); border-color:var(--amber);}
   .hero-prev{left:22px;} .hero-next{right:22px;}
   .hero-info{
-    position:absolute; left:0; right:0; bottom:0; padding:32px 34px;
+    position:absolute; left:0; right:0; bottom:0; padding:20px 24px;
     background:linear-gradient(0deg, rgba(2,9,17,.94) 10%, transparent 100%);
   }
   .hero-tag{
@@ -136,8 +137,8 @@
     text-transform:uppercase; color:var(--amber); font-weight:700;
   }
   .hero-info h3{
-    font-family:'Anton', sans-serif; font-size:clamp(22px,3.4vw,36px);
-    text-transform:uppercase; color:var(--chrome-1); margin:8px 0 10px; line-height:1.15;
+    font-family:'Anton', sans-serif; font-size:clamp(18px,2.6vw,28px);
+    text-transform:uppercase; color:var(--chrome-1); margin:6px 0 8px; line-height:1.15;
   }
   .hero-info p{color:var(--chrome-3); font-size:13.5px; line-height:1.6; max-width:640px;}
   .hero-count{
@@ -269,12 +270,10 @@
 
 <section id="galerie">
   <div class="section-head">
-    <span class="eyebrow">Souvenirs de la route</span>
-    <h2>La galerie</h2>
-    <p>Une sélection de photos de convois et de la flotte J.B.C Crome — clique sur un album pour l'ouvrir.</p>
+    <span class="eyebrow">Galerie</span>
+    <h2>Photos de route, convois et regroupements</h2>
+    <p>Retrouvez les meilleurs moments J.B.C Crome en images : convois, routes, rassemblements et souvenirs de la VTC.</p>
   </div>
-
-  <span class="filmstrip-hint">Toute la flotte, album par album</span>
 
   <div id="hero-wrap"></div>
 
