@@ -92,61 +92,6 @@
     background:var(--amber); box-shadow:0 0 8px var(--amber-glow);
   }
 
-  #next-event-banner{
-    position:relative; z-index:40; display:none;
-    align-items:center; gap:22px;
-    padding:13px 6vw;
-    background:
-      repeating-linear-gradient(135deg, rgba(0,0,0,.18) 0 10px, transparent 10px 20px),
-      linear-gradient(90deg, var(--safety-red-dark), var(--safety-red) 60%, var(--safety-red-dark));
-    color:#fff5ee;
-    flex-wrap:wrap;
-    border-bottom:1px solid rgba(0,0,0,.3);
-    overflow:hidden;
-  }
-  #next-event-banner.visible{display:flex;}
-  #next-event-banner .neb-label{
-    font-family:'Space Mono', monospace; font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase;
-    background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.3);
-    border-radius:3px; padding:6px 12px; flex-shrink:0;
-  }
-  #next-event-banner .neb-slider{
-    flex:1; min-width:200px; position:relative; overflow:hidden;
-    height:38px;
-  }
-  #next-event-banner .neb-track{
-    display:flex;
-    height:100%;
-    transition:transform .5s cubic-bezier(.4,0,.2,1);
-    will-change:transform;
-  }
-  #next-event-banner .neb-slide{
-    flex:0 0 100%;
-    width:100%;
-    display:flex; flex-direction:column; justify-content:center; gap:2px;
-    min-width:0;
-  }
-  #next-event-banner .neb-title{font-family:'Anton', sans-serif; font-size:16px; text-transform:uppercase; letter-spacing:.3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  #next-event-banner .neb-meta{font-size:12.5px; color:rgba(255,255,255,.85); font-family:'Space Mono', monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  #next-event-banner .neb-countdown{
-    font-family:'Space Mono', monospace; font-size:13px; font-weight:700;
-    background:rgba(0,0,0,.28); border-radius:4px; padding:8px 14px; text-align:center; flex-shrink:0; white-space:nowrap;
-  }
-  #next-event-banner .neb-btn{
-    flex-shrink:0; font-size:12px; letter-spacing:1px; text-transform:uppercase; font-weight:700;
-    background:#fff5ee; color:var(--safety-red-dark); padding:11px 22px; border-radius:3px;
-    transition:transform .2s ease;
-  }
-  #next-event-banner .neb-btn:hover{transform:translateY(-2px);}
-  #next-event-banner .neb-dots{
-    display:flex; gap:6px; flex-shrink:0; align-items:center;
-  }
-  #next-event-banner .neb-dot{
-    width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.35);
-    transition:background .2s ease, transform .2s ease; cursor:pointer;
-  }
-  #next-event-banner .neb-dot.active{background:#fff; transform:scale(1.25);}
-
   /* ---- Hero façon "photo pleine largeur + cartes flottantes" ---- */
   .hero-full{
     position:relative; min-height:88vh;
@@ -191,6 +136,9 @@
     border-radius:999px; padding:9px 17px;
   }
 
+  /* colonne de droite : logo + carte "prochain événement" empilés */
+  .hero-side-stack{display:flex; flex-direction:column; gap:18px;}
+
   .hero-side-card{
     background:linear-gradient(160deg, rgba(15,23,38,.92), rgba(9,17,29,.9));
     border:1px solid rgba(93,168,255,.22); border-radius:20px;
@@ -200,9 +148,55 @@
   .hero-side-card h3{font-family:'Anton', sans-serif; font-size:19px; letter-spacing:1px; text-transform:uppercase; color:var(--chrome-1);}
   .hero-side-card p{margin-top:8px; font-size:12px; color:var(--chrome-3); letter-spacing:.3px;}
 
+  /* ---- Carte "prochain événement" (remplace l'ancienne barre du haut) ---- */
+  .event-card{
+    display:none;
+    flex-direction:column; gap:16px;
+    background:linear-gradient(160deg, rgba(15,23,38,.94), rgba(9,17,29,.92));
+    border:1px solid rgba(93,168,255,.22); border-radius:20px;
+    padding:26px 24px; box-shadow:var(--shadow-hard);
+  }
+  .event-card.visible{display:flex;}
+  .ec-label{
+    align-self:flex-start;
+    font-family:'Space Mono', monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; font-weight:700;
+    color:var(--amber); background:rgba(93,168,255,.1); border:1px solid rgba(93,168,255,.3);
+    border-radius:20px; padding:6px 14px;
+  }
+  .ec-slider{position:relative; overflow:hidden; width:100%;}
+  .ec-track{display:flex; transition:transform .5s cubic-bezier(.4,0,.2,1); will-change:transform;}
+  .ec-slide{flex:0 0 100%; min-width:0; display:flex; flex-direction:column; gap:10px;}
+  .ec-title{
+    font-family:'Anton', sans-serif; font-size:19px; line-height:1.25;
+    text-transform:uppercase; letter-spacing:.3px; color:var(--chrome-1);
+  }
+  .ec-meta-row{display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--chrome-3);}
+  .ec-meta-row svg{flex-shrink:0; width:15px; height:15px; color:var(--amber);}
+  .ec-countdown{
+    align-self:flex-start;
+    font-family:'Space Mono', monospace; font-weight:700; font-size:13px;
+    background:rgba(255,255,255,.05); border:1px solid var(--hairline); border-radius:7px;
+    padding:9px 15px; color:var(--chrome-1);
+  }
+  .ec-btn{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    font-size:12px; letter-spacing:1.2px; text-transform:uppercase; font-weight:700;
+    background:linear-gradient(135deg, #f7fbff 0%, #dce9f9 50%, #8fbcee 100%);
+    color:#0f1f33; border-radius:999px; padding:13px 18px;
+    box-shadow:0 12px 24px rgba(5,18,32,.24);
+    transition:transform .2s ease, filter .2s ease;
+  }
+  .ec-btn:hover{transform:translateY(-2px); filter:brightness(1.04);}
+  .ec-dots{display:flex; gap:6px; justify-content:center;}
+  .ec-dot{
+    width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.22); cursor:pointer;
+    transition:background .2s ease, transform .2s ease;
+  }
+  .ec-dot.active{background:var(--amber); transform:scale(1.25);}
+
   @media (max-width:780px){
     .hero-content{grid-template-columns:1fr;}
-    .hero-side-card{order:-1;}
+    .hero-side-stack{order:-1;}
     .hero-cta{justify-content:center;} .hero-main-card{text-align:left;}
   }
 
@@ -432,7 +426,6 @@
   @media (max-width:760px){
     header{padding:16px 5vw;} nav ul{gap:6px;} nav a{font-size:10.5px; padding:7px 10px;}
     .plates{grid-template-columns:1fr;} .discord-band{flex-direction:column; text-align:center; align-items:center;}
-    #next-event-banner{padding:12px 5vw; gap:12px;} #next-event-banner .neb-countdown{display:none;}
     .event-row{flex-direction:column;}
     .event-badge{width:100%; flex-direction:row; justify-content:flex-start; gap:12px; padding:14px 20px; border-right:none; border-bottom:3px solid rgba(0,0,0,.25);}
     .event-badge .day{font-size:26px;}
@@ -486,21 +479,6 @@
   </nav>
 </header>
 
-<div id="next-event-banner">
-  <span class="neb-label">Prochain événement</span>
-  <div class="neb-slider" id="neb-slider">
-    <div class="neb-track" id="neb-track">
-      <div class="neb-slide">
-        <span class="neb-title">Convoi J.B.C Crome</span>
-        <span class="neb-meta">6 septembre 2026 — Berlin → Rennes</span>
-      </div>
-    </div>
-  </div>
-  <span class="neb-countdown" id="neb-countdown"></span>
-  <div class="neb-dots" id="neb-dots"></div>
-  <a class="neb-btn" id="neb-btn" href="calendrier.html">Voir l'événement</a>
-</div>
-
 <section class="hero-full">
   <div class="hero-bg"></div>
   <div class="hero-overlay"></div>
@@ -521,10 +499,22 @@
       </div>
     </div>
 
-    <div class="hero-side-card">
-      <img src="LogoV3.png" alt="Logo J.B.C Crome" class="hero-side-logo">
-      <h3>J.B.C Crome</h3>
-      <p>VTC validée · Escorte · Événements ETS2</p>
+    <div class="hero-side-stack">
+      <div class="hero-side-card">
+        <img src="LogoV3.png" alt="Logo J.B.C Crome" class="hero-side-logo">
+        <h3>J.B.C Crome</h3>
+        <p>VTC validée · Escorte · Événements ETS2</p>
+      </div>
+
+      <div id="next-event-card" class="event-card">
+        <span class="ec-label">Prochain événement</span>
+        <div class="ec-slider">
+          <div class="ec-track" id="neb-track"></div>
+        </div>
+        <div class="ec-countdown" id="neb-countdown"></div>
+        <a class="ec-btn" id="neb-btn" href="calendrier.html">Voir l'événement</a>
+        <div class="ec-dots" id="neb-dots"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -740,14 +730,14 @@
 <script>
 (function(){
   // ============================================================
-  // Bannière "prochain événement" - Version dynamique avec events.json
+  // Carte "prochain événement" - Version dynamique avec events.json
   // ============================================================
 
   const EVENTS_URL = 'events.json';
   const ROTATION_MS = 6000;
 
-  const banner = document.getElementById('next-event-banner');
-  if(!banner) return;
+  const carte = document.getElementById('next-event-card');
+  if(!carte) return;
 
   const trackEl = document.getElementById('neb-track');
   const countdownEl = document.getElementById('neb-countdown');
@@ -756,17 +746,20 @@
 
   const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 
+  const ICONE_CALENDRIER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+  const ICONE_LIEU = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+
   function formaterDate(d) {
     return d.getDate() + ' ' + MOIS[d.getMonth()] + ' ' + d.getFullYear();
   }
 
   function formaterCompteARebours(msRestant) {
     if(msRestant <= 0) return 'En cours';
-    
+
     const jours = Math.floor(msRestant / (1000 * 60 * 60 * 24));
     const heures = Math.floor((msRestant / (1000 * 60 * 60)) % 24);
     const minutes = Math.floor((msRestant / (1000 * 60)) % 60);
-    
+
     if(jours > 0) {
       return jours + ' j ' + heures + ' h ' + minutes + ' min';
     } else if(heures > 0) {
@@ -784,17 +777,18 @@
   function construireSlides() {
     trackEl.innerHTML = evenementsFuturs.map(function(ev) {
       const d = new Date(ev.date);
-      return '<div class="neb-slide">'
-        + '<span class="neb-title">' + (ev.titre || '') + '</span>'
-        + '<span class="neb-meta">' + formaterDate(d) + (ev.lieu ? ' — ' + ev.lieu : '') + '</span>'
+      return '<div class="ec-slide">'
+        + '<span class="ec-title">' + (ev.titre || '') + '</span>'
+        + '<span class="ec-meta-row">' + ICONE_CALENDRIER + '<span>' + formaterDate(d) + '</span></span>'
+        + (ev.lieu ? '<span class="ec-meta-row">' + ICONE_LIEU + '<span>' + ev.lieu + '</span></span>' : '')
         + '</div>';
     }).join('');
 
     dotsEl.innerHTML = evenementsFuturs.map(function(_, i) {
-      return '<span class="neb-dot' + (i === 0 ? ' active' : '') + '" data-index="' + i + '"></span>';
+      return '<span class="ec-dot' + (i === 0 ? ' active' : '') + '" data-index="' + i + '"></span>';
     }).join('');
 
-    dotsEl.querySelectorAll('.neb-dot').forEach(function(dot) {
+    dotsEl.querySelectorAll('.ec-dot').forEach(function(dot) {
       dot.addEventListener('click', function() {
         allerVersSlide(parseInt(dot.dataset.index, 10));
         redemarrerRotation();
@@ -805,11 +799,11 @@
   function majCompteAReboursEtBouton() {
     const ev = evenementsFuturs[indexActif];
     if(!ev) return;
-    
+
     const dateEvent = new Date(ev.date);
     const maintenant = new Date();
     const reste = dateEvent - maintenant;
-    
+
     countdownEl.textContent = formaterCompteARebours(reste);
     btnEl.href = 'https://j-b-c-crome.pages.dev/calendrier';
   }
@@ -819,7 +813,7 @@
 
     trackEl.style.transform = 'translateX(-' + (nouvelIndex * 100) + '%)';
 
-    dotsEl.querySelectorAll('.neb-dot').forEach(function(dot) {
+    dotsEl.querySelectorAll('.ec-dot').forEach(function(dot) {
       dot.classList.toggle('active', parseInt(dot.dataset.index, 10) === nouvelIndex);
     });
 
@@ -858,9 +852,7 @@
         });
 
       if(!evenementsFuturs.length) {
-        // Si aucun événement futur, afficher un message
-        trackEl.innerHTML = '<div class="neb-slide"><span class="neb-title">Aucun événement à venir</span></div>';
-        countdownEl.textContent = '--:--';
+        // Pas d'événement à venir : on masque simplement la carte
         return;
       }
 
@@ -871,15 +863,12 @@
       // Mise à jour du compte à rebours toutes les 30 secondes
       if(intervalleCompteARebours) clearInterval(intervalleCompteARebours);
       intervalleCompteARebours = setInterval(majCompteAReboursEtBouton, 30000);
-      
+
       redemarrerRotation();
 
-      banner.classList.add('visible');
+      carte.classList.add('visible');
     } catch(err) {
-      console.warn('[next-event-banner] Échec chargement events.json', err);
-      // Affichage d'un message d'erreur
-      trackEl.innerHTML = '<div class="neb-slide"><span class="neb-title">⚠️ Erreur de chargement</span></div>';
-      countdownEl.textContent = '--:--';
+      console.warn('[next-event-card] Échec chargement events.json', err);
     }
   }
 
