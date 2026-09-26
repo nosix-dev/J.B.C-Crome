@@ -240,7 +240,7 @@
   .section-head p{margin-top:14px; color:var(--chrome-3); line-height:1.7; font-size:15px;}
 
   /* ---- En chiffres (stats bot Discord / TrucksBook) ---- */
-  .stats-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; max-width:900px;}
+  .stats-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(170px,1fr)); gap:20px; max-width:1100px;}
   .stat-card{
     background:linear-gradient(160deg, var(--panel-2), var(--panel));
     border:1px solid var(--hairline); border-radius:14px; padding:28px 24px;
@@ -539,6 +539,14 @@
       <span class="stat-value" id="hs-chauffeurs">–</span>
       <span class="stat-label">Chauffeurs</span>
     </div>
+    <div class="stat-card">
+      <span class="stat-value" id="hs-km-mois">–</span>
+      <span class="stat-label">Distance ce mois-ci</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="hs-trajets-mois">–</span>
+      <span class="stat-label">Livraisons ce mois-ci</span>
+    </div>
   </div>
 </section>
 
@@ -706,6 +714,8 @@
   const elChauffeurs = document.getElementById('hs-chauffeurs');
   const elTrajets = document.getElementById('hs-trajets');
   const elKm = document.getElementById('hs-km');
+  const elKmMois = document.getElementById('hs-km-mois');
+  const elTrajetsMois = document.getElementById('hs-trajets-mois');
 
   function formaterNombre(n){
     return Number(n || 0).toLocaleString('fr-FR');
@@ -720,6 +730,8 @@
       elChauffeurs.textContent = formaterNombre(data.chauffeurs);
       elTrajets.textContent = formaterNombre(data.trajets);
       elKm.textContent = formaterNombre(data.km) + ' km';
+      if(elKmMois) elKmMois.textContent = formaterNombre(data.km_mois) + ' km';
+      if(elTrajetsMois) elTrajetsMois.textContent = formaterNombre(data.trajets_mois);
     })
     .catch(function(err){
       console.warn('[hero-stats] indisponibles :', err.message);
