@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin – J.B.C Crome</title>
+<link rel="icon" type="image/png" href="LogoV3.png">
+<style>
+:root{--bg:#07111d;--panel:#0f1726;--panel2:#142338;--line:rgba(255,255,255,.12);--ink:#dfe7f2;--mute:#8ea0b7;--acc:#5da8ff;--ok:#68d97a;--err:#e05c4d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans-serif;padding:24px 16px 60px}
+main{max-width:800px;margin:0 auto}
+h1{font:400 28px Anton,Impact,sans-serif;letter-spacing:1px;text-transform:uppercase;margin:0 0 4px;color:#f5f7fb}
+h2{font:400 20px Anton,Impact,sans-serif;letter-spacing:.5px;text-transform:uppercase;margin:26px 0 10px;color:#f5f7fb}
+p.sub{color:var(--mute);margin:0 0 20px}
+.box{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:8px;padding:18px;margin-bottom:16px}
+label{display:block;margin:10px 0 4px;color:var(--mute);font-size:13px}
+input,textarea,select{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);padding:9px 10px;font:inherit;border-radius:6px}
+textarea{min-height:76px;resize:vertical}
+input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.row{grid-template-columns:1fr}}
+button{background:var(--acc);color:#07111d;border:0;padding:10px 18px;font:700 13px system-ui;letter-spacing:.5px;cursor:pointer;border-radius:999px;margin:14px 8px 0 0}
+button.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.sm{margin:0;padding:6px 12px;font-weight:600;background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.del{color:var(--err)}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tabs button{margin:0}
+.tabs button:not(.on){background:transparent;color:var(--ink);border:1px solid var(--line)}
+.item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.item small{color:var(--mute);display:block}
+.item .acts{display:flex;gap:6px;flex-shrink:0}
+#msg{position:sticky;top:8px;z-index:5;padding:10px 14px;margin-bottom:14px;display:none;border:1px solid var(--line);background:var(--panel);border-radius:8px}
+#msg.ok{display:block;border-color:var(--ok);color:var(--ok)}
+#msg.err{display:block;border-color:var(--err);color:var(--err)}
+#msg.info{display:block}
+.hide{display:none}
+.hint{color:var(--mute);font-size:12.5px;margin-top:6px}
+.chk{display:flex;align-items:center;gap:8px;margin-top:12px}
+.chk input{width:auto}
+</style>
+</head>
+<body>
+<main>
+<h1>Administration J.B.C Crome</h1>
+<p class="sub">Les changements sont publiés directement dans le dépôt GitHub (un commit par action).</p>
+<div id="msg" role="status"></div>
+
+<section id="login" class="box">
+  <label for="tok">Jeton GitHub (fine-grained, « Contents : Read and write » sur le dépôt)</label>
+  <input id="tok" type="password" autocomplete="off" placeholder="github_pat_…">
+  <div class="row">
+    <div><label for="repo">Dépôt</label><input id="repo" value="nosix-dev/J.B.C-Crome"></div>
+    <div><label for="branch">Branche</label><input id="branch" value="main"></div>
+  </div>
+  <button id="btnLogin">Se connecter</button>
+  <p class="hint">Le jeton reste dans cet onglet uniquement.</p>
+</section>
+
+<section id="app" class="hide">
+  <div class="tabs">
+    <button id="tabE" class="on">Événements</button>
+    <button id="tabA">Albums</button>
+    <button id="btnOut" class="sec" style="margin-left:auto">Déconnexion</button>
+  </div>
+
+  <div id="pE">
+    <div class="box">
+      <h2 id="eHead" style="margin-top:0">Nouvel événement</h2>
+      <label for="eTitre">Titre</label><input id="eTitre">
+      <div class="row">
+        <div><label for="eDate">Date</label><input id="eDate" type="date"></div>
+        <div><label for="eTime">Heure (optionnel)</label><input id="eTime" type="time"></div>
+      </div>
+      <div class="row">
+        <div><label for="eLieu">Lieu</label><input id="eLieu"></div>
+        <div><label for="eCat">Catégorie</label><input id="eCat" placeholder="Convoi, Réunion…"></div>
+      </div>
+      <label for="eDesc">Description (une ligne = une puce)</label><textarea id="eDesc"></textarea>
+      <label for="eReg">Règlement (une ligne = une puce)</label><textarea id="eReg"></textarea>
+      <label for="eImg">Image (URL)</label><input id="eImg" placeholder="https://…">
+      <div class="row">
+        <div><label for="eLien">Lien TrucksBook</label><input id="eLien"></div>
+        <div><label for="eHaul">Lien HaulMP</label><input id="eHaul"></div>
+      </div>
+      <label for="eTicket">Ticket</label><input id="eTicket">
+      <label class="chk"><input id="eConvoi" type="checkbox"> C’est un convoi (icône 🚛)</label>
+      <button id="addE">Publier</button><button id="cancelE" class="sec hide">Annuler la modification</button>
+    </div>
+    <h2>Événements publiés</h2>
+    <div id="listE"></div>
+  </div>
+
+  <div id="pA" class="hide">
+    <div class="box">
+      <h2 style="margin-top:0">Album</h2>
+      <label for="aDossier">Dossier (nouveau, ou existant pour ajouter des photos)</label>
+      <input id="aDossier" list="dl" placeholder="convoi-octobre-2026"><datalist id="dl"></datalist>
+      <label for="aTitre">Titre</label><input id="aTitre">
+      <div class="row">
+        <div><label for="aCat">Catégorie</label><input id="aCat" placeholder="Convoi"></div>
+        <div><label for="aCouv">Couverture (nom de fichier ou chemin)</label><input id="aCouv" placeholder="par défaut : 1re photo"></div>
+      </div>
+      <label for="aDesc">Description</label><textarea id="aDesc"></textarea>
+      <label for="aFiles">Photos à ajouter</label>
+      <input id="aFiles" type="file" accept="image/*" multiple>
+      <p class="hint">Les images sont réduites à 2000 px max et converties en JPEG avant l’envoi.</p>
+      <button id="addA">Publier l’album</button>
+    </div>
+    <h2>Albums publiés</h2>
+    <div id="listA"></div>
+  </div>
+</section>
+</main>
+
+<script>
+const CFG = { albumPaths:['albums.json','galerie/albums.json'], eventsFile:'events.json', galDir:'galerie', maxPx:2000 };
+const $ = id => document.getElementById(id);
+const S = { tok:'', repo:'', branch:'' };
+let EV = [], AL = [], alPath = CFG.albumPaths[0], editId = null;
+
+function say(t,k='info'){ const m=$('msg'); m.className=k; m.textContent=t; if(k==='ok') setTimeout(()=>{m.className=''},4000); }
+const slug = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const clean = n => n.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9._-]+/g,'-');
+const enc = s => btoa(unescape(encodeURIComponent(s)));
+const dec = b => decodeURIComponent(escape(atob(b.replace(/\n/g,''))));
+
+async function gh(path, opt={}){
+  const m = opt.method || 'GET';
+  const r = await fetch(`https://api.github.com/repos/${S.repo}/contents/${path.split('/').map(encodeURIComponent).join('/')}` + (m==='GET' ? `?ref=${S.branch}` : ''), {
+    ...opt, headers:{ Authorization:`Bearer ${S.tok}`, Accept:'application/vnd.github+json', 'Content-Type':'application/json' }
+  });
+  if(r.status===404) return null;
+  if(!r.ok){ const j=await r.json().catch(()=>({})); throw new Error(`GitHub ${r.status} : ${j.message||'erreur'}`); }
+  return r.json();
+}
+async function readArr(path){
+  const f = await gh(path);
+  if(!f) return null;
+  const d = JSON.parse(dec(f.content));
+  return { list:Array.isArray(d)?d:[], sha:f.sha };
+}
+// Relit le fichier juste avant d'écrire (le bot peut l'avoir modifié) puis applique fn
+async function mutate(path, fn, msg){
+  const st = (await readArr(path)) || { list:[], sha:null };
+  fn(st.list);
+  const body = { message:msg, content:enc(JSON.stringify(st.list,null,2)+'\n'), branch:S.branch };
+  if(st.sha) body.sha = st.sha;
+  await gh(path,{ method:'PUT', body:JSON.stringify(body) });
+  return st.list;
+}
+function b64(blob){ return new Promise((ok,ko)=>{ const r=new FileReader(); r.onload=()=>ok(r.result.split(',')[1]); r.onerror=()=>ko(new Error('Lecture impossible')); r.readAsDataURL(blob); }); }
+
+async function prep(f){
+  const base = f.name.replace(/\.[^.]+$/,'');
+  if(!/^image\/(jpeg|png|webp)$/.test(f.type)) return { name:clean(f.name), data:await b64(f) };
+  const bmp = await createImageBitmap(f);
+  const k = Math.min(1, CFG.maxPx/Math.max(bmp.width,bmp.height));
+  const c = document.createElement('canvas'); c.width=Math.round(bmp.width*k); c.height=Math.round(bmp.height*k);
+  const x = c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(bmp,0,0,c.width,c.height);
+  const blob = await new Promise(r=>c.toBlob(r,'image/jpeg',.85));
+  return { name:clean(base)+'.jpg', data:await b64(blob) };
+}
+
+function renderList(el, list, label, sub, acts){
+  el.textContent='';
+  if(!list.length){ el.textContent='Aucun élément.'; return; }
+  list.forEach((it,i)=>{
+    const d=document.createElement('div'); d.className='item';
+    const t=document.createElement('div');
+    const b=document.createElement('strong'); b.textContent=label(it);
+    const s=document.createElement('small'); s.textContent=sub(it);
+    t.append(b,s);
+    const a=document.createElement('div'); a.className='acts';
+    acts(it,i).forEach(([txt,cls,fn])=>{ const x=document.createElement('button'); x.className='sm '+cls; x.textContent=txt; x.onclick=fn; a.append(x); });
+    d.append(t,a); el.append(d);
+  });
+}
+
+async function load(){
+  say('Chargement…');
+  EV = (await readArr(CFG.eventsFile))?.list || [];
+  let found = null;
+  for(const p of CFG.albumPaths){ found = await readArr(p); if(found){ alPath=p; break; } }
+  AL = found?.list || []; if(!found) alPath = CFG.albumPaths[0];
+  drawE(); drawA(); say('Connecté.','ok');
+}
+
+/* ---------- Événements ---------- */
+function drawE(){
+  const l = [...EV].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  renderList($('listE'), l, e=>(e._isConvoi?'🚛 ':'')+(e.titre||'(sans titre)'), e=>[String(e.date||'').replace('T',' '),e.lieu,e.categorie].filter(Boolean).join(' – '),
+    e=>[['Modifier','',()=>editE(e)],['Supprimer','del',()=>delE(e)]]);
+}
+const lines = t => { const a=t.split('\n').map(s=>s.trim()).filter(Boolean); return a.length>1?a:(a[0]||''); };
+const unlines = v => Array.isArray(v)?v.join('\n'):(v||'');
+function resetE(){ editId=null; ['eTitre','eDate','eTime','eLieu','eCat','eDesc','eReg','eImg','eLien','eHaul','eTicket'].forEach(k=>$(k).value=''); $('eConvoi').checked=false; $('eHead').textContent='Nouvel événement'; $('cancelE').classList.add('hide'); $('addE').textContent='Publier'; }
+function editE(e){
+  editId=e.id; const [d,t]=String(e.date||'').split('T');
+  $('eTitre').value=e.titre||''; $('eDate').value=d||''; $('eTime').value=(t||'').slice(0,5); $('eLieu').value=e.lieu||''; $('eCat').value=e.categorie||'';
+  $('eDesc').value=unlines(e.description); $('eReg').value=unlines(e['règlement']); $('eImg').value=e.image||''; $('eLien').value=e.lien||''; $('eHaul').value=e.lienHaulmp||''; $('eTicket').value=e.ticket||''; $('eConvoi').checked=!!e._isConvoi;
+  $('eHead').textContent='Modifier l’événement'; $('addE').textContent='Enregistrer'; $('cancelE').classList.remove('hide'); scrollTo({top:0,behavior:'smooth'});
+}
+async function delE(e){
+  if(!confirm('Supprimer « '+(e.titre||'')+' » ?')) return;
+  try{ EV = await mutate(CFG.eventsFile, l=>{ const i=l.findIndex(x=>x.id===e.id&&x.titre===e.titre); if(i>-1) l.splice(i,1); }, `Admin : suppression événement ${e.titre||''}`); drawE(); say('Événement supprimé.','ok'); }
+  catch(err){ say(err.message,'err'); }
+}
+$('cancelE').onclick = resetE;
+$('addE').onclick = async () => {
+  const titre=$('eTitre').value.trim(), date=$('eDate').value;
+  if(!titre||!date){ say('Titre et date obligatoires.','err'); return; }
+  const o = { id: editId ?? Date.now(), titre, date: $('eTime').value ? date+'T'+$('eTime').value : date,
+    lieu:$('eLieu').value.trim(), categorie:$('eCat').value.trim(), description:lines($('eDesc').value), 'règlement':lines($('eReg').value),
+    image:$('eImg').value.trim(), lien:$('eLien').value.trim(), lienHaulmp:$('eHaul').value.trim(), ticket:$('eTicket').value.trim() };
+  Object.keys(o).forEach(k=>{ if(o[k]===''||(Array.isArray(o[k])&&!o[k].length)) delete o[k]; });
+  if($('eConvoi').checked) o._isConvoi = true;
+  try{
+    say('Publication…');
+    EV = await mutate(CFG.eventsFile, l=>{ const i=editId!==null?l.findIndex(x=>x.id===editId):-1; if(i>-1) l[i]=o; else l.push(o); l.sort((a,b)=>String(a.date).localeCompare(String(b.date))); }, `Admin : ${editId!==null?'modification':'ajout'} événement ${titre}`);
+    resetE(); drawE(); say('Événement publié.','ok');
+  }catch(err){ say(err.message,'err'); }
+};
+
+/* ---------- Albums ---------- */
+function drawA(){
+  $('dl').textContent=''; AL.forEach(a=>{ const o=document.createElement('option'); o.value=a.dossier; $('dl').append(o); });
+  renderList($('listA'), AL, a=>a.titre||a.dossier, a=>[a.dossier,a.categorie,Object.keys(a.photos||{}).length+' photo(s) décrite(s)'].filter(Boolean).join(' – '),
+    a=>[['Modifier','',()=>{ $('aDossier').value=a.dossier; fillA(); scrollTo({top:0,behavior:'smooth'}); }],['Supprimer','del',()=>delA(a)]]);
+}
+function fillA(){
+  const a = AL.find(x=>x.dossier===slug($('aDossier').value));
+  if(a){ $('aTitre').value=a.titre||''; $('aCat').value=a.categorie||''; $('aDesc').value=a.description||''; $('aCouv').value=a.couverture||''; }
+}
+$('aDossier').addEventListener('change', fillA);
+async function delA(a){
+  if(!confirm(`Supprimer l’album « ${a.titre||a.dossier} » et TOUTES ses photos du dépôt ?`)) return;
+  try{
+    say('Suppression des photos…');
+    const files = await gh(`${CFG.galDir}/${a.dossier}`);
+    for(const f of (Array.isArray(files)?files:[]).filter(f=>f.type==='file')){
+      await gh(f.path,{ method:'DELETE', body:JSON.stringify({ message:`Admin : suppression photo ${f.name}`, sha:f.sha, branch:S.branch }) });
+    }
+    AL = await mutate(alPath, l=>{ const i=l.findIndex(x=>x.dossier===a.dossier); if(i>-1) l.splice(i,1); }, `Admin : suppression album ${a.dossier}`);
+    drawA(); say('Album supprimé.','ok');
+  }catch(err){ say(err.message,'err'); }
+}
+$('addA').onclick = async () => {
+  const dossier = slug($('aDossier').value), titre=$('aTitre').value.trim(), files=[...$('aFiles').files];
+  if(!dossier||!titre){ say('Dossier et titre obligatoires.','err'); return; }
+  const isNew = !AL.some(x=>x.dossier===dossier);
+  if(isNew && !files.length){ say('Ajoute au moins une photo pour un nouvel album.','err'); return; }
+  const names=[];
+  try{
+    for(let i=0;i<files.length;i++){
+      say(`Envoi photo ${i+1}/${files.length}…`);
+      const p = await prep(files[i]);
+      const path = `${CFG.galDir}/${dossier}/${p.name}`;
+      const ex = await gh(path);
+      const body = { message:`Admin : photo ${p.name} (${dossier})`, content:p.data, branch:S.branch };
+      if(ex) body.sha = ex.sha;
+      await gh(path,{ method:'PUT', body:JSON.stringify(body) });
+      names.push(p.name);
+    }
+    say('Mise à jour de albums.json…');
+    AL = await mutate(alPath, l=>{
+      let e = l.find(x=>x.dossier===dossier);
+      if(!e){ e={ dossier, photos:{} }; l.push(e); }
+      e.titre=titre; e.categorie=$('aCat').value.trim()||'Album'; e.description=$('aDesc').value.trim();
+      e.photos = (e.photos && !Array.isArray(e.photos)) ? e.photos : {};
+      names.forEach(n=>{ if(!(n in e.photos)) e.photos[n]=''; });
+      const c=$('aCouv').value.trim() || e.couverture || names[0]; if(c) e.couverture=c;
+    }, `Admin : ${isNew?'ajout':'mise à jour'} album ${dossier}`);
+    ['aDossier','aTitre','aCat','aCouv','aDesc','aFiles'].forEach(k=>$(k).value='');
+    drawA(); say('Album publié (le site peut mettre quelques minutes à afficher les images : cache GitHub).','ok');
+  }catch(err){ say(err.message,'err'); }
+};
+
+/* ---------- Session / onglets ---------- */
+$('btnLogin').onclick = async () => {
+  S.tok=$('tok').value.trim(); S.repo=$('repo').value.trim(); S.branch=$('branch').value.trim()||'main';
+  if(!S.tok||!S.repo){ say('Renseigne le jeton et le dépôt.','err'); return; }
+  try{ await load(); sessionStorage.setItem('jbc',JSON.stringify(S)); $('login').classList.add('hide'); $('app').classList.remove('hide'); }
+  catch(e){ say(e.message+' – vérifie le jeton et les droits.','err'); }
+};
+$('btnOut').onclick = () => { sessionStorage.removeItem('jbc'); location.reload(); };
+$('tabE').onclick = () => { $('pE').classList.remove('hide'); $('pA').classList.add('hide'); $('tabE').classList.add('on'); $('tabA').classList.remove('on'); };
+$('tabA').onclick = () => { $('pA').classList.remove('hide'); $('pE').classList.add('hide'); $('tabA').classList.add('on'); $('tabE').classList.remove('on'); };
+try{
+  const s=JSON.parse(sessionStorage.getItem('jbc')||'null');
+  if(s){ Object.assign(S,s); load().then(()=>{ $('login').classList.add('hide'); $('app').classList.remove('hide'); }).catch(()=>sessionStorage.removeItem('jbc')); }
+}catch(_){}
+</script>
+</body>
+</html>
