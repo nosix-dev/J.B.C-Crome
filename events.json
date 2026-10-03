@@ -1,1 +1,24 @@
-
+[
+  {
+    "date": "2026-10-10T20:15:00",
+    "titre": "Convoi Calais → Lisbonne | J.B.C Crome",
+    "lieu": "Calais → Lisbonne",
+    "description": [
+      "Heure de rassemblement : 20h00",
+      "Heure de départ : 20h15",
+      "Départ Ville : Calais",
+      "Arrivée Ville : Lisbonne",
+      "Distance : 1994 km",
+      "Durée estimée : 26 h 59 min",
+      "Serveur : Simulation 2",
+      "Organisation : J.B.C Crome Trucking Club | HAULMP"
+    ],
+    "règlement": [
+      "RESPECTEZ LE CODE DE LA ROUTE",
+      "SOYEZ COURTOIS ET RESPECTUEUX",
+      "PAS DE DÉPASSEMENTS DANGEREUX",
+      "AMUSEZ-VOUS ET PROFITEZ DU CONVOI"
+    ],
+    "lienHaulmp": "https://vtc.haulmp.com/jbc-crome#convoys"
+  }
+]
