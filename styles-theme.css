@@ -132,3 +132,20 @@ footer .footer-shell {
   border-radius: 18px !important;
   padding: 18px 22px !important;
 }
+
+/* ---- Fond d'image du hero ---- */
+.hero-bg {
+  background-image: url('hero-convoi.jpg') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  filter: brightness(.75) saturate(1.05) contrast(1.05) !important;
+}
+
+.hero-overlay {
+  background: linear-gradient(180deg,
+    rgba(7,17,29,.35) 0%,
+    rgba(7,17,29,.25) 45%,
+    rgba(7,17,29,.85) 85%,
+    var(--asphalt) 100%) !important;
+}
