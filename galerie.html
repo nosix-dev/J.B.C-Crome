@@ -3,10 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>J.B.C Crome VTC ETS2</title>
+<title>Galerie J.B.C Crome</title>
 <link rel="icon" type="image/png" href="LogoV3.png">
 <link rel="stylesheet" href="base.css">
 <link rel="stylesheet" href="royal-look.css">
+<style>
+  .hero-card{position:relative; border-radius:20px; overflow:hidden; cursor:pointer; margin:0 auto 36px; max-width:1100px; box-shadow:var(--shadow-hard); border:1px solid var(--hairline);}
+  .hero-photo{height:clamp(320px,40vw,480px); background-size:cover; background-position:center;}
+  .hero-arrow{position:absolute; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:50%; background:rgba(5,6,8,.55); border:1px solid rgba(93,168,255,.3); color:var(--chrome-1); display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer; z-index:3;}
+  .hero-arrow:hover{background:rgba(93,168,255,.18); border-color:var(--amber);}
+  .hero-prev{left:22px;} .hero-next{right:22px;}
+  .hero-info{position:absolute; left:0; right:0; bottom:0; padding:30px 34px; background:linear-gradient(0deg,rgba(5,6,8,.95) 10%,transparent 100%);}
+  .hero-tag{font-size:13px; font-weight:700; color:var(--amber);}
+  .hero-info h3{font-weight:800; font-size:clamp(22px,3.2vw,34px); color:#fff; margin:6px 0 10px; letter-spacing:-.5px;}
+  .hero-info p{color:var(--chrome-3); font-size:14px; line-height:1.6; max-width:640px;}
+  .hero-count{display:inline-block; margin-top:14px; font-size:12px; font-weight:600; color:var(--chrome-1); background:rgba(255,255,255,.08); border:1px solid var(--hairline); padding:5px 13px; border-radius:20px;}
+
+  .albums-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:22px; max-width:1100px; margin:0 auto;}
+  .mini-card{position:relative; border-radius:16px; overflow:hidden; cursor:pointer; border:1px solid var(--hairline); transition:transform .25s ease, box-shadow .25s ease;}
+  .mini-card:hover{transform:translateY(-6px); box-shadow:var(--shadow-hard);}
+  .mini-photo{aspect-ratio:3/2; background-size:cover; background-position:center; transition:transform .4s ease;}
+  .mini-card:hover .mini-photo{transform:scale(1.07);}
+  .mini-info{position:absolute; left:0; right:0; bottom:0; padding:14px 16px; background:linear-gradient(0deg,rgba(5,6,8,.94) 15%,transparent 100%);}
+  .mini-info h4{font-weight:800; font-size:16px; color:#fff;}
+  .mini-meta{margin-top:6px; display:flex; justify-content:space-between; font-size:12px; font-weight:600; color:var(--amber);}
+  .empty-state, .loading-state{grid-column:1/-1; text-align:center; padding:56px 20px; color:var(--chrome-3); border:1px dashed rgba(255,255,255,.14); border-radius:14px; font-size:14px;}
+
+  #lightbox{position:fixed; inset:0; z-index:200; background:rgba(5,6,8,.95); backdrop-filter:blur(6px); display:none; flex-direction:column; align-items:center; justify-content:center; padding:5vh 5vw; opacity:0; transition:opacity .25s ease;}
+  #lightbox.open{display:flex; opacity:1;}
+  #lightbox img{max-width:100%; max-height:76vh; border-radius:12px; box-shadow:0 30px 70px rgba(0,0,0,.6);}
+  #lightbox-info{margin-top:18px; max-width:620px; text-align:center;}
+  #lightbox-caption{color:var(--chrome-3); font-size:13px;}
+  #lightbox-caption strong{color:var(--chrome-1);}
+  #lightbox-description{margin-top:8px; color:var(--chrome-2); font-size:14px; line-height:1.6;}
+  #lightbox-description:empty{display:none;}
+  #lightbox-close, #lightbox-prev, #lightbox-next{position:absolute; border-radius:50%; background:rgba(255,255,255,.06); border:1px solid rgba(93,168,255,.3); color:var(--chrome-1); display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  #lightbox-close:hover, #lightbox-prev:hover, #lightbox-next:hover{background:rgba(93,168,255,.14); border-color:var(--amber);}
+  #lightbox-close{top:26px; right:6vw; width:42px; height:42px; font-size:20px;}
+  #lightbox-prev, #lightbox-next{top:50%; transform:translateY(-50%); width:48px; height:48px; font-size:22px;}
+  #lightbox-prev{left:4vw;} #lightbox-next{right:4vw;}
+  @media (max-width:760px){.hero-info{padding:22px;} .hero-arrow{width:36px; height:36px; font-size:17px;}}
+</style>
 </head>
 <body>
 
@@ -22,40 +59,43 @@
   <a href="index.html" class="logo-link"><img src="LogoV3.png" alt="J.B.C Crome" class="logo-img"></a>
   <nav>
     <ul>
-      <li><a href="index.html" class="active">Accueil</a></li>
+      <li><a href="index.html">Accueil</a></li>
       <li><a href="apropos.html">À propos</a></li>
       <li><a href="calendrier.html">Calendrier</a></li>
-      <li><a href="galerie.html">Galerie</a></li>
+      <li><a href="galerie.html" class="active">Galerie</a></li>
       <li><a href="discord.html">Discord</a></li>
     </ul>
   </nav>
   <a href="discord.html" class="header-cta">Rejoindre →</a>
 </header>
 
-<section class="home-hero">
-  <div class="home-bg"></div>
-  <div class="home-overlay"></div>
-  <div class="home-content">
-    <h1>Bienvenue chez J.B.C Crome</h1>
-    <p class="home-sub">« Un convoi propre, une présence qui marque »</p>
-    <div class="hero-cta">
-      <a href="discord.html" class="btn btn-discord">Rejoindre le Discord</a>
-      <a href="calendrier.html" class="btn btn-ghost">Voir les événements</a>
-      <a href="https://trucksbook.eu/company/223335" target="_blank" rel="noopener" class="btn btn-truckbook">Voir sur TruckBook</a>
-      <a href="https://vtc.haulmp.com/jbc-crome" target="_blank" rel="noopener" class="btn btn-haulmp">Voir sur HaulMP</a>
-    </div>
+<div class="page-hero" style="--hero-img:url('hero-page.jpg')">
+  <div class="page-hero-bg"></div>
+  <div class="page-hero-overlay"></div>
+  <div class="page-hero-content">
+    <span class="page-badge">Souvenirs</span>
+    <h1>Galerie</h1>
+    <p class="page-sub">"Les meilleurs moments sur la route"</p>
+  </div>
+</div>
+
+<section id="galerie">
+  <div id="hero-wrap"></div>
+  <div id="albums-grid" class="albums-grid">
+    <div class="loading-state">Chargement des albums…</div>
   </div>
 </section>
 
-<section class="home-event">
-  <div id="next-event-card" class="event-card">
-    <span class="ec-label">Prochain événement</span>
-    <div class="ec-slider"><div class="ec-track" id="neb-track"></div></div>
-    <div class="ec-countdown" id="neb-countdown"></div>
-    <a class="ec-btn" id="neb-btn" href="calendrier.html">Voir l'événement</a>
-    <div class="ec-dots" id="neb-dots"></div>
+<div id="lightbox">
+  <div id="lightbox-close">✕</div>
+  <div id="lightbox-prev">‹</div>
+  <img id="lightbox-img" src="" alt="Photo agrandie">
+  <div id="lightbox-next">›</div>
+  <div id="lightbox-info">
+    <div id="lightbox-caption"></div>
+    <div id="lightbox-description"></div>
   </div>
-</section>
+</div>
 
 <footer>
   <div class="footer-shell">
@@ -67,86 +107,209 @@
 <script src="common.js"></script>
 <script>
 (function(){
-  var EVENTS_URL = 'events.json';
-  var ROTATION_MS = 6000;
-  var carte = document.getElementById('next-event-card');
-  if(!carte) return;
-  var trackEl = document.getElementById('neb-track');
-  var countdownEl = document.getElementById('neb-countdown');
-  var dotsEl = document.getElementById('neb-dots');
-  var btnEl = document.getElementById('neb-btn');
-  var MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
-  var S = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
-  var ICONE_CAL = S + '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
-  var ICONE_LIEU = S + '<path d="M4 9a8 8 0 0 1 16 0c0 4-8 12-8 12S4 13 4 9z"/><circle cx="12" cy="9" r="2.3"/></svg>';
-  var ICONE_TICKET = S + '<path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z"/><line x1="12" y1="6" x2="12" y2="18" stroke-dasharray="2 2"/></svg>';
+  const GITHUB_USER = "nosix-dev";
+  const GITHUB_REPO = "J.B.C-Crome";
+  const GITHUB_BRANCH = "main";
+  const GITHUB_FOLDER = "galerie";
+  const PROXY_BASE = "https://jbc-crome-proxy.levrailuciferms.workers.dev";
+  const DOSSIERS_IGNORES = ["couverture"];
 
-  function fDate(d){ return d.getDate() + ' ' + MOIS[d.getMonth()] + ' ' + d.getFullYear(); }
-  function fHeure(d){ return String(d.getHours()).padStart(2,'0') + 'h' + String(d.getMinutes()).padStart(2,'0'); }
-  function fReste(ms){
-    if(ms <= 0) return 'En cours';
-    var j = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5 % 24), m = Math.floor(ms / 6e4 % 60);
-    return j > 0 ? j + ' j ' + h + ' h ' + m + ' min' : (h > 0 ? h + ' h ' + m + ' min' : m + ' min');
+  const heroWrap = document.getElementById('hero-wrap');
+  const grid = document.getElementById('albums-grid');
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const lightboxCaption = document.getElementById('lightbox-caption');
+  const lightboxDescription = document.getElementById('lightbox-description');
+
+  let albums = [], albumOuvert = null, currentIndex = 0, heroIndex = 0;
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
+  }
+  function estImage(nom){ return /\.(jpe?g|png|webp|gif)$/i.test(nom); }
+  function urlFichier(chemin){ return "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/" + chemin; }
+  function apiUrl(chemin){ return PROXY_BASE + "/gh/repos/" + GITHUB_USER + "/" + GITHUB_REPO + "/contents/" + chemin + "?ref=" + GITHUB_BRANCH; }
+
+  function afficherMessage(html){
+    heroWrap.innerHTML = '';
+    grid.innerHTML = '<div class="empty-state">' + html + '</div>';
   }
 
-  var futurs = [], index = 0, rot = null, cpt = null;
+  // ---- Lightbox ----
+  function ouvrirLightbox(album, index){
+    albumOuvert = album; currentIndex = index;
+    majLightbox();
+    lightbox.classList.add('open');
+  }
+  function majLightbox(){
+    const photo = albumOuvert.photos[currentIndex];
+    lightboxImg.src = photo.url;
+    lightboxCaption.innerHTML = '<strong>' + esc(albumOuvert.titre) + '</strong> — ' + (currentIndex + 1) + ' / ' + albumOuvert.photos.length;
+    lightboxDescription.textContent = photo.description || '';
+  }
+  function fermer(){ lightbox.classList.remove('open'); }
+  function naviguer(d){
+    if(!albumOuvert) return;
+    currentIndex = (currentIndex + d + albumOuvert.photos.length) % albumOuvert.photos.length;
+    majLightbox();
+  }
+  document.getElementById('lightbox-close').addEventListener('click', fermer);
+  document.getElementById('lightbox-prev').addEventListener('click', function(){ naviguer(-1); });
+  document.getElementById('lightbox-next').addEventListener('click', function(){ naviguer(1); });
+  lightbox.addEventListener('click', function(e){ if(e.target === lightbox) fermer(); });
+  document.addEventListener('keydown', function(e){
+    if(!lightbox.classList.contains('open')) return;
+    if(e.key === 'Escape') fermer();
+    if(e.key === 'ArrowLeft') naviguer(-1);
+    if(e.key === 'ArrowRight') naviguer(1);
+  });
 
-  function construire(){
-    trackEl.innerHTML = futurs.map(function(ev){
-      var d = new Date(ev.date);
-      return '<div class="ec-slide">'
-        + '<span class="ec-title">' + (ev.titre || '') + '</span>'
-        + (ev.description ? '<p class="ec-desc">' + ev.description + '</p>' : '')
-        + '<span class="ec-meta-row">' + ICONE_CAL + '<span>' + fDate(d) + ' - ' + fHeure(d) + '</span></span>'
-        + (ev.lieu ? '<span class="ec-meta-row">' + ICONE_LIEU + '<span>' + ev.lieu + '</span></span>' : '')
-        + (ev.ticket ? '<span class="ec-meta-row">' + ICONE_TICKET + '<span>' + ev.ticket + '</span></span>' : '')
+  // ---- Album vedette ----
+  function afficherHero(album){
+    heroIndex = 0;
+    heroWrap.innerHTML =
+      '<div class="hero-card" id="hero-card">'
+      + '<div class="hero-photo" id="hero-photo"></div>'
+      + '<div class="hero-arrow hero-prev" id="hero-prev">‹</div>'
+      + '<div class="hero-arrow hero-next" id="hero-next">›</div>'
+      + '<div class="hero-info">'
+      + '<span class="hero-tag">' + esc(album.categorie) + '</span>'
+      + '<h3>' + esc(album.titre) + '</h3>'
+      + (album.description ? '<p>' + esc(album.description) + '</p>' : '')
+      + '<span class="hero-count" id="hero-count"></span>'
+      + '</div></div>';
+
+    const photo = document.getElementById('hero-photo');
+    const count = document.getElementById('hero-count');
+    function maj(){
+      photo.style.backgroundImage = "url('" + album.photos[heroIndex].url + "')";
+      count.textContent = '🖼 ' + (heroIndex + 1) + ' / ' + album.photos.length;
+    }
+    maj();
+    document.getElementById('hero-prev').addEventListener('click', function(e){
+      e.stopPropagation(); heroIndex = (heroIndex - 1 + album.photos.length) % album.photos.length; maj();
+    });
+    document.getElementById('hero-next').addEventListener('click', function(e){
+      e.stopPropagation(); heroIndex = (heroIndex + 1) % album.photos.length; maj();
+    });
+    document.getElementById('hero-card').addEventListener('click', function(){ ouvrirLightbox(album, heroIndex); });
+  }
+
+  function afficherAlbums(){
+    if(!albums.length){
+      afficherMessage('Aucun album pour le moment. Ajoute des photos dans le dossier "galerie" sur GitHub.');
+      return;
+    }
+    afficherHero(albums[0]);
+    const reste = albums.slice(1);
+    if(!reste.length){ grid.innerHTML = ''; return; }
+
+    grid.innerHTML = reste.map(function(album, i){
+      const couv = album.couverture || (album.photos[0] && album.photos[0].url) || '';
+      return '<div class="mini-card" data-i="' + i + '">'
+        + '<div class="mini-photo" style="background-image:url(\'' + couv + '\')"></div>'
+        + '<div class="mini-info"><h4>' + esc(album.titre) + '</h4>'
+        + '<div class="mini-meta"><span>' + esc(album.categorie) + '</span><span>' + album.photos.length + ' photos</span></div></div>'
         + '</div>';
     }).join('');
-    dotsEl.innerHTML = futurs.map(function(_, i){
-      return '<span class="ec-dot' + (i === 0 ? ' active' : '') + '" data-index="' + i + '"></span>';
-    }).join('');
-    dotsEl.querySelectorAll('.ec-dot').forEach(function(dot){
-      dot.addEventListener('click', function(){ aller(parseInt(dot.dataset.index, 10)); relancer(); });
+
+    grid.querySelectorAll('.mini-card').forEach(function(card){
+      card.addEventListener('click', function(){
+        const album = reste[parseInt(card.dataset.i, 10)];
+        if(album && album.photos.length) ouvrirLightbox(album, 0);
+      });
     });
-  }
-  function maj(){
-    var ev = futurs[index];
-    if(!ev) return;
-    countdownEl.textContent = fReste(new Date(ev.date) - new Date());
-    btnEl.href = 'calendrier.html';
-  }
-  function aller(i){
-    if(!futurs.length) return;
-    trackEl.style.transform = 'translateX(-' + (i * 100) + '%)';
-    dotsEl.querySelectorAll('.ec-dot').forEach(function(dot){
-      dot.classList.toggle('active', parseInt(dot.dataset.index, 10) === i);
-    });
-    index = i;
-    maj();
-  }
-  function relancer(){
-    if(rot) clearInterval(rot);
-    if(futurs.length > 1) rot = setInterval(function(){ aller((index + 1) % futurs.length); }, ROTATION_MS);
   }
 
-  fetch(EVENTS_URL, { cache: 'no-store' })
-    .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(function(events){
-      if(!Array.isArray(events)) return;
-      var now = new Date();
-      futurs = events.filter(function(ev){
-        return ev && ev.date && !isNaN(new Date(ev.date)) && new Date(ev.date) > now;
-      }).sort(function(a, b){ return new Date(a.date) - new Date(b.date); });
-      if(!futurs.length) return;
-      construire();
-      index = 0;
-      maj();
-      if(cpt) clearInterval(cpt);
-      cpt = setInterval(maj, 30000);
-      relancer();
-      carte.classList.add('visible');
-    })
-    .catch(function(err){ console.warn('[next-event-card]', err); });
+  // ---- Chargement GitHub ----
+  async function lireDossier(chemin){
+    const res = await fetch(apiUrl(chemin));
+    if(!res.ok) throw new Error("Erreur API GitHub (" + res.status + ")");
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  }
+  async function lireDossierSilencieux(chemin){
+    try { return await lireDossier(chemin); } catch(e){ return []; }
+  }
+  function images(fichiers){ return fichiers.filter(function(f){ return f.type === 'file' && estImage(f.name); }); }
+  function joli(nom){ return nom.replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/\b\w/g, function(c){ return c.toUpperCase(); }); }
+
+  async function chargerMetaGlobale(){
+    const urls = [urlFichier("albums.json"), urlFichier(GITHUB_FOLDER + "/albums.json")];
+    for(const url of urls){
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if(!res.ok) continue;
+        const liste = await res.json();
+        if(!Array.isArray(liste)) continue;
+        const map = {};
+        liste.forEach(function(e){ if(e && e.dossier) map[e.dossier] = e; });
+        return map;
+      } catch(e){}
+    }
+    return {};
+  }
+
+  function resoudreCouverture(val, imgs){
+    if(!val) return '';
+    if(/^https?:\/\//i.test(val)) return val;
+    if(val.charAt(0) === '/') return urlFichier(val.slice(1));
+    const t = imgs.find(function(i){ return i.name === val; });
+    return t ? t.download_url : '';
+  }
+
+  async function chargerAlbums(){
+    try {
+      const contenu = await lireDossier(GITHUB_FOLDER);
+      if(!contenu.length){ afficherAlbums(); return; }
+
+      const meta = await chargerMetaGlobale();
+      const dossiers = contenu.filter(function(it){ return it.type === 'dir' && DOSSIERS_IGNORES.indexOf(it.name.toLowerCase()) === -1; });
+      const imagesRacine = images(contenu);
+      const liste = [];
+
+      for(const d of dossiers){
+        const fichiers = await lireDossierSilencieux(d.path);
+        const imgs = images(fichiers);
+        if(!imgs.length) continue;
+
+        let m = meta[d.name] || {};
+        if(!meta[d.name]){
+          try {
+            const f = fichiers.find(function(x){ return x.name === 'albums.json'; });
+            if(f){ const r = await fetch(f.download_url); if(r.ok) m = await r.json(); }
+          } catch(e){}
+        }
+
+        liste.push({
+          dossier: d.name,
+          titre: m.titre || joli(d.name),
+          categorie: m.categorie || "Album",
+          description: m.description || "",
+          couverture: resoudreCouverture(m.couverture, imgs) || imgs[0].download_url,
+          photos: imgs.map(function(img){
+            return { name: img.name, url: img.download_url, description: (m.photos && m.photos[img.name]) || '' };
+          })
+        });
+      }
+
+      if(imagesRacine.length){
+        liste.unshift({
+          dossier: "_racine", titre: "Photos", categorie: "Général", description: "Photos diverses",
+          couverture: imagesRacine[0].download_url,
+          photos: imagesRacine.map(function(img){ return { name: img.name, url: img.download_url, description: '' }; })
+        });
+      }
+
+      albums = liste;
+      afficherAlbums();
+    } catch(err){
+      console.error(err);
+      afficherMessage("Impossible de charger la galerie. Vérifie que le dossier 'galerie' existe sur GitHub.<br><br>Erreur : " + esc(err.message));
+    }
+  }
+
+  chargerAlbums();
 })();
 </script>
 </body>
