@@ -5,250 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Galerie J.B.C Crome</title>
 <link rel="icon" type="image/png" href="LogoV3.png">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="royal-look.css">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
-
-  :root{
-    --asphalt:#07111d;
-    --panel:#0f1726;
-    --panel-2:#142338;
-    --hairline:rgba(255,255,255,.10);
-    --chrome-1:#f5f7fb;
-    --chrome-2:#dfe7f2;
-    --chrome-3:#8ea0b7;
-    --amber:#5da8ff;
-    --amber-dim:#274d7c;
-    --amber-glow:rgba(93,168,255,.24);
-    --safety-red:#3b82f6;
-    --safety-red-dark:#18365d;
-    --shadow-hard:0 18px 45px rgba(2,10,20,.45);
-  }
-
-  *{box-sizing:border-box; margin:0; padding:0;}
-  html{scroll-behavior:smooth;}
-
-  body{
-    background:
-      radial-gradient(ellipse at 15% -10%, #12233a 0%, transparent 55%),
-      radial-gradient(ellipse at 85% 110%, #0b1726 0%, transparent 55%),
-      var(--asphalt);
-    color:var(--chrome-2);
-    font-family:'Work Sans', sans-serif;
-    min-height:100vh;
-    overflow-x:hidden;
-  }
-  body::before{
-    content:"";
-    position:fixed; inset:0;
-    background-image: repeating-linear-gradient(35deg, rgba(255,255,255,.014) 0px, rgba(255,255,255,.014) 1px, transparent 1px, transparent 4px);
-    pointer-events:none;
-    z-index:1;
-  }
-  a{color:inherit; text-decoration:none;}
-  ::selection{background:var(--amber); color:#1a0f04;}
-
-  header{
-    position:sticky; top:0; z-index:50;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:18px 6vw;
-    background:linear-gradient(180deg, rgba(7,17,29,.96), rgba(7,17,29,.86));
-    backdrop-filter:blur(14px);
-    border-bottom:1px solid var(--hairline);
-  }
-  .logo{
-    font-family:'Anton', sans-serif;
-    font-size:22px;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    background:linear-gradient(90deg, #ffffff 0%, #dce8f6 35%, #8db7eb 60%, #ffffff 100%);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
-  .logo::after{
-    content:"●"; color:var(--amber); font-size:8px; vertical-align:top;
-    -webkit-text-fill-color:var(--amber); margin-left:4px;
-  }
-  nav ul{list-style:none; display:flex; gap:10px;}
-  nav a{
-    font-size:12px; letter-spacing:1px; text-transform:uppercase;
-    color:var(--chrome-3); font-weight:600;
-    padding:8px 14px; border-radius:20px;
-    background:rgba(255,255,255,.02);
-    border:1px solid transparent;
-    display:inline-flex; align-items:center; gap:7px;
-    transition:color .2s ease, background .2s ease, border-color .2s ease;
-  }
-  nav a::before{
-    content:""; width:5px; height:5px; border-radius:50%;
-    background:var(--chrome-3); flex-shrink:0;
-    transition:background .2s ease, box-shadow .2s ease;
-  }
-  nav a:hover, nav a.active{
-    color:var(--chrome-1);
-    background:rgba(93,168,255,.12);
-    border-color:rgba(93,168,255,.28);
-  }
-  nav a:hover::before, nav a.active::before{
-    background:var(--amber); box-shadow:0 0 8px var(--amber-glow);
-  }
-
-  section{position:relative; z-index:2; padding:100px 6vw; scroll-margin-top:90px;}
-  .section-head{max-width:980px; margin:0 auto 52px; text-align:center;}
-  .eyebrow{
-    font-family:'Space Mono', monospace;
-    font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--amber);
-    font-weight:700; margin-bottom:14px; display:flex; align-items:center; justify-content:center; gap:12px;
-  }
-  .eyebrow::after{content:""; width:60px; height:1px; background:linear-gradient(90deg, var(--amber), transparent);}
-  .section-head h2{
-    font-family:'Anton', sans-serif; font-size:clamp(24px,3vw,42px);
-    text-transform:uppercase; letter-spacing:.5px; color:var(--chrome-1);
-    white-space:nowrap;
-  }
-  .section-head p{margin-top:14px; color:var(--chrome-3); line-height:1.7; font-size:15px;}
-
-  .filmstrip-hint{font-family:'Space Mono', monospace; font-size:11px; letter-spacing:1px; color:var(--chrome-3); margin-bottom:22px; display:block;}
-
-  /* ---- Album vedette (hero) ---- */
-  .hero-card{
-    position:relative; border-radius:14px; overflow:hidden; cursor:pointer;
-    margin:0 auto 36px; max-width:1100px; box-shadow:var(--shadow-hard);
-    border:1px solid var(--hairline);
-  }
-  .hero-photo{
-    aspect-ratio:auto; height:clamp(320px, 40vw, 480px);
-    background-size:cover; background-position:center;
-    filter:grayscale(.08) contrast(1.05) saturate(1.05);
-    transition:opacity .25s ease;
-  }
-  .hero-arrow{
-    position:absolute; top:50%; transform:translateY(-50%);
-    width:44px; height:44px; border-radius:50%;
-    background:rgba(7,17,29,.55); border:1px solid rgba(93,168,255,.28);
-    color:var(--chrome-1); display:flex; align-items:center; justify-content:center;
-    font-size:20px; cursor:pointer; z-index:3;
-    transition:background .2s ease, border-color .2s ease;
-  }
+  .hero-card{position:relative; border-radius:20px; overflow:hidden; cursor:pointer; margin:0 auto 36px; max-width:1100px; box-shadow:var(--shadow-hard); border:1px solid var(--hairline);}
+  .hero-photo{height:clamp(320px,40vw,480px); background-size:cover; background-position:center;}
+  .hero-arrow{position:absolute; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:50%; background:rgba(5,6,8,.55); border:1px solid rgba(93,168,255,.3); color:var(--chrome-1); display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer; z-index:3;}
   .hero-arrow:hover{background:rgba(93,168,255,.18); border-color:var(--amber);}
   .hero-prev{left:22px;} .hero-next{right:22px;}
-  .hero-info{
-    position:absolute; left:0; right:0; bottom:0; padding:30px 34px;
-    background:linear-gradient(0deg, rgba(2,9,17,.94) 10%, transparent 100%);
-  }
-  .hero-tag{
-    font-family:'Space Mono', monospace; font-size:11px; letter-spacing:2.5px;
-    text-transform:uppercase; color:var(--amber); font-weight:700;
-  }
-  .hero-info h3{
-    font-family:'Anton', sans-serif; font-size:clamp(22px,3.2vw,34px);
-    text-transform:uppercase; color:var(--chrome-1); margin:8px 0 10px; line-height:1.15;
-  }
+  .hero-info{position:absolute; left:0; right:0; bottom:0; padding:30px 34px; background:linear-gradient(0deg,rgba(5,6,8,.95) 10%,transparent 100%);}
+  .hero-tag{font-size:13px; font-weight:700; color:var(--amber);}
+  .hero-info h3{font-weight:800; font-size:clamp(22px,3.2vw,34px); color:#fff; margin:6px 0 10px; letter-spacing:-.5px;}
   .hero-info p{color:var(--chrome-3); font-size:14px; line-height:1.6; max-width:640px;}
-  .hero-count{
-    display:inline-block; margin-top:14px; font-family:'Space Mono', monospace;
-    font-size:11px; letter-spacing:1px; color:var(--chrome-1);
-    background:rgba(255,255,255,.08); border:1px solid var(--hairline);
-    padding:5px 13px; border-radius:20px;
-  }
+  .hero-count{display:inline-block; margin-top:14px; font-size:12px; font-weight:600; color:var(--chrome-1); background:rgba(255,255,255,.08); border:1px solid var(--hairline); padding:5px 13px; border-radius:20px;}
 
-  /* ---- Grille des autres albums ---- */
-  .albums-grid{
-    display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:22px;
-  }
-  .mini-card{
-    position:relative; border-radius:10px; overflow:hidden; cursor:pointer;
-    transition:transform .25s ease, box-shadow .25s ease;
-    border:1px solid var(--hairline);
-  }
+  .albums-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:22px; max-width:1100px; margin:0 auto;}
+  .mini-card{position:relative; border-radius:16px; overflow:hidden; cursor:pointer; border:1px solid var(--hairline); transition:transform .25s ease, box-shadow .25s ease;}
   .mini-card:hover{transform:translateY(-6px); box-shadow:var(--shadow-hard);}
-  .mini-photo{
-    aspect-ratio:3/2; background-size:cover; background-position:center;
-    filter:grayscale(.1) contrast(1.05) saturate(1.05);
-    transition:transform .4s ease;
-  }
+  .mini-photo{aspect-ratio:3/2; background-size:cover; background-position:center; transition:transform .4s ease;}
   .mini-card:hover .mini-photo{transform:scale(1.07);}
-  .mini-info{
-    position:absolute; left:0; right:0; bottom:0; padding:14px 15px;
-    background:linear-gradient(0deg, rgba(2,9,17,.92) 15%, transparent 100%);
-  }
-  .mini-info h4{
-    font-family:'Anton', sans-serif; font-size:14.5px; text-transform:uppercase; color:var(--chrome-1);
-  }
-  .mini-meta{
-    margin-top:6px; display:flex; justify-content:space-between;
-    font-family:'Space Mono', monospace; font-size:9.5px; letter-spacing:1px;
-    text-transform:uppercase; color:var(--amber); font-weight:700;
-  }
+  .mini-info{position:absolute; left:0; right:0; bottom:0; padding:14px 16px; background:linear-gradient(0deg,rgba(5,6,8,.94) 15%,transparent 100%);}
+  .mini-info h4{font-weight:800; font-size:16px; color:#fff;}
+  .mini-meta{margin-top:6px; display:flex; justify-content:space-between; font-size:12px; font-weight:600; color:var(--amber);}
+  .empty-state, .loading-state{grid-column:1/-1; text-align:center; padding:56px 20px; color:var(--chrome-3); border:1px dashed rgba(255,255,255,.14); border-radius:14px; font-size:14px;}
 
-  #lightbox{
-    position:fixed; inset:0; z-index:200; background:rgba(8,7,6,.94); backdrop-filter:blur(6px);
-    display:none; flex-direction:column; align-items:center; justify-content:center; padding:5vh 5vw;
-    opacity:0; transition:opacity .25s ease;
-  }
+  #lightbox{position:fixed; inset:0; z-index:200; background:rgba(5,6,8,.95); backdrop-filter:blur(6px); display:none; flex-direction:column; align-items:center; justify-content:center; padding:5vh 5vw; opacity:0; transition:opacity .25s ease;}
   #lightbox.open{display:flex; opacity:1;}
-  #lightbox img{max-width:100%; max-height:76vh; border-radius:8px; box-shadow:0 30px 70px rgba(0,0,0,.6); transform:scale(.96); transition:transform .25s ease;}
-  #lightbox.open img{transform:scale(1);}
+  #lightbox img{max-width:100%; max-height:76vh; border-radius:12px; box-shadow:0 30px 70px rgba(0,0,0,.6);}
   #lightbox-info{margin-top:18px; max-width:620px; text-align:center;}
-  #lightbox-caption{color:var(--chrome-3); font-size:12px; letter-spacing:1px; text-transform:uppercase; font-family:'Space Mono', monospace;}
+  #lightbox-caption{color:var(--chrome-3); font-size:13px;}
   #lightbox-caption strong{color:var(--chrome-1);}
   #lightbox-description{margin-top:8px; color:var(--chrome-2); font-size:14px; line-height:1.6;}
   #lightbox-description:empty{display:none;}
-  #lightbox-close, #lightbox-prev, #lightbox-next{
-    position:absolute; border-radius:50%; background:rgba(255,255,255,.06);
-    border:1px solid rgba(93,168,255,.25); color:var(--chrome-1);
-    display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .2s ease, border-color .2s ease;
-  }
+  #lightbox-close, #lightbox-prev, #lightbox-next{position:absolute; border-radius:50%; background:rgba(255,255,255,.06); border:1px solid rgba(93,168,255,.3); color:var(--chrome-1); display:flex; align-items:center; justify-content:center; cursor:pointer;}
   #lightbox-close:hover, #lightbox-prev:hover, #lightbox-next:hover{background:rgba(93,168,255,.14); border-color:var(--amber);}
   #lightbox-close{top:26px; right:6vw; width:42px; height:42px; font-size:20px;}
   #lightbox-prev, #lightbox-next{top:50%; transform:translateY(-50%); width:48px; height:48px; font-size:22px;}
   #lightbox-prev{left:4vw;} #lightbox-next{right:4vw;}
-
-  .empty-state, .loading-state{
-    grid-column:1/-1; text-align:center; padding:56px 20px; color:var(--chrome-3);
-    border:1px dashed rgba(255,255,255,.14); border-radius:8px; font-size:14px;
-  }
-
-  footer{
-    padding:0 6vw 28px; position:relative; z-index:2;
-  }
-  footer .footer-shell{
-    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
-    padding:18px 22px; border:1px solid var(--hairline); border-radius:18px;
-    background:linear-gradient(135deg, rgba(255,255,255,.04), rgba(255,255,255,.025));
-    color:var(--chrome-3); font-size:11px; letter-spacing:.5px;
-    font-family:'Space Mono', monospace;
-    box-shadow:0 10px 24px rgba(2,10,20,.16);
-  }
-  body.push-footer{display:flex; flex-direction:column; min-height:100vh;}
-  body.push-footer footer{margin-top:auto;}
-
-  @media (max-width:760px){
-    header{padding:16px 5vw;} nav ul{gap:6px;} nav a{font-size:10.5px; padding:7px 10px;}
-    .hero-info{padding:22px;}
-    .hero-arrow{width:36px; height:36px; font-size:17px;}
-    .section-head h2{white-space:normal;}
-  }
-
-  #preloader{
-    position:fixed; inset:0; z-index:999; background:var(--asphalt);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px;
-    transition:opacity .6s ease, visibility .6s ease;
-  }
-  #preloader.hidden{opacity:0; visibility:hidden; pointer-events:none;}
-  .preloader-logo{
-    font-family:'Anton', sans-serif; font-size:16px; letter-spacing:3px;
-    background:linear-gradient(180deg, #fff 0%, #e8e0d2 40%, #8a7f70 50%, #f3ede1 62%, #fff 100%);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
-  .preloader-ring{width:50px; height:50px; border-radius:50%; border:2px solid rgba(255,255,255,.08); border-top-color:var(--amber); animation:preloaderSpin .9s linear infinite;}
-  .preloader-bar{width:220px; height:3px; background:rgba(255,255,255,.08); border-radius:3px; overflow:hidden; position:relative;}
-  .preloader-bar-fill{height:100%; width:0%; border-radius:3px; background:linear-gradient(90deg, var(--amber-dim), var(--amber)); box-shadow:0 0 12px var(--amber-glow); transition:width .25s ease-out;}
-  .preloader-percent{font-family:'Space Mono', monospace; font-size:13px; letter-spacing:1px; color:var(--chrome-3); font-variant-numeric:tabular-nums; min-width:42px; text-align:center;}
-  .preloader-status{font-family:'Space Mono', monospace; font-size:9.5px; letter-spacing:2px; text-transform:uppercase; color:rgba(214,205,190,.4);}
-  @keyframes preloaderSpin{to{transform:rotate(360deg);}}
-
+  @media (max-width:760px){.hero-info{padding:22px;} .hero-arrow{width:36px; height:36px; font-size:17px;}}
 </style>
 </head>
-<body class="push-footer">
+<body>
 
 <div id="preloader">
   <div class="preloader-ring"></div>
@@ -259,27 +56,31 @@
 </div>
 
 <header>
-  <a href="index.html" class="logo">J.B.C&nbsp;CROME</a>
+  <a href="index.html" class="logo-link"><img src="LogoV3.png" alt="J.B.C Crome" class="logo-img"></a>
   <nav>
     <ul>
       <li><a href="index.html">Accueil</a></li>
-      <li><a href="apropos.html">A propos</a></li>
+      <li><a href="apropos.html">À propos</a></li>
       <li><a href="calendrier.html">Calendrier</a></li>
       <li><a href="galerie.html" class="active">Galerie</a></li>
       <li><a href="discord.html">Discord</a></li>
     </ul>
   </nav>
+  <a href="discord.html" class="header-cta">Rejoindre →</a>
 </header>
 
-<section id="galerie">
-  <div class="section-head">
-    <span class="eyebrow">Galerie</span>
-    <h2>Photos de route, convois et regroupements</h2>
-    <p>Retrouvez les meilleurs moments J.B.C Crome en images : convois, routes, rassemblements et souvenirs de la VTC.</p>
+<div class="page-hero" style="--hero-img:url('hero-convoi.jpg')">
+  <div class="page-hero-bg"></div>
+  <div class="page-hero-overlay"></div>
+  <div class="page-hero-content">
+    <span class="page-badge">Souvenirs</span>
+    <h1>Galerie</h1>
+    <p class="page-sub">"Les meilleurs moments sur la route"</p>
   </div>
+</div>
 
+<section id="galerie">
   <div id="hero-wrap"></div>
-
   <div id="albums-grid" class="albums-grid">
     <div class="loading-state">Chargement des albums…</div>
   </div>
@@ -303,93 +104,15 @@
   </div>
 </footer>
 
+<script src="common.js"></script>
 <script>
 (function(){
-  function forceScrollTop(){
-    window.scrollTo(0, 0);
-  }
-  forceScrollTop();
-  document.addEventListener('DOMContentLoaded', forceScrollTop);
-  window.addEventListener('load', forceScrollTop);
-  window.addEventListener('pageshow', forceScrollTop);
-  setTimeout(forceScrollTop, 0);
-  setTimeout(forceScrollTop, 350);
-})();
-</script>
-
-<script>
-(function(){
-  const preloader = document.getElementById('preloader');
-  const fill = document.getElementById('preloader-fill');
-  const percentLabel = document.getElementById('preloader-percent');
-  const statusLabel = document.getElementById('preloader-status');
-  if(!preloader || !fill || !percentLabel) return;
-
-  const DUREE_MIN_MS = 150;
-  const DUREE_MAX_MS = 400;
-
-  const debut = performance.now();
-  let pageEstPrete = (document.readyState === 'complete');
-  let masque = false;
-
-  const messages = [
-    'Chargement du site…',
-    'Préparation de la flotte…',
-    'Polissage du chrome…',
-    'Presque prêt…'
-  ];
-
-  window.addEventListener('load', function(){ pageEstPrete = true; });
-
-  function definirProgression(pct){
-    pct = Math.max(0, Math.min(100, pct));
-    fill.style.width = pct + '%';
-    percentLabel.textContent = Math.round(pct) + '%';
-    if(statusLabel){
-      const idx = Math.min(messages.length - 1, Math.floor((pct / 100) * messages.length));
-      statusLabel.textContent = messages[idx];
-    }
-  }
-
-  function cacherPreloader(){
-    if(masque) return;
-    masque = true;
-    definirProgression(100);
-    setTimeout(function(){
-      preloader.classList.add('hidden');
-    }, 150);
-  }
-
-  function boucle(){
-    const ecoule = performance.now() - debut;
-    const ratioTemps = Math.min(1, ecoule / DUREE_MIN_MS);
-    const progressionSimulee = 90 * (1 - Math.pow(1 - ratioTemps, 2));
-    definirProgression(progressionSimulee);
-
-    const dureeMinAtteinte = ecoule >= DUREE_MIN_MS;
-    const dureeMaxAtteinte = ecoule >= DUREE_MAX_MS;
-
-    if((pageEstPrete && dureeMinAtteinte) || dureeMaxAtteinte){
-      cacherPreloader();
-      return;
-    }
-    requestAnimationFrame(boucle);
-  }
-  requestAnimationFrame(boucle);
-})();
-</script>
-
-<script>
-(function(){
-  // Configuration GitHub - À MODIFIER AVEC VOS INFOS
   const GITHUB_USER = "nosix-dev";
   const GITHUB_REPO = "J.B.C-Crome";
   const GITHUB_BRANCH = "main";
   const GITHUB_FOLDER = "galerie";
-
-  // Proxy Cloudflare Worker : évite le rate limit de l'API GitHub non authentifiée
-  // et cache le token GitHub côté serveur.
   const PROXY_BASE = "https://jbc-crome-proxy.levrailuciferms.workers.dev";
+  const DOSSIERS_IGNORES = ["couverture"];
 
   const heroWrap = document.getElementById('hero-wrap');
   const grid = document.getElementById('albums-grid');
@@ -397,323 +120,197 @@
   const lightboxImg = document.getElementById('lightbox-img');
   const lightboxCaption = document.getElementById('lightbox-caption');
   const lightboxDescription = document.getElementById('lightbox-description');
-  const btnClose = document.getElementById('lightbox-close');
-  const btnPrev = document.getElementById('lightbox-prev');
-  const btnNext = document.getElementById('lightbox-next');
 
-  let albums = [];
-  let albumOuvert = null;
-  let currentIndex = 0;
-  let heroIndex = 0;
+  let albums = [], albumOuvert = null, currentIndex = 0, heroIndex = 0;
 
-  function estImage(nom){
-    return /\.(jpe?g|png|webp|gif)$/i.test(nom);
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
   }
+  function estImage(nom){ return /\.(jpe?g|png|webp|gif)$/i.test(nom); }
+  function urlFichier(chemin){ return "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/" + chemin; }
+  function apiUrl(chemin){ return PROXY_BASE + "/gh/repos/" + GITHUB_USER + "/" + GITHUB_REPO + "/contents/" + chemin + "?ref=" + GITHUB_BRANCH; }
 
-  function urlFichier(chemin){
-    return "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/" + chemin;
-  }
-
-  function afficherErreur(message){
+  function afficherMessage(html){
     heroWrap.innerHTML = '';
-    grid.innerHTML = '<div class="empty-state">' + message + '</div>';
+    grid.innerHTML = '<div class="empty-state">' + html + '</div>';
   }
 
-  function afficherVide(){
-    heroWrap.innerHTML = '';
-    grid.innerHTML = '<div class="empty-state">Aucun album pour le moment. Ajoute des photos dans le dossier "galerie" sur GitHub.</div>';
-  }
-
+  // ---- Lightbox ----
   function ouvrirLightbox(album, index){
-    albumOuvert = album;
-    currentIndex = index;
-    majImageLightbox();
+    albumOuvert = album; currentIndex = index;
+    majLightbox();
     lightbox.classList.add('open');
   }
-
-  function majImageLightbox(){
+  function majLightbox(){
     const photo = albumOuvert.photos[currentIndex];
     lightboxImg.src = photo.url;
-    lightboxCaption.innerHTML = '<strong>' + albumOuvert.titre + '</strong> — ' + (currentIndex + 1) + ' / ' + albumOuvert.photos.length;
+    lightboxCaption.innerHTML = '<strong>' + esc(albumOuvert.titre) + '</strong> — ' + (currentIndex + 1) + ' / ' + albumOuvert.photos.length;
     lightboxDescription.textContent = photo.description || '';
   }
-
-  function fermerLightbox(){
-    lightbox.classList.remove('open');
-  }
-
-  function suivant(delta){
+  function fermer(){ lightbox.classList.remove('open'); }
+  function naviguer(d){
     if(!albumOuvert) return;
-    currentIndex = (currentIndex + delta + albumOuvert.photos.length) % albumOuvert.photos.length;
-    majImageLightbox();
+    currentIndex = (currentIndex + d + albumOuvert.photos.length) % albumOuvert.photos.length;
+    majLightbox();
   }
-
-  btnClose.addEventListener('click', fermerLightbox);
-  btnPrev.addEventListener('click', function(){ suivant(-1); });
-  btnNext.addEventListener('click', function(){ suivant(1); });
-  lightbox.addEventListener('click', function(e){
-    if(e.target === lightbox) fermerLightbox();
-  });
+  document.getElementById('lightbox-close').addEventListener('click', fermer);
+  document.getElementById('lightbox-prev').addEventListener('click', function(){ naviguer(-1); });
+  document.getElementById('lightbox-next').addEventListener('click', function(){ naviguer(1); });
+  lightbox.addEventListener('click', function(e){ if(e.target === lightbox) fermer(); });
   document.addEventListener('keydown', function(e){
     if(!lightbox.classList.contains('open')) return;
-    if(e.key === 'Escape') fermerLightbox();
-    if(e.key === 'ArrowLeft') suivant(-1);
-    if(e.key === 'ArrowRight') suivant(1);
+    if(e.key === 'Escape') fermer();
+    if(e.key === 'ArrowLeft') naviguer(-1);
+    if(e.key === 'ArrowRight') naviguer(1);
   });
 
-  // ---- Album vedette (hero) ----
+  // ---- Album vedette ----
   function afficherHero(album){
     heroIndex = 0;
     heroWrap.innerHTML =
       '<div class="hero-card" id="hero-card">'
-      + '<div class="hero-photo" id="hero-photo" style="background-image:url(\'' + album.photos[0].url + '\')"></div>'
+      + '<div class="hero-photo" id="hero-photo"></div>'
       + '<div class="hero-arrow hero-prev" id="hero-prev">‹</div>'
       + '<div class="hero-arrow hero-next" id="hero-next">›</div>'
       + '<div class="hero-info">'
-      + '<span class="hero-tag">' + album.categorie + '</span>'
-      + '<h3>' + album.titre + '</h3>'
-      + (album.description ? '<p>' + album.description + '</p>' : '')
-      + '<span class="hero-count" id="hero-count">🖼 1 / ' + album.photos.length + '</span>'
-      + '</div>'
-      + '</div>';
+      + '<span class="hero-tag">' + esc(album.categorie) + '</span>'
+      + '<h3>' + esc(album.titre) + '</h3>'
+      + (album.description ? '<p>' + esc(album.description) + '</p>' : '')
+      + '<span class="hero-count" id="hero-count"></span>'
+      + '</div></div>';
 
-    const heroPhoto = document.getElementById('hero-photo');
-    const heroCount = document.getElementById('hero-count');
-    const heroCard = document.getElementById('hero-card');
-    const heroPrev = document.getElementById('hero-prev');
-    const heroNext = document.getElementById('hero-next');
-
-    function majHero(){
-      heroPhoto.style.backgroundImage = "url('" + album.photos[heroIndex].url + "')";
-      heroCount.textContent = '🖼 ' + (heroIndex + 1) + ' / ' + album.photos.length;
+    const photo = document.getElementById('hero-photo');
+    const count = document.getElementById('hero-count');
+    function maj(){
+      photo.style.backgroundImage = "url('" + album.photos[heroIndex].url + "')";
+      count.textContent = '🖼 ' + (heroIndex + 1) + ' / ' + album.photos.length;
     }
-
-    heroPrev.addEventListener('click', function(e){
-      e.stopPropagation();
-      heroIndex = (heroIndex - 1 + album.photos.length) % album.photos.length;
-      majHero();
+    maj();
+    document.getElementById('hero-prev').addEventListener('click', function(e){
+      e.stopPropagation(); heroIndex = (heroIndex - 1 + album.photos.length) % album.photos.length; maj();
     });
-    heroNext.addEventListener('click', function(e){
-      e.stopPropagation();
-      heroIndex = (heroIndex + 1) % album.photos.length;
-      majHero();
+    document.getElementById('hero-next').addEventListener('click', function(e){
+      e.stopPropagation(); heroIndex = (heroIndex + 1) % album.photos.length; maj();
     });
-    heroCard.addEventListener('click', function(){
-      ouvrirLightbox(album, heroIndex);
-    });
+    document.getElementById('hero-card').addEventListener('click', function(){ ouvrirLightbox(album, heroIndex); });
   }
 
   function afficherAlbums(){
-    if(!albums.length){ afficherVide(); return; }
-
-    afficherHero(albums[0]);
-    const reste = albums.slice(1);
-
-    if(!reste.length){
-      grid.innerHTML = '';
+    if(!albums.length){
+      afficherMessage('Aucun album pour le moment. Ajoute des photos dans le dossier "galerie" sur GitHub.');
       return;
     }
+    afficherHero(albums[0]);
+    const reste = albums.slice(1);
+    if(!reste.length){ grid.innerHTML = ''; return; }
 
     grid.innerHTML = reste.map(function(album, i){
-      const nbPhotos = album.photos.length;
-      const couverture = album.couverture || album.photos[0]?.url || '';
-      return '<div class="mini-card" data-album-index="' + i + '">'
-        + '<div class="mini-photo" style="background-image:url(\'' + couverture + '\')"></div>'
-        + '<div class="mini-info">'
-        + '<h4>' + album.titre + '</h4>'
-        + '<div class="mini-meta"><span>' + album.categorie + '</span><span>' + nbPhotos + ' PH</span></div>'
-        + '</div>'
+      const couv = album.couverture || (album.photos[0] && album.photos[0].url) || '';
+      return '<div class="mini-card" data-i="' + i + '">'
+        + '<div class="mini-photo" style="background-image:url(\'' + couv + '\')"></div>'
+        + '<div class="mini-info"><h4>' + esc(album.titre) + '</h4>'
+        + '<div class="mini-meta"><span>' + esc(album.categorie) + '</span><span>' + album.photos.length + ' photos</span></div></div>'
         + '</div>';
     }).join('');
 
     grid.querySelectorAll('.mini-card').forEach(function(card){
       card.addEventListener('click', function(){
-        const album = reste[parseInt(card.dataset.albumIndex, 10)];
-        if(album && album.photos.length > 0) {
-          ouvrirLightbox(album, 0);
-        }
+        const album = reste[parseInt(card.dataset.i, 10)];
+        if(album && album.photos.length) ouvrirLightbox(album, 0);
       });
     });
   }
 
-  async function chargerArborescence(){
-    const url = PROXY_BASE + "/gh/repos/" + GITHUB_USER + "/" + GITHUB_REPO + "/contents/" + GITHUB_FOLDER + "?ref=" + GITHUB_BRANCH;
-    console.log("Chargement depuis :", url);
-
-    const res = await fetch(url);
-    if(!res.ok) throw new Error("Erreur API GitHub (" + res.status + ") - " + res.statusText);
-    return res.json();
-  }
-
-  async function chargerDossier(chemin){
-    const url = PROXY_BASE + "/gh/repos/" + GITHUB_USER + "/" + GITHUB_REPO + "/contents/" + chemin + "?ref=" + GITHUB_BRANCH;
-    const res = await fetch(url);
-    if(!res.ok) return [];
+  // ---- Chargement GitHub ----
+  async function lireDossier(chemin){
+    const res = await fetch(apiUrl(chemin));
+    if(!res.ok) throw new Error("Erreur API GitHub (" + res.status + ")");
     const data = await res.json();
     return Array.isArray(data) ? data : [];
   }
-
-  function extraireImages(fichiers){
-    return fichiers.filter(f => f.type === 'file' && estImage(f.name));
+  async function lireDossierSilencieux(chemin){
+    try { return await lireDossier(chemin); } catch(e){ return []; }
   }
+  function images(fichiers){ return fichiers.filter(function(f){ return f.type === 'file' && estImage(f.name); }); }
+  function joli(nom){ return nom.replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/\b\w/g, function(c){ return c.toUpperCase(); }); }
 
-  function prettifier(nomDossier){
-    return nomDossier
-      .replace(/[-_]+/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .replace(/\b\w/g, c => c.toUpperCase());
-  }
-
-  // Dossiers à ignorer : ce sont des dossiers d'assets (ex: images de couverture),
-  // pas de vrais albums à afficher dans la grille.
-  const DOSSIERS_IGNORES = ["couverture"];
-
-  // Charge le fichier unique albums.json et retourne un objet { nomDossier: meta }.
-  // On essaie d'abord à la racine du repo, puis dans galerie/ en secours (compatibilité).
-  // Ces fichiers passent par raw.githubusercontent.com, pas soumis au rate limit de l'API,
-  // donc pas besoin du proxy ici.
   async function chargerMetaGlobale(){
-    const emplacements = [
-      "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/albums.json",
-      "https://raw.githubusercontent.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/" + GITHUB_FOLDER + "/albums.json"
-    ];
-
-    for(const url of emplacements){
+    const urls = [urlFichier("albums.json"), urlFichier(GITHUB_FOLDER + "/albums.json")];
+    for(const url of urls){
       try {
         const res = await fetch(url, { cache: "no-store" });
         if(!res.ok) continue;
         const liste = await res.json();
         if(!Array.isArray(liste)) continue;
         const map = {};
-        liste.forEach(function(entry){
-          if(entry && entry.dossier) map[entry.dossier] = entry;
-        });
+        liste.forEach(function(e){ if(e && e.dossier) map[e.dossier] = e; });
         return map;
-      } catch(e) {
-        // On tente l'emplacement suivant
-      }
+      } catch(e){}
     }
-
-    console.warn("Aucun albums.json trouvé (ni à la racine, ni dans " + GITHUB_FOLDER + "/).");
     return {};
   }
 
-  // Résout l'URL de couverture : chemin absolu type "/galerie/couverture/xxx.jpg" -> raw GitHub,
-  // simple nom de fichier -> cherché dans les images du dossier de l'album.
-  function resoudreCouverture(valeurCouverture, imagesDuDossier){
-    if(!valeurCouverture) return '';
-
-    if(/^https?:\/\//i.test(valeurCouverture)) {
-      return valeurCouverture;
-    }
-
-    if(valeurCouverture.startsWith('/')) {
-      return urlFichier(valeurCouverture.slice(1));
-    }
-
-    const trouve = imagesDuDossier.find(img => img.name === valeurCouverture);
-    if(trouve) return trouve.download_url;
-
-    return '';
+  function resoudreCouverture(val, imgs){
+    if(!val) return '';
+    if(/^https?:\/\//i.test(val)) return val;
+    if(val.charAt(0) === '/') return urlFichier(val.slice(1));
+    const t = imgs.find(function(i){ return i.name === val; });
+    return t ? t.download_url : '';
   }
 
   async function chargerAlbums(){
     try {
-      const contenu = await chargerArborescence();
+      const contenu = await lireDossier(GITHUB_FOLDER);
+      if(!contenu.length){ afficherAlbums(); return; }
 
-      if(!Array.isArray(contenu) || contenu.length === 0) {
-        afficherVide();
-        return;
-      }
+      const meta = await chargerMetaGlobale();
+      const dossiers = contenu.filter(function(it){ return it.type === 'dir' && DOSSIERS_IGNORES.indexOf(it.name.toLowerCase()) === -1; });
+      const imagesRacine = images(contenu);
+      const liste = [];
 
-      // Meta globale depuis galerie/albums.json
-      const metaGlobale = await chargerMetaGlobale();
+      for(const d of dossiers){
+        const fichiers = await lireDossierSilencieux(d.path);
+        const imgs = images(fichiers);
+        if(!imgs.length) continue;
 
-      // Dossiers dans galerie/ (on exclut les dossiers d'assets comme "couverture")
-      const dossiers = contenu.filter(item => item.type === 'dir' && !DOSSIERS_IGNORES.includes(item.name.toLowerCase()));
-
-      // Images directement dans galerie/ (album racine)
-      const imagesRacine = extraireImages(contenu);
-
-      const albumsTemp = [];
-
-      // Pour chaque dossier, on va chercher son contenu
-      for(const dossier of dossiers) {
-        const fichiers = await chargerDossier(dossier.path);
-        const images = extraireImages(fichiers);
-
-        if(images.length > 0) {
-          // Priorité : meta globale (galerie/albums.json) sur ce dossier,
-          // sinon on retente un albums.json local au dossier (compatibilité ancienne méthode)
-          let meta = metaGlobale[dossier.name] || {};
-
-          if(!metaGlobale[dossier.name]) {
-            try {
-              const metaFile = fichiers.find(f => f.name === 'albums.json');
-              if(metaFile) {
-                const resp = await fetch(metaFile.download_url);
-                if(resp.ok) {
-                  meta = await resp.json();
-                }
-              }
-            } catch(e) {
-              // Pas de meta locale non plus, on continue avec les valeurs par défaut
-            }
-          }
-
-          const titre = meta.titre || prettifier(dossier.name);
-          const categorie = meta.categorie || "Album";
-          const description = meta.description || "";
-
-          let couverture = resoudreCouverture(meta.couverture, images);
-          if(!couverture && images.length > 0) {
-            couverture = images[0].download_url;
-          }
-
-          albumsTemp.push({
-            dossier: dossier.name,
-            titre: titre,
-            categorie: categorie,
-            description: description,
-            couverture: couverture,
-            photos: images.map(img => ({
-              name: img.name,
-              url: img.download_url,
-              description: (meta.photos && meta.photos[img.name]) || ''
-            }))
-          });
+        let m = meta[d.name] || {};
+        if(!meta[d.name]){
+          try {
+            const f = fichiers.find(function(x){ return x.name === 'albums.json'; });
+            if(f){ const r = await fetch(f.download_url); if(r.ok) m = await r.json(); }
+          } catch(e){}
         }
-      }
 
-      // Album racine (photos directement dans galerie/)
-      if(imagesRacine.length > 0) {
-        albumsTemp.unshift({
-          dossier: "_racine",
-          titre: "Photos",
-          categorie: "Général",
-          description: "Photos diverses",
-          couverture: imagesRacine[0].download_url,
-          photos: imagesRacine.map(img => ({
-            name: img.name,
-            url: img.download_url,
-            description: ''
-          }))
+        liste.push({
+          dossier: d.name,
+          titre: m.titre || joli(d.name),
+          categorie: m.categorie || "Album",
+          description: m.description || "",
+          couverture: resoudreCouverture(m.couverture, imgs) || imgs[0].download_url,
+          photos: imgs.map(function(img){
+            return { name: img.name, url: img.download_url, description: (m.photos && m.photos[img.name]) || '' };
+          })
         });
       }
 
-      albums = albumsTemp;
-      afficherAlbums();
+      if(imagesRacine.length){
+        liste.unshift({
+          dossier: "_racine", titre: "Photos", categorie: "Général", description: "Photos diverses",
+          couverture: imagesRacine[0].download_url,
+          photos: imagesRacine.map(function(img){ return { name: img.name, url: img.download_url, description: '' }; })
+        });
+      }
 
-    } catch(err) {
-      console.error("Erreur détaillée :", err);
-      afficherErreur("Impossible de charger la galerie. Vérifiez que le dépôt GitHub existe et que le dossier 'galerie' contient des images.<br><br>Erreur : " + err.message);
+      albums = liste;
+      afficherAlbums();
+    } catch(err){
+      console.error(err);
+      afficherMessage("Impossible de charger la galerie. Vérifie que le dossier 'galerie' existe sur GitHub.<br><br>Erreur : " + esc(err.message));
     }
   }
 
   chargerAlbums();
 })();
 </script>
-
 </body>
 </html>
