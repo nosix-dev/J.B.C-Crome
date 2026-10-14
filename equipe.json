@@ -1,0 +1,26 @@
+{
+  "membres": [
+    {
+      "nom": "Pseudo Fondateur",
+      "role": "Fondateur",
+      "camion": "Scania S 2016",
+      "haulmp": "PseudoHaulMP",
+      "haulmp_url": "https://vtc.haulmp.com/jbc-crome",
+      "avatar": "/equipe/fondateur.jpg"
+    },
+    {
+      "nom": "Pseudo Manager",
+      "role": "Manager",
+      "camion": "Volvo FH 2012",
+      "haulmp": "PseudoHaulMP2",
+      "avatar": ""
+    },
+    {
+      "nom": "Pseudo Staff",
+      "role": "Organisateur convois",
+      "camion": "DAF XF 2021",
+      "haulmp": "PseudoHaulMP3",
+      "avatar": ""
+    }
+  ]
+}
