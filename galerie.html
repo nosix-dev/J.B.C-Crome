@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Galerie J.B.C Crome</title>
 <link rel="icon" type="image/png" href="LogoV3.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#111317">
+<link rel="apple-touch-icon" href="LogoV3.png">
 <link rel="stylesheet" href="base.css">
 <link rel="stylesheet" href="royal-look.css">
 <style>
@@ -44,6 +47,7 @@
   #lightbox-prev{left:4vw;} #lightbox-next{right:4vw;}
   @media (max-width:760px){.hero-info{padding:22px;} .hero-arrow{width:36px; height:36px; font-size:17px;}}
 </style>
+<link rel="stylesheet" href="chrome-fx.css">
 </head>
 <body>
 
@@ -105,6 +109,8 @@
 </footer>
 
 <script src="common.js"></script>
+<script src="chrome-fx.js" defer></script>
+<script src="pwa.js" defer></script>
 <script>
 (function(){
   const GITHUB_USER = "nosix-dev";
