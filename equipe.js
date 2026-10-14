@@ -3,7 +3,7 @@
    equipe.json : "extras" (camion, pseudo HaulMP, par pseudo Discord) + "membres" (secours si l'API est injoignable). */
 (() => {
   // ⚠️ Domaine ngrok du bot (NGROK_DOMAIN)
-  const TEAM_API_URL = 'https://caviar-gatherer-matriarch.ngrok-free.dev/api/team';
+  const TEAM_API_URL = 'https://gigabyte-puppet-surprise.ngrok-free.dev/api/team';
   const JSON_URL = 'equipe.json';
 
   // Équipes affichées, dans l'ordre : clé de l'API → titre sur le site.
@@ -114,12 +114,17 @@
         });
         if (membres.length) groupes.push({ titre: g.titre, membres });
       });
-    } catch (e) { console.warn('[equipe] API du bot injoignable :', e.message); }
+      if (groupes.length) { try { localStorage.setItem('jbc-team', JSON.stringify(groupes)); } catch (_) {} }
+    } catch (e) {
+      console.warn('[equipe] API du bot injoignable :', e.message);
+      // Bot coupé : on réaffiche la dernière équipe connue sur cet appareil
+      try { groupes = JSON.parse(localStorage.getItem('jbc-team') || '[]'); } catch (_) { groupes = []; }
+    }
 
     if (!groupes.length && secours.length) {
       groupes = [{ titre: null, membres: secours.map(m => ({ pseudo: m.pseudo || m.nom, avatar: m.avatar, camion: m.camion, haulmp: m.haulmp, haulmp_url: m.haulmp_url, role: m.role })) }];
     }
-    if (!groupes.length) return;
+    if (!groupes.length) { mount.style.display = 'none'; return; }
 
     document.head.appendChild(el('style', null, css));
 
