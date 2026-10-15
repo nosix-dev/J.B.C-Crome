@@ -1,1 +1,43 @@
-
+[
+  {
+    "date": "2026-10-22T21:20:00",
+    "titre": "20 ans de Bobi | J.B.C Crome",
+    "lieu": "Rostock → Villa San Giovanni",
+    "description": [
+      "Heure de rassemblement : 20h00",
+      "Heure de départ : 21h00",
+      "Départ Ville : Rostock",
+      "Arrivée Ville : Villa San Giovanni",
+      "Distance : 2286 km",
+      "Serveur : HaulMP",
+      "Organisation : J.B.C Crome | HAULMP",
+      "⛔ Les doubles remorques sont strictement interdites pendant le convoi ⛔."
+    ],
+    "règlement": [
+      "🚦 1. RESPECT DU CODE DE LA ROUTE",
+      "Respectez les limitations de vitesse et la signalisation.",
+      "Adaptez votre conduite aux conditions de circulation.",
+      "Gardez une distance de sécurité suffisante entre les camions.",
+      "🤝 2. RESPECT ET COMPORTEMENT",
+      "Restez courtois envers les autres participants.",
+      "Aucun comportement toxique, provocateur ou irrespectueux ne sera toléré.",
+      "Respectez les organisateurs et les consignes données pendant le convoi.",
+      "🚫 3. DÉPASSEMENTS ET CIRCULATION",
+      "Les dépassements sont interdits sauf autorisation des organisateurs.",
+      "Les manœuvres dangereuses, collisions volontaires et blocages de la circulation sont interdits.",
+      "Ne doublez pas le convoi et ne vous insérez pas volontairement entre les camions.",
+      "📢 4. CONSIGNES DES ORGANISATEURS",
+      "Suivez les instructions communiquées pendant le rassemblement et le trajet.",
+      "Gardez votre microphone libre lorsque des annonces sont effectuées.",
+      "En cas de problème technique ou de déconnexion, prévenez un organisateur dès que possible.",
+      "🕒 5. PONCTUALITÉ ET PRÉPARATION",
+      "Soyez présent à 20h00 pour le rassemblement.",
+      "Préparez votre camion avant le départ prévu à 21h00.",
+      "Vérifiez votre carburant, votre itinéraire et l'état de votre véhicule.",
+      "⚠️ 7. SANCTIONS",
+      "Tout non-respect du règlement pourra entraîner un avertissement.",
+      "En cas de comportement dangereux ou de récidive, les organisateurs pourront exclure le participant du convoi."
+    ],
+    "lienHaulmp": "https://vtc.haulmp.com/jbc-crome#convoys"
+  }
+]
