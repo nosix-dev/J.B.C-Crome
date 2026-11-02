@@ -1,5 +1,5 @@
 /* J.B.C Crome — service worker (cache + rappels de convoi) */
-const CACHE = 'jbc-v1';
+const CACHE = 'jbc-v2';
 const EVENTS_URL = 'https://raw.githubusercontent.com/nosix-dev/J.B.C-Crome/main/events.json'; // ou ton /api/events
 const LEAD_MINUTES = 60; // rappel envoyé 1 h avant le départ
 const PRECACHE = ['/', '/index.html', '/LogoV3.png', '/chrome-fx.css', '/chrome-fx.js', '/pwa.js', '/equipe.js'];
@@ -25,7 +25,7 @@ self.addEventListener('fetch', e => {
   const url = new URL(req.url);
   if (url.origin !== location.origin) return; // events.json distant, Discord, etc. : pas touchés
 
-  const networkFirst = req.mode === 'navigate' || url.pathname.endsWith('.json') || url.pathname.startsWith('/api/');
+  const networkFirst = req.mode === 'navigate' || /\.(json|js|css|html)$/.test(url.pathname) || url.pathname.startsWith('/api/');
   if (networkFirst) {
     e.respondWith(
       fetch(req).then(res => {

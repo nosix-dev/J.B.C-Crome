@@ -1,0 +1,79 @@
+/* J.B.C Crome — fil d'actualité, réactions emoji et profils (fil.html + profil.html) */
+
+/* ---------- Fil ---------- */
+.fil{max-width:700px;margin:0 auto}
+.box,.post{background:var(--panel);border:1px solid var(--hairline);border-radius:18px;padding:18px;margin-bottom:18px}
+.me,.ph{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.ph b{display:block;color:var(--chrome-1);line-height:1.2}
+.ph a.pname:hover,.me a.pname:hover{color:var(--amber)}
+.mut{color:var(--chrome-3);font-size:13px}
+.fil textarea{width:100%;min-height:80px;resize:vertical;background:transparent;border:0;outline:0;color:var(--chrome-1);font:inherit;font-size:15px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px}
+.pill{background:none;border:1px solid var(--hairline);color:var(--chrome-3);border-radius:999px;padding:7px 16px;cursor:pointer;font:600 13px 'Plus Jakarta Sans',sans-serif;text-decoration:none;display:inline-block}
+.pill:hover{border-color:var(--amber);color:var(--amber)}
+.pill.on{background:var(--amber);border-color:var(--amber);color:#06101c}
+.pill.sm{padding:5px 11px;font-size:17px;line-height:1.2}
+.btn[disabled]{opacity:.5;cursor:default;transform:none}
+.del,.out{margin-left:auto;background:none;border:0;color:var(--chrome-3);cursor:pointer;font-size:13px}
+.del:hover,.out:hover{color:var(--amber)}
+.body{white-space:pre-wrap;word-break:break-word;margin:0 0 12px;color:var(--chrome-2);line-height:1.6}
+.imgs{display:grid;gap:4px;border-radius:12px;overflow:hidden;margin-bottom:12px}
+.imgs.n2,.imgs.n3,.imgs.n4{grid-template-columns:1fr 1fr}
+.imgs img{width:100%;height:100%;max-height:420px;object-fit:cover;display:block;cursor:zoom-in}
+.imgs.n1 img{max-height:540px}
+.imgs.n3 img:first-child{grid-column:span 2}
+.note{padding:18px;border:1px dashed var(--hairline);border-radius:18px;color:var(--chrome-3);text-align:center;font-size:14px;margin-bottom:18px}
+
+/* ---------- Avatars (anneau = couleur d'accent du membre) ---------- */
+.av{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--panel-2);flex:none;border:2px solid var(--pf,var(--amber-dim));display:inline-flex;align-items:center;justify-content:center;color:var(--chrome-1);font:700 18px 'Plus Jakarta Sans',sans-serif;text-transform:uppercase;overflow:hidden}
+.av.xl{width:104px;height:104px;font-size:42px;border:4px solid var(--panel);box-shadow:0 0 0 3px var(--pf,var(--amber-dim))}
+.pl{display:inline-flex;flex:none}
+
+/* ---------- Réactions emoji ---------- */
+.rx{position:relative;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rx-chip,.rx-add{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid var(--hairline);color:var(--chrome-2);border-radius:999px;padding:5px 11px;cursor:pointer;font:600 13px 'Plus Jakarta Sans',sans-serif;line-height:1.2;transition:border-color .15s,color .15s,background .15s}
+.rx-chip .e{font-size:16px;line-height:1}
+.rx-chip:hover,.rx-add:hover{border-color:var(--amber);color:var(--amber)}
+.rx-chip.on{background:rgba(93,168,255,.16);border-color:var(--amber);color:var(--chrome-1)}
+.rx-chip[disabled]{opacity:.6;cursor:default}
+.rx-pop{position:absolute;left:0;top:calc(100% + 8px);z-index:20;display:grid;grid-template-columns:repeat(8,1fr);gap:2px;padding:8px;width:min(340px,100%);background:var(--panel-2);border:1px solid var(--hairline);border-radius:14px;box-shadow:var(--shadow-hard)}
+.rx-pick{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:none;border:0;border-radius:10px;font-size:21px;line-height:1;cursor:pointer}
+.rx-pick:hover{background:rgba(255,255,255,.09)}
+.rx-pick.on{background:rgba(93,168,255,.22)}
+
+/* ---------- Profil ---------- */
+.pf{max-width:760px;margin:0 auto}
+.pf-card{background:var(--panel);border:1px solid var(--hairline);border-radius:20px;overflow:hidden;margin-bottom:18px}
+.pf-banner{position:relative;aspect-ratio:3/1;background:var(--panel-2)}
+.pf-banner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.pf-body{padding:0 24px 24px}
+.pf-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:-52px}
+.pf-name{font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(26px,5vw,34px);text-transform:uppercase;color:var(--chrome-1);margin-top:14px;line-height:1.15;word-break:break-word}
+.pf-status{margin-top:6px;color:var(--chrome-2);font-size:15px}
+.pf-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.pf-tag{border:1px solid var(--pf,var(--amber-dim));color:var(--chrome-2);border-radius:999px;padding:5px 13px;font:600 12.5px 'Plus Jakarta Sans',sans-serif}
+.pf-bio{margin-top:16px;color:var(--chrome-2);line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.pf-h{font-family:'Anton',sans-serif;font-weight:400;font-size:22px;text-transform:uppercase;color:var(--chrome-1);margin:30px 0 14px}
+.pf-h span{color:var(--chrome-3);font-size:15px;font-family:'Space Mono',monospace}
+.pf-edit{background:var(--panel);border:1px solid var(--hairline);border-radius:18px;padding:22px;margin-bottom:18px;display:grid;gap:20px}
+.pf-edit[hidden]{display:none}
+.fld>label{display:block;font:700 11.5px 'Space Mono',monospace;letter-spacing:1px;text-transform:uppercase;color:var(--chrome-3);margin-bottom:9px}
+.fld input[type=text],.fld textarea{width:100%;background:var(--panel-2);border:1px solid var(--hairline);border-radius:12px;padding:11px 14px;color:var(--chrome-1);font:inherit;font-size:15px;outline:0}
+.fld input[type=text]:focus,.fld textarea:focus{border-color:var(--amber)}
+.fld textarea{min-height:96px;resize:vertical}
+.fld .hint{margin-top:7px;color:var(--chrome-3);font-size:12.5px}
+.fld .btns{display:flex;gap:8px;flex-wrap:wrap}
+.sw{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw button{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+.sw button.on{border-color:#fff}
+.sw input[type=color]{width:36px;height:32px;padding:0;border:0;background:none;cursor:pointer}
+.pf-save{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pf-msg{font-size:13px;color:var(--chrome-3)}
+.pf-msg.err{color:#ff8d8d}
+
+@media (max-width:600px){
+  .pf-body{padding:0 16px 18px}
+  .av.xl{width:84px;height:84px;font-size:34px}
+  .pf-top{margin-top:-42px}
+  .post,.box{padding:14px}
+}
