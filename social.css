@@ -46,7 +46,7 @@
 .pf-card{background:var(--panel);border:1px solid var(--hairline);border-radius:20px;overflow:hidden;margin-bottom:18px}
 .pf-banner{position:relative;aspect-ratio:3/1;background:var(--panel-2)}
 .pf-banner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.pf-body{padding:0 24px 24px}
+.pf-body{position:relative;z-index:1;padding:0 24px 24px}
 .pf-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:-52px}
 .pf-name{font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(26px,5vw,34px);text-transform:uppercase;color:var(--chrome-1);margin-top:14px;line-height:1.15;word-break:break-word}
 .pf-status{margin-top:6px;color:var(--chrome-2);font-size:15px}
