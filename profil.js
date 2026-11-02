@@ -8,16 +8,34 @@
   var BANNERS = ["#142338", "#1b2a4a", "#2d1b4e", "#4a1b2d", "#4a2e1b", "#1b4a3a", "#3a3a3a", "#0f1726"];
   var STATUS = ["", "🚛", "🛣️", "🎮", "🎧", "☕", "😴", "🔥", "⛽", "🅿️", "🏁"];
 
+  /* Doivent rester identiques aux contraintes SQL (profils-setup-complet.sql) */
+  var BIO_MAX = 2000, BADGE_MAX = 5;
+  var EFFECTS = { none: "Aucun", snow: "❄️ Neige", sparkle: "✨ Étincelles", embers: "🔥 Braises", rain: "🌧️ Pluie", confetti: "🎉 Confettis", fireflies: "🟡 Lucioles", stars: "⭐ Étoiles", hearts: "💖 Cœurs", bubbles: "🫧 Bulles", matrix: "💚 Matrix", lightning: "⚡ Éclairs", petals: "🌸 Pétales", smoke: "💨 Fumée" };
+  var FRAMES = { none: "Aucun", neon: "Néon", rainbow: "Arc-en-ciel", chrome: "Chrome", fire: "Feu", gold: "Or", glitch: "Glitch", pulse: "Pulsation", ice: "Glace" };
+  var NAMES = { plain: "Normal", gradient: "Dégradé", neon: "Néon", chrome: "Chrome", gold: "Or", glitch: "Glitch", rainbow: "Arc-en-ciel", fire: "Feu" };
+  var CARDS = { classic: "Classique", glow: "Lueur", aurora: "Aurore", glass: "Verre", neon: "Néon", carbon: "Carbone" };
+  var BANNER_FX = { none: "Normal", dim: "Assombrie", blur: "Floue", scanlines: "Scanlines", gradient: "Fondu" };
+  var BADGES = {
+    convoyeur: { e: "🚛", l: "Convoyeur" }, nocturne: { e: "🌙", l: "Nocturne" }, matinal: { e: "🌅", l: "Matinal" },
+    rapide: { e: "⚡", l: "Rapide" }, photographe: { e: "📸", l: "Photographe" }, mecano: { e: "🔧", l: "Mécano" },
+    voyageur: { e: "🧭", l: "Voyageur" }, champion: { e: "🏆", l: "Champion" }, cafe: { e: "☕", l: "Accro au café" },
+    dev: { e: "💻", l: "Développeur" }, fondateur: { e: "👑", l: "Fondateur" }, legende: { e: "🌟", l: "Légende" }
+  };
+
   var P = null,        /* profil enregistré */
       D = null,        /* brouillon en cours d'édition */
       own = false, viewId = null,
       headEl = null, editEl = null, plist = null, countEl = null;
+
+  function pick(map, v, d) { return Object.prototype.hasOwnProperty.call(map, v) ? v : d; }
 
   /* ---------- Affichage ---------- */
   function view(d) {
     return {
       display_name: d.display_name, bio: d.bio, accent: d.accent, banner_color: d.banner_color,
       status_emoji: d.status_emoji, status_text: d.status_text, truck: d.truck, game: d.game, created_at: d.created_at,
+      effect: d.effect, frame: d.frame, name_style: d.name_style, card_style: d.card_style, banner_style: d.banner_style,
+      badges: d.badges, location: d.location, truckersmp_id: d.truckersmp_id,
       avatar_url: d.avatarBlob ? d.avatarPrev : d.avatar_url,
       banner_url: d.bannerBlob ? d.bannerPrev : d.banner_url
     };
@@ -25,21 +43,26 @@
 
   function buildHead(v) {
     var accent = JBC.okColor(v.accent, "#5da8ff"), bc = JBC.okColor(v.banner_color, "#142338");
-    var card = el("div", "pf-card"); card.style.setProperty("--pf", accent);
+    var card = el("div", "pf-card cs-" + pick(CARDS, v.card_style, "classic"));
+    card.style.setProperty("--pf", accent);
+    card.dataset.fx = pick(EFFECTS, v.effect, "none");
 
-    var ban = el("div", "pf-banner");
+    var ban = el("div", "pf-banner bn-" + pick(BANNER_FX, v.banner_style, "none"));
     if (JBC.okImg(v.banner_url)) { var bi = el("img"); bi.alt = ""; bi.referrerPolicy = "no-referrer"; bi.src = v.banner_url; ban.appendChild(bi); }
     else ban.style.background = "linear-gradient(120deg," + bc + " 0%," + bc + " 45%," + accent + "88 100%)";
     card.appendChild(ban);
 
     var body = el("div", "pf-body"), top = el("div", "pf-top");
-    top.appendChild(JBC.avatar({ display_name: v.display_name, avatar_url: v.avatar_url, accent: accent }, "xl"));
+    var av = JBC.avatar({ display_name: v.display_name, avatar_url: v.avatar_url, accent: accent }, "xl");
+    var fr = pick(FRAMES, v.frame, "none");
+    if (fr !== "none") { av.classList.add("pf-fr"); av.classList.add("fr-" + fr); }
+    top.appendChild(av);
     if (own && !D) {
       var eb = el("button", "pill", "✏️ Personnaliser mon profil"); eb.type = "button"; eb.onclick = openEdit;
       top.appendChild(eb);
     }
     body.appendChild(top);
-    body.appendChild(el("h1", "pf-name", v.display_name));
+    body.appendChild(el("h1", "pf-name ns-" + pick(NAMES, v.name_style, "plain"), v.display_name));
 
     var st = ((v.status_emoji ? v.status_emoji + " " : "") + (v.status_text || "")).trim();
     if (st) body.appendChild(el("div", "pf-status", st));
@@ -47,16 +70,41 @@
     var tags = el("div", "pf-tags");
     tags.appendChild(el("span", "pf-tag", GAMES[v.game] || "ETS2"));
     if (v.truck) tags.appendChild(el("span", "pf-tag", "🚛 " + v.truck));
+    if (v.location) tags.appendChild(el("span", "pf-tag", "📍 " + v.location));
+    if (v.truckersmp_id && /^[0-9]{1,10}$/.test(v.truckersmp_id)) {
+      var tl = el("a", "pf-tag", "🌍 TruckersMP #" + v.truckersmp_id);
+      tl.href = "https://truckersmp.com/user/" + v.truckersmp_id; tl.target = "_blank"; tl.rel = "noopener noreferrer";
+      tags.appendChild(tl);
+    }
     if (v.created_at) tags.appendChild(el("span", "pf-tag", "Membre depuis " + new Date(v.created_at).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })));
     body.appendChild(tags);
 
-    if (v.bio) body.appendChild(el("p", "pf-bio", v.bio));
+    var bd = (v.badges || []).filter(function (k) { return BADGES[k]; }).slice(0, BADGE_MAX);
+    if (bd.length) {
+      var bw = el("div", "pf-badges");
+      bd.forEach(function (k) { bw.appendChild(el("span", "pf-badge", BADGES[k].e + " " + BADGES[k].l)); });
+      body.appendChild(bw);
+    }
+
+    if (v.bio) {
+      var bio = el("div", "pf-bio");
+      if (window.DiscordMD) bio.innerHTML = DiscordMD.render(v.bio); else bio.textContent = v.bio;
+      body.appendChild(bio);
+    }
     card.appendChild(body);
     return card;
   }
 
-  function refresh() { var n = buildHead(view(D)); headEl.replaceWith(n); headEl = n; }
-  function redrawHead() { var n = buildHead(view(P)); headEl.replaceWith(n); headEl = n; }
+  /* Effet : réutilise le canvas existant si l'effet n'a pas changé (pas de redémarrage à chaque frappe) */
+  function fx(card, old) {
+    var n = card.dataset.fx;
+    if (!n || n === "none" || !window.PFX) return;
+    var cv = old && old.dataset.fx === n ? old.querySelector(".pf-fx") : null;
+    if (cv) card.appendChild(cv); else PFX.start(card, n, card.style.getPropertyValue("--pf"));
+  }
+  function swap(v) { var n = buildHead(v); fx(n, headEl); headEl.replaceWith(n); headEl = n; }
+  function refresh() { swap(view(D)); }
+  function redrawHead() { swap(view(P)); }
 
   /* ---------- Éditeur ---------- */
   function field(label, node, hint) {
@@ -78,6 +126,7 @@
     });
     sync(); return w;
   }
+  function mapChoices(map, key) { return choices(Object.keys(map), key, function (v) { return map[v]; }, "pill sm"); }
   function swatches(list, key) {
     var w = el("div", "sw"), ci = el("input"); ci.type = "color";
     function sync() { [].forEach.call(w.querySelectorAll("button"), function (b) { b.classList.toggle("on", b.dataset.c === String(D[key]).toLowerCase()); }); ci.value = D[key]; }
@@ -93,7 +142,40 @@
     i.oninput = function () { D[key] = i.value; refresh(); };
     return i;
   }
+  function idInput() {
+    var i = el("input"); i.type = "text"; i.inputMode = "numeric"; i.maxLength = 10; i.placeholder = "ex. 1234567"; i.value = D.truckersmp_id || "";
+    i.oninput = function () { i.value = i.value.replace(/\D/g, "").slice(0, 10); D.truckersmp_id = i.value; refresh(); };
+    return i;
+  }
+  function badgePicker() {
+    var w = el("div", "btns");
+    function sync() { [].forEach.call(w.children, function (b) { b.classList.toggle("on", D.badges.indexOf(b.dataset.v) > -1); }); }
+    Object.keys(BADGES).forEach(function (k) {
+      var b = btn(BADGES[k].e + " " + BADGES[k].l, function () {
+        var i = D.badges.indexOf(k);
+        if (i > -1) D.badges.splice(i, 1); else if (D.badges.length < BADGE_MAX) D.badges.push(k); else return;
+        sync(); refresh();
+      }, "pill sm");
+      b.dataset.v = k; w.appendChild(b);
+    });
+    sync(); return w;
+  }
   function dropPreview(k) { if (D[k + "Prev"]) URL.revokeObjectURL(D[k + "Prev"]); D[k + "Prev"] = null; D[k + "Blob"] = null; }
+
+  /* Barre de mise en forme de la bio */
+  function fire(ta) { ta.dispatchEvent(new Event("input")); }
+  function wrapSel(ta, pre, suf) {
+    var s = ta.selectionStart, e = ta.selectionEnd, v = ta.value, sel = v.slice(s, e) || "texte";
+    var nv = v.slice(0, s) + pre + sel + suf + v.slice(e);
+    if (nv.length > BIO_MAX) return;
+    ta.value = nv; ta.focus(); ta.setSelectionRange(s + pre.length, s + pre.length + sel.length); fire(ta);
+  }
+  function prefixLine(ta, pre) {
+    var s = ta.selectionStart, v = ta.value, ls = v.lastIndexOf("\n", s - 1) + 1;
+    var nv = v.slice(0, ls) + pre + v.slice(ls);
+    if (nv.length > BIO_MAX) return;
+    ta.value = nv; ta.focus(); ta.setSelectionRange(s + pre.length, s + pre.length); fire(ta);
+  }
 
   function buildEditor() {
     var e = el("div", "pf-edit"), msgEl = el("span", "pf-msg");
@@ -128,11 +210,21 @@
     var bnF = field("Bannière", bnB, "Recadrée en 3:1 (idéal : une capture large de ton camion). Sans image, la couleur ci-dessous est utilisée.");
     bnF.appendChild(bnIn);
 
-    /* Texte */
-    var bio = el("textarea"); bio.maxLength = 300; bio.value = D.bio || ""; bio.placeholder = "Parle un peu de toi, de ton style de conduite, de ton camion…";
-    var cnt = el("div", "hint", bio.value.length + " / 300");
-    bio.oninput = function () { D.bio = bio.value; cnt.textContent = bio.value.length + " / 300"; refresh(); };
-    var bioF = field("Bio", bio); bioF.appendChild(cnt);
+    /* Bio (markdown façon Discord) */
+    var bio = el("textarea"); bio.maxLength = BIO_MAX; bio.rows = 8; bio.value = D.bio || "";
+    bio.placeholder = "Parle de toi, de ton style de conduite, de ton camion…\n# Titre\n**gras** *italique* __souligné__ ~~barré~~ ||spoiler|| ^^MAJUSCULES^^";
+    var cnt = el("div", "hint", bio.value.length + " / " + BIO_MAX);
+    bio.oninput = function () { D.bio = bio.value; cnt.textContent = bio.value.length + " / " + BIO_MAX; refresh(); };
+    var tb = el("div", "pf-tb");
+    [["B", "**", "**"], ["I", "*", "*"], ["U", "__", "__"], ["S", "~~", "~~"], ["Spoiler", "||", "||"], ["MAJ", "^^", "^^"], ["Code", "`", "`"]].forEach(function (t) {
+      tb.appendChild(btn(t[0], function () { wrapSel(bio, t[1], t[2]); }, "pill sm"));
+    });
+    [["H1", "# "], ["H2", "## "], ["H3", "### "], ["Petit", "-# "], ["Citation", "> "], ["Liste", "- "]].forEach(function (t) {
+      tb.appendChild(btn(t[0], function () { prefixLine(bio, t[1]); }, "pill sm"));
+    });
+    var bioBox = el("div"); bioBox.appendChild(tb); bioBox.appendChild(bio);
+    var bioF = field("Bio", bioBox, "Syntaxe Discord : # titre · **gras** · *italique* · __souligné__ · ~~barré~~ · ||spoiler|| · ^^MAJUSCULES^^ · `code` · > citation · - liste · [texte](https://lien)");
+    bioF.appendChild(cnt);
 
     var stRow = el("div"); stRow.style.cssText = "display:grid;gap:10px";
     stRow.appendChild(choices(STATUS, "status_emoji", function (v) { return v || "∅"; }, "pill sm"));
@@ -145,7 +237,15 @@
     e.appendChild(bioF);
     e.appendChild(field("Jeu", choices(["ets2", "ats", "both"], "game", function (v) { return GAMES[v]; })));
     e.appendChild(field("Camion préféré", textInput("truck", 60)));
-    e.appendChild(field("Couleur d'accent", swatches(ACCENTS, "accent"), "Anneau de l'avatar, étiquettes… visible aussi dans le fil."));
+    e.appendChild(field("Localisation", textInput("location", 40), "Ville, pays… (40 caractères max)"));
+    e.appendChild(field("ID TruckersMP", idInput(), "Chiffres uniquement : affiche un lien vers ton profil TruckersMP."));
+    e.appendChild(field("Badges", badgePicker(), "Jusqu'à " + BADGE_MAX + " badges."));
+    e.appendChild(field("Effet de profil", mapChoices(EFFECTS, "effect"), "Animation affichée sur toute ta carte."));
+    e.appendChild(field("Cadre d'avatar", mapChoices(FRAMES, "frame")));
+    e.appendChild(field("Style du pseudo", mapChoices(NAMES, "name_style")));
+    e.appendChild(field("Style de la carte", mapChoices(CARDS, "card_style")));
+    e.appendChild(field("Style de la bannière", mapChoices(BANNER_FX, "banner_style")));
+    e.appendChild(field("Couleur d'accent", swatches(ACCENTS, "accent"), "Anneau de l'avatar, étiquettes, néon… visible aussi dans le fil."));
     e.appendChild(field("Couleur de la bannière", swatches(BANNERS, "banner_color")));
 
     var sv = el("button", "btn btn-discord", "Enregistrer"); sv.type = "button";
@@ -158,7 +258,12 @@
   function openEdit() {
     if (D) return;
     D = Object.assign({}, P, { avatarBlob: null, bannerBlob: null, avatarPrev: null, bannerPrev: null });
-    D.bio = D.bio || ""; D.truck = D.truck || ""; D.status_text = D.status_text || "";
+    D.bio = D.bio || ""; D.truck = D.truck || ""; D.status_text = D.status_text || ""; D.location = D.location || "";
+    D.truckersmp_id = D.truckersmp_id || "";
+    D.effect = pick(EFFECTS, D.effect, "none"); D.frame = pick(FRAMES, D.frame, "none");
+    D.name_style = pick(NAMES, D.name_style, "plain"); D.card_style = pick(CARDS, D.card_style, "classic");
+    D.banner_style = pick(BANNER_FX, D.banner_style, "none");
+    D.badges = (D.badges || []).filter(function (k) { return BADGES[k]; }).slice(0, BADGE_MAX);
     D.accent = JBC.okColor(D.accent, "#5da8ff"); D.banner_color = JBC.okColor(D.banner_color, "#142338");
     refresh();
     editEl = buildEditor();
@@ -180,9 +285,12 @@
     var upA = null, upB = null;
     try {
       var row = {
-        display_name: name, bio: D.bio.trim().slice(0, 300), accent: D.accent, banner_color: D.banner_color,
+        display_name: name, bio: D.bio.trim().slice(0, BIO_MAX), accent: D.accent, banner_color: D.banner_color,
         status_emoji: D.status_emoji || null, status_text: D.status_text.trim().slice(0, 60),
-        truck: D.truck.trim().slice(0, 60), game: D.game, avatar_url: D.avatar_url || null, banner_url: D.banner_url || null
+        truck: D.truck.trim().slice(0, 60), game: D.game, avatar_url: D.avatar_url || null, banner_url: D.banner_url || null,
+        effect: D.effect, frame: D.frame, name_style: D.name_style, card_style: D.card_style, banner_style: D.banner_style,
+        badges: D.badges.slice(0, BADGE_MAX), location: D.location.trim().slice(0, 40),
+        truckersmp_id: D.truckersmp_id ? D.truckersmp_id : null
       };
       if (D.avatarBlob) { upA = await JBC.upload(D.avatarBlob, "avatar"); row.avatar_url = upA; }
       if (D.bannerBlob) { upB = await JBC.upload(D.bannerBlob, "banner"); row.banner_url = upB; }
@@ -197,7 +305,8 @@
     } catch (er) {
       if (upA) JBC.removeFile(upA);
       if (upB) JBC.removeFile(upB);
-      msg("Erreur : " + (er.message || er), 1);
+      var m = String(er.message || er);
+      msg(/column|constraint|check/i.test(m) ? "Base non à jour : exécute profils-setup-complet.sql dans Supabase. (" + m + ")" : "Erreur : " + m, 1);
       b.disabled = false;
     }
   }
@@ -228,7 +337,7 @@
     viewId = id; own = !!(JBC.me && JBC.me.id === id);
 
     if (own) {
-      if (JBC.profilesError) { note("Profils non activés : exécute fil-profils-setup.sql dans Supabase (SQL Editor), puis recharge la page."); return; }
+      if (JBC.profilesError) { note("Profils non activés : exécute fil-profils-setup.sql puis profils-setup-complet.sql dans Supabase (SQL Editor), puis recharge la page."); return; }
       P = JBC.profile;
     } else {
       var r = await JBC.sb.from("profiles").select("*").eq("user_id", id).maybeSingle();
@@ -237,7 +346,7 @@
     if (!P) { note("Profil introuvable.", ["Retour au fil", "fil.html"]); return; }
 
     document.title = P.display_name + " — J.B.C Crome";
-    headEl = buildHead(view(P)); root.appendChild(headEl);
+    headEl = buildHead(view(P)); fx(headEl, null); root.appendChild(headEl);
 
     var h = el("h2", "pf-h", "Publications "); countEl = el("span", null, ""); h.appendChild(countEl);
     root.appendChild(h);
