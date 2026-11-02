@@ -10,29 +10,7 @@
 <link rel="apple-touch-icon" href="LogoV3.png">
 <link rel="stylesheet" href="base.css">
 <link rel="stylesheet" href="royal-look.css">
-<style>
-.fil{max-width:700px;margin:0 auto}
-.box,.post{background:var(--panel);border:1px solid var(--hairline);border-radius:18px;padding:18px;margin-bottom:18px}
-.me,.ph{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.av{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--panel-2);flex:none;border:2px solid var(--amber-dim)}
-.ph b{display:block;color:var(--chrome-1);line-height:1.2}
-.mut{color:var(--chrome-3);font-size:13px}
-.fil textarea{width:100%;min-height:80px;resize:vertical;background:transparent;border:0;outline:0;color:var(--chrome-1);font:inherit;font-size:15px}
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px}
-.pill{background:none;border:1px solid var(--hairline);color:var(--chrome-3);border-radius:999px;padding:7px 16px;cursor:pointer;font:600 13px 'Plus Jakarta Sans',sans-serif}
-.pill:hover{border-color:var(--amber);color:var(--amber)}
-.pill.on{background:var(--amber);border-color:var(--amber);color:#06101c}
-.btn[disabled]{opacity:.5;cursor:default;transform:none}
-.del,.out{margin-left:auto;background:none;border:0;color:var(--chrome-3);cursor:pointer;font-size:13px}
-.del:hover,.out:hover{color:var(--amber)}
-.body{white-space:pre-wrap;word-break:break-word;margin:0 0 12px;color:var(--chrome-2);line-height:1.6}
-.imgs{display:grid;gap:4px;border-radius:12px;overflow:hidden;margin-bottom:12px}
-.imgs.n2,.imgs.n3,.imgs.n4{grid-template-columns:1fr 1fr}
-.imgs img{width:100%;height:100%;max-height:420px;object-fit:cover;display:block;cursor:zoom-in}
-.imgs.n1 img{max-height:540px}
-.imgs.n3 img:first-child{grid-column:span 2}
-.note{padding:18px;border:1px dashed var(--hairline);border-radius:18px;color:var(--chrome-3);text-align:center;font-size:14px;margin-bottom:18px}
-</style>
+<link rel="stylesheet" href="social.css">
 </head>
 <body>
 <div id="preloader"><div id="preloader-fill"></div><span id="preloader-percent"></span><span id="preloader-status"></span></div>
@@ -80,78 +58,85 @@
 <script src="common.js"></script>
 <script src="chrome-fx.js" defer></script>
 <script src="pwa.js" defer></script>
+<script src="social.js"></script>
 <script>
-/* ===== À REMPLIR (Supabase > Project Settings > API) ===== */
-var SUPABASE_URL="https://aqckkzgbdmtxgieqfurl.supabase.co";
-var SUPABASE_KEY="sb_publishable_0XuAuJvOtEZuV13jtm1H0A_mR-2BJX3"; /* clé "anon public" */
-/* ========================================================== */
-var sb=null,me=null,files=[],liked={};
-if(SUPABASE_URL&&SUPABASE_KEY&&window.supabase)sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
-function ago(d){var s=(Date.now()-new Date(d))/1000;if(s<60)return"à l'instant";var m=Math.floor(s/60);if(m<60)return"il y a "+m+" min";var h=Math.floor(m/60);if(h<24)return"il y a "+h+" h";return"il y a "+Math.floor(h/24)+" j"}
-function avatar(u){var a=el("img","av");a.alt="";a.referrerPolicy="no-referrer";if(u&&/^https:\/\/cdn\.discordapp\.com\//.test(u))a.src=u;return a}
-function meta(u){var m=u.user_metadata||{};return{name:((m.custom_claims&&m.custom_claims.global_name)||m.full_name||m.name||"Chauffeur").slice(0,40),avatar:m.avatar_url||""}}
+/* La config Supabase (URL + clé) est dans social.js */
+var el = JBC.el, files = [], authErr = "";
 
-function drawAuth(){var a=document.getElementById("auth");a.innerHTML="";
-if(!sb){a.appendChild(el("div","note","Fil non configuré : renseigne SUPABASE_URL et SUPABASE_KEY dans fil.html (voir fil-setup.sql)."));return}
-var box=el("div","box");
-if(authErr){var er=el("div","note","Connexion refusée : "+authErr);er.style.marginBottom="12px";box.appendChild(er)}
-if(!me){box.appendChild(el("p","mut","Connecte-toi avec Discord pour publier et réagir."));
-var b=el("button","btn btn-discord","Se connecter avec Discord");b.style.marginTop="12px";
-b.onclick=function(){sb.auth.signInWithOAuth({provider:"discord",options:{redirectTo:location.origin+location.pathname,scopes:"identify email"}})};
-box.appendChild(b);a.appendChild(box);return}
-var m=meta(me),top=el("div","me");top.appendChild(avatar(m.avatar));top.appendChild(el("b",null,m.name));
-var o=el("button","out","Déconnexion");o.onclick=function(){sb.auth.signOut()};top.appendChild(o);
-var ta=el("textarea");ta.maxLength=1000;ta.placeholder="Partage quelque chose avec la communauté…";
-var inp=el("input");inp.type="file";inp.accept="image/*";inp.multiple=true;inp.hidden=true;
-var pick=el("button","pill","📷 Photos");pick.type="button";pick.onclick=function(){inp.click()};
-var info=el("span","mut","4 photos max, 5 Mo chacune");
-inp.onchange=function(){files=[].slice.call(inp.files).filter(function(f){return f.type.indexOf("image/")===0&&f.size<=5242880}).slice(0,4);info.textContent=files.length?files.length+" photo(s) prête(s)":"4 photos max, 5 Mo chacune"};
-var go=el("button","btn btn-discord","Publier");
-go.onclick=function(){var t=ta.value.trim();if(!t&&!files.length)return;go.disabled=true;go.textContent="Publication…";
-publish(t,m).then(function(){ta.value="";files=[];inp.value="";info.textContent="4 photos max, 5 Mo chacune";return load()})
-.catch(function(e){alert("Erreur : "+(e.message||e))}).then(function(){go.disabled=false;go.textContent="Publier"})};
-var l=el("div");l.style.cssText="display:flex;align-items:center;gap:10px;flex-wrap:wrap";l.appendChild(pick);l.appendChild(info);
-var r=el("div","row");r.appendChild(l);r.appendChild(go);
-box.appendChild(top);box.appendChild(ta);box.appendChild(inp);box.appendChild(r);a.appendChild(box)}
+function drawAuth() {
+  var a = document.getElementById("auth"); a.innerHTML = "";
+  if (!JBC.sb) { a.appendChild(el("div", "note", "Fil non configuré : renseigne SUPABASE_URL et SUPABASE_KEY dans social.js (voir fil-setup.sql).")); return; }
+  var box = el("div", "box");
+  if (authErr) { var er = el("div", "note", "Connexion refusée : " + authErr); er.style.marginBottom = "12px"; box.appendChild(er); }
+  if (!JBC.me) {
+    box.appendChild(el("p", "mut", "Connecte-toi avec Discord pour publier, réagir et créer ton profil."));
+    var b = el("button", "btn btn-discord", "Se connecter avec Discord"); b.style.marginTop = "12px";
+    b.onclick = function () { JBC.login(); };
+    box.appendChild(b); a.appendChild(box); return;
+  }
+  var pr = JBC.profile, top = el("div", "me");
+  var al = el("a", "pl"); al.href = JBC.profileUrl(JBC.me.id); al.appendChild(JBC.avatar(pr));
+  var nm = el("b"), nl = el("a", "pname", pr.display_name); nl.href = JBC.profileUrl(JBC.me.id); nm.appendChild(nl);
+  top.appendChild(al); top.appendChild(nm);
+  var mp = el("a", "pill", "👤 Mon profil"); mp.href = JBC.profileUrl(JBC.me.id); mp.style.marginLeft = "auto";
+  var o = el("button", "out", "Déconnexion"); o.style.marginLeft = "4px"; o.onclick = function () { JBC.logout(); };
+  top.appendChild(mp); top.appendChild(o);
 
-async function publish(txt,m){var urls=[];
-for(var i=0;i<files.length;i++){var f=files[i],ext=(f.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,5)||"jpg";
-var p=me.id+"/"+Date.now()+"-"+i+"."+ext;
-var u=await sb.storage.from("feed").upload(p,f,{contentType:f.type});if(u.error)throw u.error;
-urls.push(sb.storage.from("feed").getPublicUrl(p).data.publicUrl)}
-var r=await sb.from("posts").insert({body:txt,images:urls,author_name:m.name,author_avatar:m.avatar});if(r.error)throw r.error}
+  var ta = el("textarea"); ta.maxLength = 1000; ta.placeholder = "Partage quelque chose avec la communauté…";
+  var inp = el("input"); inp.type = "file"; inp.accept = "image/*"; inp.multiple = true; inp.hidden = true;
+  var pick = el("button", "pill", "📷 Photos"); pick.type = "button"; pick.onclick = function () { inp.click(); };
+  var info = el("span", "mut", "4 photos max, 5 Mo chacune");
+  inp.onchange = function () {
+    files = [].slice.call(inp.files).filter(function (f) { return f.type.indexOf("image/") === 0 && f.size <= 5242880; }).slice(0, 4);
+    info.textContent = files.length ? files.length + " photo(s) prête(s)" : "4 photos max, 5 Mo chacune";
+  };
+  var go = el("button", "btn btn-discord", "Publier");
+  go.onclick = function () {
+    var t = ta.value.trim(); if (!t && !files.length) return;
+    go.disabled = true; go.textContent = "Publication…";
+    publish(t).then(function () { ta.value = ""; files = []; inp.value = ""; info.textContent = "4 photos max, 5 Mo chacune"; return load(); })
+      .catch(function (e) { alert("Erreur : " + (e.message || e)); })
+      .then(function () { go.disabled = false; go.textContent = "Publier"; });
+  };
+  var l = el("div"); l.style.cssText = "display:flex;align-items:center;gap:10px;flex-wrap:wrap"; l.appendChild(pick); l.appendChild(info);
+  var r = el("div", "row"); r.appendChild(l); r.appendChild(go);
+  box.appendChild(top); box.appendChild(ta); box.appendChild(inp); box.appendChild(r); a.appendChild(box);
+}
 
-async function load(){if(!sb)return;var box=document.getElementById("list");
-var r=await sb.from("posts").select("*, likes(count)").order("created_at",{ascending:false}).limit(50);
-if(r.error){box.textContent="Erreur : "+r.error.message;return}
-liked={};if(me){var lk=await sb.from("likes").select("post_id").eq("user_id",me.id);(lk.data||[]).forEach(function(x){liked[x.post_id]=1})}
-box.innerHTML="";if(!r.data.length){box.appendChild(el("div","note","Aucune publication pour le moment."));return}
-r.data.forEach(function(p){box.appendChild(card(p))})}
+async function publish(txt) {
+  var urls = [];
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i], ext = (f.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 5) || "jpg";
+    var p = JBC.me.id + "/" + Date.now() + "-" + i + "." + ext;
+    var u = await JBC.sb.storage.from("feed").upload(p, f, { contentType: f.type }); if (u.error) throw u.error;
+    urls.push(JBC.sb.storage.from("feed").getPublicUrl(p).data.publicUrl);
+  }
+  var pr = JBC.profile;
+  var r = await JBC.sb.from("posts").insert({ body: txt, images: urls, author_name: pr.display_name, author_avatar: pr.avatar_url || null });
+  if (r.error) throw r.error;
+}
 
-function card(p){var c=el("div","post"),h=el("div","ph");h.appendChild(avatar(p.author_avatar));
-var n=el("div");n.appendChild(el("b",null,p.author_name));n.appendChild(el("span","mut",ago(p.created_at)));h.appendChild(n);
-if(me&&me.id===p.user_id){var d=el("button","del","Supprimer");d.onclick=async function(){if(!confirm("Supprimer cette publication ?"))return;var x=await sb.from("posts").delete().eq("id",p.id);if(x.error)alert("Erreur : "+x.error.message);else load()};h.appendChild(d)}
-c.appendChild(h);if(p.body)c.appendChild(el("p","body",p.body));
-var im=(p.images||[]).filter(function(u){return typeof u==="string"&&u.indexOf(SUPABASE_URL+"/storage/")===0});
-if(im.length){var g=el("div","imgs n"+im.length);im.forEach(function(u){var i=el("img");i.src=u;i.loading="lazy";i.alt="";i.onclick=function(){window.open(u,"_blank","noopener")};g.appendChild(i)});c.appendChild(g)}
-var cnt=(p.likes&&p.likes[0]&&p.likes[0].count)||0,b=el("button","pill"+(liked[p.id]?" on":""),"♥ "+cnt);
-b.onclick=async function(){if(!me){alert("Connecte-toi avec Discord pour réagir.");return}
-var on=!!liked[p.id];b.disabled=true;
-var x=on?await sb.from("likes").delete().eq("post_id",p.id).eq("user_id",me.id):await sb.from("likes").insert({post_id:p.id});
-if(x.error)alert("Erreur : "+x.error.message);else{if(on)delete liked[p.id];else liked[p.id]=1;cnt+=on?-1:1;b.textContent="♥ "+Math.max(0,cnt);b.classList.toggle("on",!on)}
-b.disabled=false};
-c.appendChild(b);return c}
+function load() {
+  if (!JBC.sb) return;
+  return JBC.renderPosts(document.getElementById("list"), { reload: load, empty: "Aucune publication pour le moment." });
+}
 
-var authErr="";
-(function(){try{var q=new URLSearchParams(location.search.slice(1)),h=new URLSearchParams(location.hash.replace(/^#/,""));
-var d=q.get("error_description")||h.get("error_description")||q.get("error")||h.get("error");
-if(d){authErr=d;history.replaceState(null,"",location.pathname)}}catch(e){}})();
-(async function(){
-if(sb){var s=await sb.auth.getSession();me=s.data.session?s.data.session.user:null;
-sb.auth.onAuthStateChange(function(ev,ss){var u=ss?ss.user:null;if((u&&u.id)!==(me&&me.id)){me=u;drawAuth();load()}});
-setInterval(load,30000)}
-drawAuth();load()})();
+(function () {
+  try {
+    var q = new URLSearchParams(location.search.slice(1)), h = new URLSearchParams(location.hash.replace(/^#/, ""));
+    var d = q.get("error_description") || h.get("error_description") || q.get("error") || h.get("error");
+    if (d) { authErr = d; history.replaceState(null, "", location.pathname); }
+  } catch (e) {}
+})();
+
+(async function () {
+  if (JBC.sb) {
+    await JBC.start(function () { drawAuth(); load(); });
+    /* Rafraîchit toutes les 30 s, sauf onglet masqué ou sélecteur d'emoji ouvert */
+    setInterval(function () { if (!document.hidden && !JBC.popOpen()) load(); }, 30000);
+  }
+  drawAuth(); load();
+})();
 </script>
 </body>
 </html>
