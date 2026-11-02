@@ -135,16 +135,20 @@ function drawAuth() {
   var ta = el("textarea"); ta.maxLength = 1000; ta.placeholder = "Partage quelque chose avec la communauté…";
   var inp = el("input"); inp.type = "file"; inp.accept = "image/*"; inp.multiple = true; inp.hidden = true;
   var pick = el("button", "pill", "📷 Photos"); pick.type = "button"; pick.onclick = function () { inp.click(); };
-  var info = el("span", "mut", "4 photos max, 5 Mo chacune");
+  var info = el("span", "mut", "4 photos max (réduites automatiquement)");
   inp.onchange = function () {
-    files = [].slice.call(inp.files).filter(function (f) { return f.type.indexOf("image/") === 0 && f.size <= 5242880; }).slice(0, 4);
-    info.textContent = files.length ? files.length + " photo(s) prête(s)" : "4 photos max, 5 Mo chacune";
+    var all = [].slice.call(inp.files), imgs = all.filter(function (f) { return f.type.indexOf("image/") === 0 || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(f.name); });
+    files = imgs.slice(0, 4);
+    var note = [];
+    if (all.length > imgs.length) note.push((all.length - imgs.length) + " fichier(s) ignoré(s) : pas une image");
+    if (imgs.length > 4) note.push("seulement 4 photos gardées");
+    info.textContent = files.length ? files.length + " photo(s) prête(s)" + (note.length ? " — " + note.join(", ") : "") : (note.join(", ") || "4 photos max (réduites automatiquement)");
   };
   var go = el("button", "btn btn-discord", "Publier");
   go.onclick = function () {
     var t = ta.value.trim(); if (!t && !files.length) return;
     go.disabled = true; go.textContent = "Publication…";
-    publish(t).then(function () { ta.value = ""; files = []; inp.value = ""; info.textContent = "4 photos max, 5 Mo chacune"; loadSide(); return load(); })
+    publish(t).then(function () { ta.value = ""; files = []; inp.value = ""; info.textContent = "4 photos max (réduites automatiquement)"; loadSide(); return load(); })
       .catch(function (e) { alert("Erreur : " + (e.message || e)); })
       .then(function () { go.disabled = false; go.textContent = "Publier"; });
   };
@@ -153,12 +157,29 @@ function drawAuth() {
   box.appendChild(top); box.appendChild(ta); box.appendChild(inp); box.appendChild(r); a.appendChild(box);
 }
 
+/* Réduit une photo (max 1920 px, JPEG) : les photos de téléphone dépassent vite les limites */
+function shrink(f) {
+  return new Promise(function (res, rej) {
+    var url = URL.createObjectURL(f), im = new Image();
+    im.onload = function () {
+      URL.revokeObjectURL(url);
+      var k = Math.min(1, 1920 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(im.width * k)); c.height = Math.max(1, Math.round(im.height * k));
+      var g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+      c.toBlob(function (b) { b ? res(b) : rej(new Error("Image illisible")); }, "image/jpeg", 0.85);
+    };
+    im.onerror = function () { URL.revokeObjectURL(url); rej(new Error("Format d'image non pris en charge (« " + f.name + " »). Utilise un JPG ou PNG.")); };
+    im.src = url;
+  });
+}
+
 async function publish(txt) {
   var urls = [];
   for (var i = 0; i < files.length; i++) {
-    var f = files[i], ext = (f.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 5) || "jpg";
-    var p = JBC.me.id + "/" + Date.now() + "-" + i + "." + ext;
-    var u = await JBC.sb.storage.from("feed").upload(p, f, { contentType: f.type }); if (u.error) throw u.error;
+    var blob = await shrink(files[i]);
+    var p = JBC.me.id + "/" + Date.now() + "-" + i + ".jpg";
+    var u = await JBC.sb.storage.from("feed").upload(p, blob, { contentType: "image/jpeg" });
+    if (u.error) throw new Error("Envoi de la photo refusé : " + u.error.message + " (bucket « feed » public + politique d'upload à vérifier dans Supabase)");
     urls.push(JBC.sb.storage.from("feed").getPublicUrl(p).data.publicUrl);
   }
   var pr = JBC.profile;
