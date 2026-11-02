@@ -95,9 +95,10 @@ function meta(u){var m=u.user_metadata||{};return{name:((m.custom_claims&&m.cust
 function drawAuth(){var a=document.getElementById("auth");a.innerHTML="";
 if(!sb){a.appendChild(el("div","note","Fil non configuré : renseigne SUPABASE_URL et SUPABASE_KEY dans fil.html (voir fil-setup.sql)."));return}
 var box=el("div","box");
+if(authErr){var er=el("div","note","Connexion refusée : "+authErr);er.style.marginBottom="12px";box.appendChild(er)}
 if(!me){box.appendChild(el("p","mut","Connecte-toi avec Discord pour publier et réagir."));
 var b=el("button","btn btn-discord","Se connecter avec Discord");b.style.marginTop="12px";
-b.onclick=function(){sb.auth.signInWithOAuth({provider:"discord",options:{redirectTo:location.origin+location.pathname}})};
+b.onclick=function(){sb.auth.signInWithOAuth({provider:"discord",options:{redirectTo:location.origin+location.pathname,scopes:"identify email"}})};
 box.appendChild(b);a.appendChild(box);return}
 var m=meta(me),top=el("div","me");top.appendChild(avatar(m.avatar));top.appendChild(el("b",null,m.name));
 var o=el("button","out","Déconnexion");o.onclick=function(){sb.auth.signOut()};top.appendChild(o);
@@ -142,6 +143,10 @@ if(x.error)alert("Erreur : "+x.error.message);else{if(on)delete liked[p.id];else
 b.disabled=false};
 c.appendChild(b);return c}
 
+var authErr="";
+(function(){try{var q=new URLSearchParams(location.search.slice(1)),h=new URLSearchParams(location.hash.replace(/^#/,""));
+var d=q.get("error_description")||h.get("error_description")||q.get("error")||h.get("error");
+if(d){authErr=d;history.replaceState(null,"",location.pathname)}}catch(e){}})();
 (async function(){
 if(sb){var s=await sb.auth.getSession();me=s.data.session?s.data.session.user:null;
 sb.auth.onAuthStateChange(function(ev,ss){var u=ss?ss.user:null;if((u&&u.id)!==(me&&me.id)){me=u;drawAuth();load()}});
