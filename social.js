@@ -179,6 +179,12 @@
           pop.appendChild(k);
         });
         box.appendChild(pop);
+        /* Pas assez de place en bas de l'écran : on ouvre vers le haut (si possible), sinon on fait défiler */
+        var pr = pop.getBoundingClientRect(), br = box.getBoundingClientRect();
+        if (pr.bottom > window.innerHeight) {
+          if (br.top - pr.height - 16 > 90) pop.classList.add("up");
+          else pop.scrollIntoView({ block: "nearest" });
+        }
       };
       box.appendChild(add);
     }
