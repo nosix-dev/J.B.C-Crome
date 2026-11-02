@@ -37,6 +37,8 @@
 .rx-chip.on{background:rgba(93,168,255,.16);border-color:var(--amber);color:var(--chrome-1)}
 .rx-chip[disabled]{opacity:.6;cursor:default}
 .rx-pop{position:absolute;left:0;top:calc(100% + 8px);z-index:20;display:grid;grid-template-columns:repeat(8,1fr);gap:2px;padding:8px;width:min(340px,100%);background:var(--panel-2);border:1px solid var(--hairline);border-radius:14px;box-shadow:var(--shadow-hard)}
+.rx-pop.up{top:auto;bottom:calc(100% + 8px)}
+#fil,#profil{z-index:3} /* au-dessus du footer : le sélecteur d'emoji ne passe plus dessous */
 .rx-pick{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:none;border:0;border-radius:10px;font-size:21px;line-height:1;cursor:pointer}
 .rx-pick:hover{background:rgba(255,255,255,.09)}
 .rx-pick.on{background:rgba(93,168,255,.22)}
