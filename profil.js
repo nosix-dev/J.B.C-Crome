@@ -389,7 +389,18 @@
     loadPosts();
   }
 
+  /* Charge tout seul les dépendances si profil.html n'est pas à jour */
+  function loadDeps() {
+    function js(src, ok) {
+      return ok() ? Promise.resolve() : new Promise(function (r) {
+        var t = document.createElement("script"); t.src = src + "?v=4"; t.onload = t.onerror = function () { r(); }; document.head.appendChild(t);
+      });
+    }
+    return js("discord-md.js", function () { return !!window.DiscordMD; }).then(function () { return js("profil-fx.js", function () { return !!window.PFX; }); });
+  }
+
   (async function () {
+    await loadDeps();
     if (JBC.sb) {
       await JBC.start(init);
       setInterval(function () { if (!document.hidden && !D && !JBC.popOpen() && plist) loadPosts(); }, 30000);
