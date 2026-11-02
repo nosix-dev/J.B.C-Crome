@@ -73,6 +73,13 @@
     if (own && !D) {
       var eb = el("button", "pill", "✏️ Personnaliser mon profil"); eb.type = "button"; eb.onclick = openEdit;
       top.appendChild(eb);
+      var lo = el("button", "pill", "🚪 Déconnexion"); lo.type = "button";
+      lo.onclick = function () {
+        if (!confirm("Te déconnecter ?")) return;
+        lo.disabled = true;
+        Promise.resolve(JBC.logout()).then(function () { location.href = "fil.html"; }, function () { lo.disabled = false; });
+      };
+      top.appendChild(lo);
     }
     body.appendChild(top);
     body.appendChild(el("h1", "pf-name ns-" + pick(NAMES, v.name_style, "plain"), v.display_name));
