@@ -76,14 +76,14 @@
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script>
 <script src="common.js"></script>
 <script src="chrome-fx.js" defer></script>
 <script src="pwa.js" defer></script>
 <script>
 /* ===== À REMPLIR (Supabase > Project Settings > API) ===== */
-var SUPABASE_URL="";
-var SUPABASE_KEY=""; /* clé "anon public" */
+var SUPABASE_URL="https://aqckkzgbdmtxgieqfurl.supabase.co";
+var SUPABASE_KEY="sb_publishable_0XuAuJvOtEZuV13jtm1H0A_mR-2BJX3"; /* clé "anon public" */
 /* ========================================================== */
 var sb=null,me=null,files=[],liked={};
 if(SUPABASE_URL&&SUPABASE_KEY&&window.supabase)sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
