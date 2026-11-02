@@ -22,6 +22,18 @@
     dev: { e: "💻", l: "Développeur" }, fondateur: { e: "👑", l: "Fondateur" }, legende: { e: "🌟", l: "Légende" }
   };
 
+  var LINKS = [
+    { k: "haulmp_url", e: "🚚", l: "HaulMP" },
+    { k: "trucksbook_url", e: "📘", l: "TrucksBook" },
+    { k: "milevox_url", e: "🛣️", l: "Milevox" }
+  ];
+  function okUrl(u) { return typeof u === "string" && /^https:\/\/[^\s<>"']{4,200}$/.test(u); }
+  function normUrl(v) {
+    v = String(v || "").trim(); if (!v) return "";
+    if (!/^https?:\/\//i.test(v)) v = "https://" + v;
+    return v.replace(/^http:\/\//i, "https://");
+  }
+
   var P = null,        /* profil enregistré */
       D = null,        /* brouillon en cours d'édition */
       own = false, viewId = null,
@@ -36,6 +48,7 @@
       status_emoji: d.status_emoji, status_text: d.status_text, truck: d.truck, game: d.game, created_at: d.created_at,
       effect: d.effect, frame: d.frame, name_style: d.name_style, card_style: d.card_style, banner_style: d.banner_style,
       badges: d.badges, location: d.location, truckersmp_id: d.truckersmp_id,
+      haulmp_url: d.haulmp_url, trucksbook_url: d.trucksbook_url, milevox_url: d.milevox_url,
       avatar_url: d.avatarBlob ? d.avatarPrev : d.avatar_url,
       banner_url: d.bannerBlob ? d.bannerPrev : d.banner_url
     };
@@ -76,6 +89,12 @@
       tl.href = "https://truckersmp.com/user/" + v.truckersmp_id; tl.target = "_blank"; tl.rel = "noopener noreferrer";
       tags.appendChild(tl);
     }
+    LINKS.forEach(function (L) {
+      if (!okUrl(v[L.k])) return;
+      var a = el("a", "pf-tag", L.e + " " + L.l);
+      a.href = v[L.k]; a.target = "_blank"; a.rel = "noopener noreferrer nofollow";
+      tags.appendChild(a);
+    });
     if (v.created_at) tags.appendChild(el("span", "pf-tag", "Membre depuis " + new Date(v.created_at).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })));
     body.appendChild(tags);
 
@@ -145,6 +164,11 @@
   function idInput() {
     var i = el("input"); i.type = "text"; i.inputMode = "numeric"; i.maxLength = 10; i.placeholder = "ex. 1234567"; i.value = D.truckersmp_id || "";
     i.oninput = function () { i.value = i.value.replace(/\D/g, "").slice(0, 10); D.truckersmp_id = i.value; refresh(); };
+    return i;
+  }
+  function urlInput(key) {
+    var i = el("input"); i.type = "url"; i.maxLength = 200; i.placeholder = "https://…"; i.value = D[key] || "";
+    i.oninput = function () { D[key] = i.value; refresh(); };
     return i;
   }
   function badgePicker() {
@@ -239,6 +263,9 @@
     e.appendChild(field("Camion préféré", textInput("truck", 60)));
     e.appendChild(field("Localisation", textInput("location", 40), "Ville, pays… (40 caractères max)"));
     e.appendChild(field("ID TruckersMP", idInput(), "Chiffres uniquement : affiche un lien vers ton profil TruckersMP."));
+    LINKS.forEach(function (L) {
+      e.appendChild(field("Lien " + L.l, urlInput(L.k), "Colle l'adresse de ton profil " + L.l + " (https://…)."));
+    });
     e.appendChild(field("Badges", badgePicker(), "Jusqu'à " + BADGE_MAX + " badges."));
     e.appendChild(field("Effet de profil", mapChoices(EFFECTS, "effect"), "Animation affichée sur toute ta carte."));
     e.appendChild(field("Cadre d'avatar", mapChoices(FRAMES, "frame")));
@@ -260,6 +287,7 @@
     D = Object.assign({}, P, { avatarBlob: null, bannerBlob: null, avatarPrev: null, bannerPrev: null });
     D.bio = D.bio || ""; D.truck = D.truck || ""; D.status_text = D.status_text || ""; D.location = D.location || "";
     D.truckersmp_id = D.truckersmp_id || "";
+    LINKS.forEach(function (L) { D[L.k] = D[L.k] || ""; });
     D.effect = pick(EFFECTS, D.effect, "none"); D.frame = pick(FRAMES, D.frame, "none");
     D.name_style = pick(NAMES, D.name_style, "plain"); D.card_style = pick(CARDS, D.card_style, "classic");
     D.banner_style = pick(BANNER_FX, D.banner_style, "none");
@@ -281,6 +309,12 @@
   async function save(b, msg) {
     var name = D.display_name.trim();
     if (name.length < 2 || name.length > 32) { msg("Le pseudo doit faire entre 2 et 32 caractères.", 1); return; }
+    var urls = {};
+    for (var li = 0; li < LINKS.length; li++) {
+      var L = LINKS[li], u = normUrl(D[L.k]);
+      if (u && !okUrl(u)) { msg("Lien " + L.l + " invalide (https://… , 200 caractères max).", 1); return; }
+      urls[L.k] = u || null;
+    }
     b.disabled = true; msg("Enregistrement…");
     var upA = null, upB = null;
     try {
@@ -292,6 +326,7 @@
         badges: D.badges.slice(0, BADGE_MAX), location: D.location.trim().slice(0, 40),
         truckersmp_id: D.truckersmp_id ? D.truckersmp_id : null
       };
+      LINKS.forEach(function (L) { row[L.k] = urls[L.k]; });
       if (D.avatarBlob) { upA = await JBC.upload(D.avatarBlob, "avatar"); row.avatar_url = upA; }
       if (D.bannerBlob) { upB = await JBC.upload(D.bannerBlob, "banner"); row.banner_url = upB; }
       var r = await JBC.sb.from("profiles").update(row).eq("user_id", JBC.me.id).select().single();
