@@ -7,6 +7,7 @@
   var page = (document.currentScript && document.currentScript.getAttribute("data-page")) || "cette page";
   var root = document.documentElement;
   var sb = window.JBC && window.JBC.sb;
+  var TIMEOUT_MS = 8000;
 
   /* Dès le départ : tout le contenu est masqué (sauf l'en-tête) tant que l'accès n'est pas confirmé */
   root.classList.add("jbc-lock");
@@ -24,6 +25,14 @@
 
   var gate = null, quitting = false;
   function ready(fn) { if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn); else fn(); }
+
+  /* Évite de rester bloqué sur « Vérification… » si Supabase ne répond jamais */
+  function withTimeout(p, ms) {
+    return new Promise(function (resolve, reject) {
+      var t = setTimeout(function () { reject(new Error("timeout")); }, ms);
+      Promise.resolve(p).then(function (v) { clearTimeout(t); resolve(v); }, function (e) { clearTimeout(t); reject(e); });
+    });
+  }
 
   function show(opts) {
     ready(function () {
@@ -55,25 +64,36 @@
 
   async function check() {
     show({ title: "Vérification…", text: "Un instant." });
-    var s = await sb.auth.getSession();
-    if (!s.data.session) { show(loginView(authError())); return; }
+    try {
+      var s = await withTimeout(sb.auth.getSession(), TIMEOUT_MS);
+      if (!s.data.session) { show(loginView(authError())); return; }
 
-    /* getUser() interroge le serveur : un compte banni est refusé même avec une ancienne session */
-    var u = await sb.auth.getUser();
-    if (u.error || !u.data || !u.data.user) {
-      var err = u.error || {}, txt = (err.code || "") + " " + (err.message || "");
-      if (/ban/i.test(txt)) {
-        quitting = true; await sb.auth.signOut({ scope: "local" });
-        show({ title: "Accès refusé", text: "Ton accès à " + page + " a été retiré. Contacte un administrateur si c'est une erreur." });
-      } else if (err.status === 401 || err.status === 403) {
-        quitting = true; await sb.auth.signOut({ scope: "local" });
-        show(loginView(""));
-      } else {
-        show({ title: "Vérification impossible", text: "Impossible de contacter le serveur. Réessaie dans un instant.", button: "Réessayer", onClick: check });
+      /* getUser() interroge le serveur : un compte banni est refusé même avec une ancienne session */
+      var u = await withTimeout(sb.auth.getUser(), TIMEOUT_MS);
+      if (u.error || !u.data || !u.data.user) {
+        var err = u.error || {}, txt = (err.code || "") + " " + (err.message || "");
+        if (/ban/i.test(txt)) {
+          quitting = true; await sb.auth.signOut({ scope: "local" });
+          show({ title: "Accès refusé", text: "Ton accès à " + page + " a été retiré. Contacte un administrateur si c'est une erreur." });
+        } else if (err.status === 401 || err.status === 403) {
+          quitting = true; await sb.auth.signOut({ scope: "local" });
+          show(loginView(""));
+        } else {
+          show({ title: "Vérification impossible", text: "Impossible de contacter le serveur. Réessaie dans un instant.", error: txt.trim() || "", button: "Réessayer", onClick: check });
+        }
+        return;
       }
-      return;
+      unlock();
+    } catch (e) {
+      console.warn("[gate]", e);
+      show({
+        title: "Vérification impossible",
+        text: "Le serveur met trop de temps à répondre. Réessaie dans un instant.",
+        error: e && e.message === "timeout" ? "Délai dépassé (" + (TIMEOUT_MS / 1000) + " s)" : String((e && e.message) || e),
+        button: "Réessayer",
+        onClick: check
+      });
     }
-    unlock();
   }
 
   function authError() {
