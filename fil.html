@@ -45,6 +45,10 @@
 @media(max-width:1100px){.fil-layout{grid-template-columns:250px minmax(0,1fr)}.fil-right{grid-column:1/-1;position:static}}
 @media(max-width:800px){.fil-layout{grid-template-columns:1fr;padding:0 12px}.fil-side{position:static}.fil-main{order:-1}}
 </style>
+<link rel="stylesheet" href="chrome-fx.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script>
+<script src="social.js"></script>
+<script src="gate.js" data-page="le fil d'actualité"></script>
 </head>
 <body>
 <div id="preloader"><div id="preloader-fill"></div><span id="preloader-percent"></span><span id="preloader-status"></span></div>
@@ -104,11 +108,9 @@
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script>
 <script src="common.js"></script>
 <script src="chrome-fx.js" defer></script>
 <script src="pwa.js" defer></script>
-<script src="social.js"></script>
 <script>
 /* La config Supabase (URL + clé) est dans social.js */
 var el = JBC.el, files = [], authErr = "";
@@ -192,6 +194,11 @@ function $(id) { return document.getElementById(id); }
 
 function load() {
   if (!JBC.sb) return;
+  if (!JBC.me) {
+    $("list").innerHTML = "";
+    $("noRes").style.display = "none";
+    return;
+  }
   var o = { reload: load, empty: "Aucune publication pour le moment." };
   if (F.mode === "mine" && JBC.me) o.userId = JBC.me.id;
   var r = JBC.renderPosts($("list"), o);
@@ -297,6 +304,12 @@ function drawDrivers() {
 }
 async function loadSide() {
   if (!JBC.sb) return;
+  if (!JBC.me) {
+    ALLP = []; ALLPROF = [];
+    $("sbTrends").innerHTML = '<div class="sb-empty">Connecte-toi pour voir les tendances.</div>';
+    $("sbDrivers").innerHTML = '<div class="sb-empty">Connecte-toi pour voir les chauffeurs.</div>';
+    return;
+  }
   try {
     var r = await JBC.sb.from("posts").select("user_id, body, images, created_at").order("created_at", { ascending: false }).limit(300);
     if (r.error) r = await JBC.sb.from("posts").select("user_id, body, images").limit(300);
