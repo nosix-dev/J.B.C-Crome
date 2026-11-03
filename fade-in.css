@@ -1,0 +1,4 @@
+/* J.B.C Crome — apparition en fondu de chaque page */
+@keyframes jbc-fade-in { from { opacity: 0; } to { opacity: 1; } }
+body { animation: jbc-fade-in .6s ease-out both; }
+@media (prefers-reduced-motion: reduce) { body { animation: none; } }

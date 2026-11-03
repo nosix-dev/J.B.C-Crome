@@ -12,7 +12,25 @@
 <link rel="stylesheet" href="royal-look.css">
 <link rel="stylesheet" href="social.css">
 <link rel="stylesheet" href="profil-fx.css">
-<style>#preloader{display:none!important}</style>
+<style>#preloader{display:none!important}
+#login-cta{display:none;padding:20px}
+.lc-wrap{max-width:720px;margin:40px auto;padding:1px;border-radius:26px;background:linear-gradient(120deg,#5da8ff,#8a5cff,#e84fa0,#f39c12,#5da8ff);background-size:300% 300%;animation:lc-flow 7s linear infinite;box-shadow:0 24px 70px rgba(93,168,255,.12)}
+.lc-card{position:relative;overflow:hidden;border-radius:25px;padding:48px 32px 40px;text-align:center;background:radial-gradient(circle at 50% -10%,rgba(93,168,255,.22),transparent 60%),radial-gradient(circle at 85% 110%,rgba(232,79,160,.12),transparent 55%),#0b0d11}
+.lc-lock{width:68px;height:68px;margin:0 auto 20px;border-radius:50%;display:grid;place-items:center;color:#8fbcee;background:rgba(93,168,255,.12);border:1px solid rgba(93,168,255,.4);animation:lc-pulse 2.8s ease-in-out infinite}
+.lc-lock svg{width:30px;height:30px}
+.lc-card h2{font-family:'Anton',Impact,sans-serif;font-weight:400;font-size:clamp(26px,4vw,36px);letter-spacing:.5px;text-transform:uppercase;color:#f5f7fb;margin:0 0 12px}
+.lc-card h2 em{font-style:normal;background:linear-gradient(90deg,#8fbcee,#c9a7ff,#ff8fc8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lc-card p{color:#8ea0b7;font-size:15px;line-height:1.7;max-width:480px;margin:0 auto}
+.lc-perks{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:26px 0 30px}
+.lc-perk{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;font-size:13px;font-weight:600;color:#dfe7f2;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);opacity:0;transform:translateY(8px);animation:lc-rise .5s ease-out forwards}
+.lc-perk:nth-child(2){animation-delay:.1s}.lc-perk:nth-child(3){animation-delay:.2s}.lc-perk:nth-child(4){animation-delay:.3s}
+#lc-btn{justify-content:center;font-size:14px;padding:16px 34px}
+.lc-hint{margin-top:16px;font-size:12px;color:#6b7c93}
+@keyframes lc-flow{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+@keyframes lc-pulse{0%,100%{box-shadow:0 0 0 0 rgba(93,168,255,.35),0 0 28px rgba(93,168,255,.25)}50%{box-shadow:0 0 0 14px rgba(93,168,255,0),0 0 40px rgba(93,168,255,.4)}}
+@keyframes lc-rise{to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.lc-wrap,.lc-lock{animation:none}.lc-perk{animation:none;opacity:1;transform:none}}
+</style>
 <link rel="stylesheet" href="fade-in.css">
 </head>
 <body>
@@ -35,6 +53,23 @@
 
 <section id="profil" style="padding-top:40px">
   <div class="pf" id="pf"></div>
+  <div id="login-cta">
+    <div class="lc-wrap">
+      <div class="lc-card">
+        <div class="lc-lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <h2>Connecte-toi pour <em>débloquer le site</em></h2>
+        <p>Un seul clic avec Discord et tu accèdes à tout le reste du site J.B.C Crome.</p>
+        <div class="lc-perks">
+          <span class="lc-perk">📅 Calendrier</span>
+          <span class="lc-perk">🖼️ Galerie</span>
+          <span class="lc-perk">📰 Fil d'actualité</span>
+          <span class="lc-perk">👤 Ton profil</span>
+        </div>
+        <button type="button" id="lc-btn" class="btn btn-discord">Se connecter avec Discord</button>
+        <div class="lc-hint">Connexion rapide et sécurisée via Discord.</div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <footer>
@@ -52,6 +87,20 @@
 <script src="discord-md.js"></script>
 <script src="profil-fx.js"></script>
 <script src="profil.js"></script>
+<script>
+/* Visiteur non connecté : carte « connecte-toi » (remplace le message du profil perso) */
+(function () {
+  var cta = document.getElementById("login-cta"), btn = document.getElementById("lc-btn");
+  if (!cta || !btn || !window.JBC || !JBC.sb) return;
+  btn.onclick = function () { JBC.login(); };
+  JBC.sb.auth.getSession().then(function (s) {
+    if (s.data && s.data.session) return;
+    cta.style.display = "block";
+    /* Sur un profil précis (?id=…), on le laisse visible ; sinon on masque le message par défaut */
+    if (!new URLSearchParams(location.search).get("id")) document.getElementById("pf").style.display = "none";
+  }).catch(function () {});
+})();
+</script>
 <script src="profil-nav.js" defer></script>
 </body>
 </html>
